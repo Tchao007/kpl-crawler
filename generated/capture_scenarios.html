@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>开盘啦抓包场景调用清单</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #18202a;
+      --muted: #677281;
+      --line: #d9dee7;
+      --accent: #176b5c;
+      --accent-weak: #e4f2ef;
+      --blue: #245a9c;
+      --blue-weak: #e8eff8;
+      --orange: #a65312;
+      --orange-weak: #fff1e3;
+      --code: #101820;
+      --code-soft: #e9edf2;
+      --shadow: 0 10px 24px rgba(28, 38, 49, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(246, 247, 249, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(260px, 430px);
+      gap: 16px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .search {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .search input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-weak);
+    }
+
+    .main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 24px 40px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 18px 0;
+    }
+
+    .filter {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: var(--panel);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .filter.active {
+      border-color: var(--accent);
+      background: var(--accent-weak);
+      color: var(--accent);
+      font-weight: 650;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .scene-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .scene-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 2px 2px 0;
+    }
+
+    .scene-heading h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .scene-heading span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .scenario {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .scenario-header {
+      padding: 15px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .scenario h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      border-radius: 999px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .tag.post {
+      color: var(--accent);
+      background: var(--accent-weak);
+    }
+
+    .tag.get {
+      color: var(--blue);
+      background: var(--blue-weak);
+    }
+
+    .tag.session {
+      color: var(--orange);
+      background: var(--orange-weak);
+    }
+
+    .meta {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .scene-note {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .copy {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-weak);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .endpoint {
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      color: var(--blue);
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .call {
+      height: 36px;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .call:hover {
+      filter: brightness(0.95);
+    }
+
+    .result {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      color: var(--ink);
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 12px;
+      max-height: 280px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .scenario-body {
+      padding: 14px 16px 16px;
+    }
+
+    .code {
+      margin: 0;
+      padding: 12px;
+      border-radius: 6px;
+      background: var(--code);
+      color: #f4f7fb;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfe;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 9px 10px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    .kv div {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--code-soft);
+      overflow-wrap: anywhere;
+    }
+
+    .kv div:nth-child(odd) {
+      color: var(--muted);
+      background: #f2f5f8;
+      font-weight: 650;
+    }
+
+    .kv div:nth-last-child(-n+2) {
+      border-bottom: 0;
+    }
+
+    .empty {
+      display: none;
+      padding: 42px 16px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 920px) {
+      .topbar-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .search {
+        justify-content: stretch;
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .scene-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner,
+      .main {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .scenario-header {
+        grid-template-columns: 1fr;
+      }
+
+      .copy {
+        width: 100%;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div>
+          <h1>开盘啦抓包场景调用清单</h1>
+          <div class="subtitle">后端接口形式：/api/scenarios 和每个场景的 /api/xxx</div>
+        </div>
+        <label class="search">
+          <input id="searchInput" type="search" placeholder="搜索方法、场景、session、参数名">
+        </label>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="summary" aria-label="接口统计">
+        <div class="metric"><strong id="totalCount">23</strong><span>抓包场景</span></div>
+        <div class="metric"><strong id="postCount">22</strong><span>POST 请求</span></div>
+        <div class="metric"><strong id="getCount">1</strong><span>GET 请求</span></div>
+        <div class="metric"><strong id="visibleCount">23</strong><span>当前显示</span></div>
+      </section>
+
+      <nav class="toolbar" id="filters" aria-label="按控制器筛选"></nav>
+      <section class="grid" id="scenarioGrid"></section>
+      <div class="empty" id="emptyState">没有匹配的场景</div>
+    </main>
+  </div>
+
+  <script>
+    const scenarios = [
+      {"methodName":"index_newgetlist","signature":"client.index_newgetlist()","sessionId":"15","title":"Index.NewGetList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Index","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Index","a":"NewGetList","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
+      {"methodName":"sysappversion_getlayout","signature":"client.sysappversion_getlayout()","sessionId":"16","title":"SysAppVersion.GetLaYout","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"SysAppVersion","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"SysAppVersion","a":"GetLaYout","apiv":"w44","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
+      {"methodName":"userinfo_appnews","signature":"client.userinfo_appnews(st=None, index=None)","sessionId":"17","title":"UserInfo.AppNews","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"UserInfo","params":{},"data":{"a":"AppNews","st":"1","c":"UserInfo","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","PhoneOS":"0","Token":"0","Index":"0","apiv":"w44","Version":"5.23.0.4","UserID":"0"}},
+      {"methodName":"system_moduleswitch","signature":"client.system_moduleswitch()","sessionId":"23","title":"System.ModuleSwitch","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"ModuleSwitch","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
+      {"methodName":"theme_infogr","signature":"client.theme_infogr()","sessionId":"27","title":"Theme.InfoGR","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Theme","params":{},"data":{"a":"InfoGR","c":"Theme","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
+      {"methodName":"system_adget","signature":"client.system_adget(type=None)","sessionId":"28","title":"System.AdGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"AdGet","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Scale":"0.5625","apiv":"w44","Type":"1"}},
+      {"methodName":"system_webjsget","signature":"client.system_webjsget()","sessionId":"37","title":"System.WebJsGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"WebJsGet","apiv":"w44","c":"System","PhoneOSNew":"1","UserID":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0"}},
+      {"methodName":"push_activepushmessageall","signature":"client.push_activepushmessageall()","sessionId":"40","title":"Push.ActivePushMessageAll","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"ActivePushMessageAll","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
+      {"methodName":"push_getnewpushmessageall","signature":"client.push_getnewpushmessageall()","sessionId":"41","title":"Push.GetNewPushMessageAll","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"GetNewPushMessageAll","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
+      {"methodName":"system_focusfunget","signature":"client.system_focusfunget(fwebid=None)","sessionId":"42","title":"System.FocusFunGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"FocusFunGet","apiv":"w44","c":"System","PhoneOSNew":"1","FWebID":"1","UserID":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0"}},
+      {"methodName":"longhubangdongcai_getstate","signature":"client.longhubangdongcai_getstate()","sessionId":"47","title":"LongHuBangDongCai.GetState","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBangDongCai","params":{},"data":{"a":"GetState","apiv":"w44","c":"LongHuBangDongCai","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4"}},
+      {"methodName":"longhubang_toptitle","signature":"client.longhubang_toptitle()","sessionId":"48","title":"LongHuBang.TopTitle","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"TopTitle","apiv":"w44","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4"}},
+      {"methodName":"longhubang_getstocklist","signature":"client.longhubang_getstocklist(st=None, time=None, index=None, type=None)","sessionId":"50","title":"LongHuBang.GetStockList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"st":"500","a":"GetStockList","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"","Index":"0","apiv":"w44","Type":"2","UserID":"0"}},
+      {"methodName":"longhubang_add","signature":"client.longhubang_add(time=None, stockid=None)","sessionId":"51","title":"LongHuBang.Add","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"Add","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Time":"2026-06-11","apiv":"w44","StockID":"603616"}},
+      {"methodName":"stock_getnewonestockinfo","signature":"client.stock_getnewonestockinfo(type=None, time=None, stockid=None)","sessionId":"52","title":"Stock.GetNewOneStockInfo","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Stock","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Stock","a":"GetNewOneStockInfo","Type":"0","Time":"2026-06-11","StockID":"603616","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
+      {"methodName":"stock_getstockchart","signature":"client.stock_getstockchart(stockid=None, index=None, st=None)","sessionId":"53","title":"Stock.GetStockChart","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Stock","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Stock","a":"GetStockChart","StockID":"603616","Index":"0","st":"530","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
+      {"methodName":"comments_get","signature":"client.comments_get(index=None, st=None, stockid=None, day=None, type=None, tsort=None)","sessionId":"62","title":"Comments.Get","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Comments","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Comments","a":"Get","Index":"0","st":"30","StockID":"603616","Day":"2026-06-11","Type":"1","Tsort":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
+      {"methodName":"longhubang_getagencylistv2","signature":"client.longhubang_getagencylistv2(st=None, time=None, index=None)","sessionId":"77","title":"LongHuBang.GetAgencyListV2","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetAgencyListV2","st":"500","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"2026-06-11","Index":"0","apiv":"w44","UserID":"0"}},
+      {"methodName":"longhubang_getagencykline","signature":"client.longhubang_getagencykline(st=None, index=None)","sessionId":"78","title":"LongHuBang.GetAgencyKline","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetAgencyKline","st":"499","apiv":"w44","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","index":"0"}},
+      {"methodName":"longhubang_getbusinesslist","signature":"client.longhubang_getbusinesslist(st=None, time=None, index=None, type=None)","sessionId":"79","title":"LongHuBang.GetBusinessList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetBusinessList","st":"100","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"2026-06-11","Index":"0","apiv":"w44","Type":"1","UserID":"0"}},
+      {"methodName":"system_adgetkhd","signature":"client.system_adgetkhd(type=None)","sessionId":"80","title":"System.AdGetKHD","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"AdGetKHD","apiv":"w44","Type":"8,11","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Scale":"0.5625"}},
+      {"methodName":"userxinshouzhiyin_xszystate","signature":"client.userxinshouzhiyin_xszystate()","sessionId":"93","title":"UserXinShouZhiYin.XSZYState","httpMethod":"GET","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"UserXinShouZhiYin","params":{"a":"XSZYState","c":"UserXinShouZhiYin","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"},"data":{}},
+      {"methodName":"push_devicetoken","signature":"client.push_devicetoken()","sessionId":"94","title":"Push.DeviceToken","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"DeviceToken","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","PhoneOS":"2","Token":"0","apiv":"w44","TokenType":"3","Version":"5.23.0.4","DeviceToken":"c5a3d9d1397b4fbf009d6004d77aee5c","UserID":"0"}}
+    ];
+
+    const grid = document.getElementById("scenarioGrid");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const filters = document.getElementById("filters");
+    const visibleCount = document.getElementById("visibleCount");
+    let activeScene = "全部";
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderKv(items) {
+      const entries = Object.entries(items);
+      if (!entries.length) return "<div>无</div><div>-</div>";
+      return entries.map(([key, value]) => `<div>${escapeHtml(key)}</div><div>${escapeHtml(value)}</div>`).join("");
+    }
+
+    function codeBlock(item) {
+      return [
+        `GET ${apiUrl(item)}`,
+        "",
+        `POST ${apiUrl(item)}`
+      ].join("\\n");
+    }
+
+    function apiBase() {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        return location.origin;
+      }
+      return "http://127.0.0.1:8765";
+    }
+
+    function apiEndpoint(item) {
+      return `/api/${item.methodName}`;
+    }
+
+    function apiUrl(item) {
+      return `${apiBase()}${apiEndpoint(item)}`;
+    }
+
+    function aliasEndpoint(item) {
+      const [controller, action] = item.title.split(".");
+      const clean = value => value.toLowerCase().replace(/[^0-9a-z]+/g, "_").replace(/^_+|_+$/g, "");
+      return `/api/${clean(controller)}/${clean(action)}`;
+    }
+
+    function sampleOverrides(item) {
+      const keys = ["StockID", "stockid", "Time", "time", "Day", "day", "Index", "index", "Type", "type", "st"];
+      const source = {...item.params, ...item.data};
+      return Object.fromEntries(keys.filter(key => source[key] !== undefined).map(key => [key, source[key]]));
+    }
+
+    function sceneInfo(item) {
+      const name = item.methodName;
+      const title = item.title;
+      if (name === "index_newgetlist") return ["启动与首页", "首页初始化数据"];
+      if (name === "sysappversion_getlayout") return ["启动与首页", "客户端布局配置"];
+      if (title.startsWith("System.")) return ["系统配置", title.replace("System.", "")];
+      if (title.startsWith("Push.")) return ["推送与通知", title.replace("Push.", "")];
+      if (title.startsWith("Theme.")) return ["主题与模块", title.replace("Theme.", "")];
+      if (title.startsWith("UserInfo.")) return ["用户消息", title.replace("UserInfo.", "")];
+      if (title.startsWith("UserXinShouZhiYin.")) return ["新手引导", title.replace("UserXinShouZhiYin.", "")];
+      if (title.startsWith("LongHuBangDongCai.")) return ["龙虎榜", "东财状态"];
+      if (title.startsWith("LongHuBang.")) return ["龙虎榜", title.replace("LongHuBang.", "")];
+      if (title.startsWith("Stock.")) return ["个股详情", title.replace("Stock.", "")];
+      if (title.startsWith("Comments.")) return ["评论", title.replace("Comments.", "")];
+      return ["其他场景", title];
+    }
+
+    function scenarioHtml(item) {
+      const httpClass = item.httpMethod.toLowerCase();
+      const [groupName, sceneName] = sceneInfo(item);
+      return `
+        <article class="scenario" data-controller="${escapeHtml(item.controller)}">
+          <div class="scenario-header">
+            <div>
+              <div class="title-row">
+                <h2>${escapeHtml(sceneName)}</h2>
+                <span class="tag ${httpClass}">${escapeHtml(item.httpMethod)}</span>
+                <span class="tag session">#${escapeHtml(item.sessionId)}</span>
+                <span class="tag get">${escapeHtml(groupName)}</span>
+              </div>
+              <div class="scene-note">${escapeHtml(item.title)}</div>
+              <div class="meta">${escapeHtml(item.methodName)} · ${escapeHtml(item.url)}</div>
+            </div>
+            <button class="copy" type="button" data-copy="${escapeHtml(apiEndpoint(item))}" title="复制 API 地址">⧉</button>
+          </div>
+          <div class="scenario-body">
+            <div class="actions">
+              <div class="endpoint" title="${escapeHtml(apiEndpoint(item))}">${escapeHtml(apiEndpoint(item))}</div>
+              <button class="copy" type="button" data-copy="${escapeHtml(apiEndpoint(item))}" title="复制 API 地址">⧉</button>
+              <button class="call" type="button" data-endpoint="${escapeHtml(apiEndpoint(item))}">调用</button>
+            </div>
+            <pre class="result" aria-live="polite"></pre>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderGroups(items) {
+      const groups = new Map();
+      items.forEach(item => {
+        const [groupName] = sceneInfo(item);
+        if (!groups.has(groupName)) groups.set(groupName, []);
+        groups.get(groupName).push(item);
+      });
+      return Array.from(groups.entries()).map(([groupName, groupItems]) => `
+        <section class="scene-group">
+          <div class="scene-heading">
+            <h2>${escapeHtml(groupName)}</h2>
+            <span>${groupItems.length} 个接口</span>
+          </div>
+          <div class="scene-grid">${groupItems.map(scenarioHtml).join("")}</div>
+        </section>
+      `).join("");
+    }
+
+    function buildFilters() {
+      const scenes = ["全部", ...Array.from(new Set(scenarios.map(item => sceneInfo(item)[0]))).sort()];
+      filters.innerHTML = scenes.map(name => (
+        `<button class="filter ${name === activeScene ? "active" : ""}" type="button" data-scene="${escapeHtml(name)}">${escapeHtml(name)}</button>`
+      )).join("");
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = scenarios.filter(item => {
+        const [groupName] = sceneInfo(item);
+        const matchScene = activeScene === "全部" || groupName === activeScene;
+        const haystack = JSON.stringify(item).toLowerCase();
+        return matchScene && (!query || haystack.includes(query));
+      });
+      grid.innerHTML = renderGroups(filtered);
+      visibleCount.textContent = filtered.length;
+      emptyState.style.display = filtered.length ? "none" : "block";
+    }
+
+    filters.addEventListener("click", event => {
+      const button = event.target.closest(".filter");
+      if (!button) return;
+      activeScene = button.dataset.scene;
+      buildFilters();
+      applyFilters();
+    });
+
+    grid.addEventListener("click", async event => {
+      const button = event.target.closest(".copy");
+      if (button) {
+        const value = button.dataset.copy;
+        try {
+          await navigator.clipboard.writeText(value);
+          button.textContent = "✓";
+          setTimeout(() => button.textContent = "⧉", 900);
+        } catch {
+          button.textContent = "!";
+          setTimeout(() => button.textContent = "⧉", 900);
+        }
+        return;
+      }
+
+      const callButton = event.target.closest(".call");
+      if (callButton) {
+        const card = callButton.closest(".scenario");
+        const result = card.querySelector(".result");
+        callButton.disabled = true;
+        callButton.textContent = "调用中";
+        result.style.display = "block";
+        result.textContent = "请求中...";
+        try {
+          const response = await fetch(`${apiBase()}${callButton.dataset.endpoint}`);
+          const text = await response.text();
+          result.textContent = text;
+        } catch (error) {
+          result.textContent = String(error);
+        } finally {
+          callButton.disabled = false;
+          callButton.textContent = "调用";
+        }
+      }
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+
+    document.getElementById("totalCount").textContent = scenarios.length;
+    document.getElementById("postCount").textContent = scenarios.filter(item => item.httpMethod === "POST").length;
+    document.getElementById("getCount").textContent = scenarios.filter(item => item.httpMethod === "GET").length;
+    buildFilters();
+    applyFilters();
+  </script>
+</body>
+</html>
