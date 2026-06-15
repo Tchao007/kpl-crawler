@@ -24,14 +24,27 @@ def _safe_route_part(value: str) -> str:
 
 def _build_scenarios() -> list[dict[str, object]]:
     scenarios: list[dict[str, object]] = []
+    used_method_names: dict[str, int] = {}
     for spec in REQUESTS:
         params = spec.get("params") or {}
         data = spec.get("data") or {}
         controller = data.get("c") or params.get("c") or "request"
         action = data.get("a") or params.get("a") or spec["session_id"]
-        method_name = f"{_safe_route_part(controller)}_{_safe_route_part(action)}"
+        base_method_name = f"{_safe_route_part(controller)}_{_safe_route_part(action)}"
+        duplicate_index = used_method_names.get(base_method_name, 0)
+        used_method_names[base_method_name] = duplicate_index + 1
+        method_name = (
+            base_method_name
+            if duplicate_index == 0
+            else f"{base_method_name}_{_safe_route_part(str(spec['session_id']))}"
+        )
         endpoint = f"/api/{method_name}"
-        alias_endpoint = f"/api/{_safe_route_part(controller)}/{_safe_route_part(action)}"
+        base_alias_endpoint = f"/api/{_safe_route_part(controller)}/{_safe_route_part(action)}"
+        alias_endpoint = (
+            base_alias_endpoint
+            if duplicate_index == 0
+            else f"{base_alias_endpoint}/{_safe_route_part(str(spec['session_id']))}"
+        )
         scenarios.append(
             {
                 "session_id": spec["session_id"],

@@ -6,500 +6,304 @@
   <title>开盘啦抓包场景调用清单</title>
   <style>
     :root {
-      --bg: #f6f7f9;
+      --bg: #f4f6f8;
       --panel: #ffffff;
-      --ink: #18202a;
-      --muted: #677281;
-      --line: #d9dee7;
-      --accent: #176b5c;
-      --accent-weak: #e4f2ef;
-      --blue: #245a9c;
-      --blue-weak: #e8eff8;
-      --orange: #a65312;
-      --orange-weak: #fff1e3;
-      --code: #101820;
-      --code-soft: #e9edf2;
-      --shadow: 0 10px 24px rgba(28, 38, 49, 0.08);
+      --ink: #17202a;
+      --muted: #667380;
+      --line: #d8dee6;
+      --accent: #136f63;
+      --accent-soft: #e6f4f1;
+      --blue: #205b9f;
+      --blue-soft: #eaf1fb;
+      --amber: #9f5b13;
+      --amber-soft: #fff0df;
+      --danger: #b0302a;
+      --shadow: 0 10px 24px rgba(25, 34, 45, 0.08);
+      --radius: 8px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
-      line-height: 1.5;
+      font: 14px/1.5 "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
     }
-
-    .app {
-      min-height: 100vh;
-    }
-
+    .shell { min-height: 100vh; }
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
       border-bottom: 1px solid var(--line);
-      background: rgba(246, 247, 249, 0.94);
-      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
-
-    .topbar-inner {
-      max-width: 1280px;
+    .wrap {
+      width: min(1480px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 18px 24px;
-      display: grid;
-      grid-template-columns: minmax(220px, 1fr) minmax(260px, 430px);
+    }
+    .topbar .wrap {
+      display: flex;
       gap: 16px;
       align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      flex-wrap: wrap;
     }
-
     h1 {
       margin: 0;
       font-size: 22px;
       font-weight: 700;
-      letter-spacing: 0;
     }
-
-    .subtitle {
+    .sub {
       margin-top: 4px;
       color: var(--muted);
       font-size: 13px;
     }
-
-    .search {
+    .toolbar {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
     }
-
-    .search input {
-      width: 100%;
-      height: 40px;
+    .search, .select, .btn {
+      height: 38px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 0 12px;
+      border-radius: var(--radius);
+      background: #fff;
       color: var(--ink);
-      background: var(--panel);
-      font-size: 14px;
+    }
+    .search, .select {
+      padding: 0 12px;
+      min-width: 180px;
       outline: none;
     }
-
-    .search input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-weak);
+    .search { width: 320px; }
+    .btn {
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 600;
     }
-
-    .main {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 22px 24px 40px;
-    }
-
-    .summary {
+    .btn:hover { border-color: #b8c2cc; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:disabled { opacity: .65; cursor: not-allowed; }
+    .btn.ghost { background: #fff; }
+    .stats {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 18px;
+      padding: 16px 0 4px;
     }
-
-    .metric {
+    .stat {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: 14px 16px;
       box-shadow: var(--shadow);
     }
-
-    .metric strong {
-      display: block;
-      font-size: 22px;
-      line-height: 1.2;
-    }
-
-    .metric span {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .toolbar {
+    .stat .label { color: var(--muted); font-size: 12px; }
+    .stat .value { margin-top: 4px; font-size: 22px; font-weight: 700; }
+    .filters {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      align-items: center;
-      margin: 18px 0;
+      padding: 16px 0 8px;
     }
-
-    .filter {
+    .chip {
       border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
       border-radius: 999px;
       padding: 7px 12px;
-      background: var(--panel);
-      color: var(--muted);
       cursor: pointer;
       font-size: 13px;
     }
-
-    .filter.active {
-      border-color: var(--accent);
-      background: var(--accent-weak);
-      color: var(--accent);
-      font-weight: 650;
-    }
-
-    .grid {
-      display: grid;
-      gap: 18px;
-    }
-
-    .scene-group {
-      display: grid;
-      gap: 10px;
-    }
-
-    .scene-heading {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 2px 2px 0;
-    }
-
-    .scene-heading h2 {
-      margin: 0;
-      font-size: 17px;
-      line-height: 1.2;
-      letter-spacing: 0;
-    }
-
-    .scene-heading span {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .scene-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .scenario {
+    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .chip.blue.active { background: var(--blue); border-color: var(--blue); }
+    .panel {
+      margin: 10px 0 24px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-
-    .scenario-header {
-      padding: 15px 16px 12px;
+    .panel-head {
+      padding: 14px 16px;
       border-bottom: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .title-row {
       display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
       align-items: center;
+      justify-content: space-between;
+    }
+    .panel-head strong { font-size: 16px; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .group {
+      border-top: 1px solid var(--line);
+    }
+    .group:first-child { border-top: 0; }
+    .group-title {
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafbfc;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+    .group-title span { color: var(--muted); font-weight: 500; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: #fff;
+    }
+    .card-head {
+      display: flex;
       gap: 8px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+      word-break: break-word;
+    }
+    .meta {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
       flex-wrap: wrap;
     }
-
-    .scenario h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0;
-      overflow-wrap: anywhere;
-    }
-
     .tag {
       display: inline-flex;
       align-items: center;
-      height: 24px;
-      border-radius: 999px;
+      min-height: 24px;
       padding: 0 8px;
+      border-radius: 999px;
       font-size: 12px;
-      font-weight: 650;
+      border: 1px solid transparent;
       white-space: nowrap;
     }
-
-    .tag.post {
-      color: var(--accent);
-      background: var(--accent-weak);
-    }
-
-    .tag.get {
-      color: var(--blue);
-      background: var(--blue-weak);
-    }
-
-    .tag.session {
-      color: var(--orange);
-      background: var(--orange-weak);
-    }
-
-    .meta {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 12px;
-      overflow-wrap: anywhere;
-    }
-
-    .scene-note {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .copy {
-      width: 34px;
-      height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--panel);
-      color: var(--muted);
-      cursor: pointer;
-      display: inline-grid;
-      place-items: center;
-      font-size: 15px;
-    }
-
-    .copy:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-weak);
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 8px;
-      margin-bottom: 12px;
-      align-items: center;
-    }
-
-    .endpoint {
-      min-width: 0;
-      padding: 9px 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #f8fafc;
-      color: var(--blue);
-      font-family: Consolas, "Cascadia Mono", monospace;
-      font-size: 13px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .call {
-      height: 36px;
-      border: 1px solid var(--accent);
-      border-radius: 6px;
-      background: var(--accent);
-      color: #ffffff;
-      padding: 0 12px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 650;
-      white-space: nowrap;
-    }
-
-    .call:hover {
-      filter: brightness(0.95);
-    }
-
-    .result {
-      display: none;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid var(--line);
-      background: #fbfcfe;
-      color: var(--ink);
-      font-family: Consolas, "Cascadia Mono", monospace;
-      font-size: 12px;
-      max-height: 280px;
-      overflow: auto;
-      white-space: pre-wrap;
-    }
-
-    .scenario-body {
-      padding: 14px 16px 16px;
-    }
-
-    .code {
-      margin: 0;
-      padding: 12px;
-      border-radius: 6px;
-      background: var(--code);
-      color: #f4f7fb;
-      font-family: Consolas, "Cascadia Mono", monospace;
-      font-size: 13px;
-      overflow-x: auto;
-      white-space: pre;
-    }
-
-    details {
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fbfcfe;
-    }
-
-    summary {
-      cursor: pointer;
-      padding: 9px 10px;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 650;
-    }
-
+    .tag.blue { background: var(--blue-soft); color: var(--blue); border-color: #cfe0f6; }
+    .tag.green { background: var(--accent-soft); color: var(--accent); border-color: #cfeae5; }
+    .tag.orange { background: var(--amber-soft); color: var(--amber); border-color: #f5d5b2; }
+    .tag.gray { background: #f2f4f7; color: #51606f; border-color: #e1e6ec; }
     .kv {
+      margin-top: 10px;
       display: grid;
-      grid-template-columns: 96px minmax(0, 1fr);
-      border-top: 1px solid var(--line);
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 6px 10px;
       font-size: 12px;
     }
-
-    .kv div {
-      padding: 7px 10px;
-      border-bottom: 1px solid var(--code-soft);
-      overflow-wrap: anywhere;
+    .kv div:nth-child(odd) { color: var(--muted); }
+    .kv code, .endpoint {
+      background: #f7f9fb;
+      border: 1px solid #e4e9ef;
+      border-radius: 6px;
+      padding: 2px 6px;
+      word-break: break-all;
     }
-
-    .kv div:nth-child(odd) {
-      color: var(--muted);
-      background: #f2f5f8;
-      font-weight: 650;
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-
-    .kv div:nth-last-child(-n+2) {
-      border-bottom: 0;
-    }
-
-    .empty {
-      display: none;
-      padding: 42px 16px;
-      text-align: center;
-      color: var(--muted);
-      background: var(--panel);
+    .tiny {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 6px;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
     }
-
-    @media (max-width: 920px) {
-      .topbar-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .search {
-        justify-content: stretch;
-      }
-
-      .summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .scene-grid {
-        grid-template-columns: 1fr;
-      }
+    .tiny.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tiny:disabled { opacity: .6; cursor: not-allowed; }
+    .empty {
+      padding: 40px 16px;
+      color: var(--muted);
+      text-align: center;
     }
-
-    @media (max-width: 560px) {
-      .topbar-inner,
-      .main {
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
-      .summary {
-        grid-template-columns: 1fr;
-      }
-
-      .scenario-header {
-        grid-template-columns: 1fr;
-      }
-
-      .copy {
-        width: 100%;
-      }
-
-      .actions {
-        grid-template-columns: 1fr;
-      }
+    .loading {
+      padding: 14px 16px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+    @media (max-width: 1120px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cards { grid-template-columns: 1fr; }
+      .search { width: 100%; }
+      .toolbar { width: 100%; justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="topbar-inner">
+  <div class="shell">
+    <div class="topbar">
+      <div class="wrap">
         <div>
           <h1>开盘啦抓包场景调用清单</h1>
-          <div class="subtitle">后端接口形式：/api/scenarios 和每个场景的 /api/xxx</div>
+          <div class="sub">自动加载 88 个场景，按业务分组展示，单条手动调用，不做批量压测。</div>
         </div>
-        <label class="search">
-          <input id="searchInput" type="search" placeholder="搜索方法、场景、session、参数名">
-        </label>
+        <div class="toolbar">
+          <input id="searchInput" class="search" type="search" placeholder="搜索标题、session、域名、接口路径">
+          <select id="hostFilter" class="select">
+            <option value="all">全部域名</option>
+          </select>
+          <button id="reloadBtn" class="btn ghost">重新加载</button>
+          <button id="copyAllBtn" class="btn primary">复制当前列表</button>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <main class="main">
-      <section class="summary" aria-label="接口统计">
-        <div class="metric"><strong id="totalCount">23</strong><span>抓包场景</span></div>
-        <div class="metric"><strong id="postCount">22</strong><span>POST 请求</span></div>
-        <div class="metric"><strong id="getCount">1</strong><span>GET 请求</span></div>
-        <div class="metric"><strong id="visibleCount">23</strong><span>当前显示</span></div>
-      </section>
+    <div class="wrap">
+      <div class="stats" id="stats"></div>
+      <div class="filters" id="groupFilters"></div>
 
-      <nav class="toolbar" id="filters" aria-label="按控制器筛选"></nav>
-      <section class="grid" id="scenarioGrid"></section>
-      <div class="empty" id="emptyState">没有匹配的场景</div>
-    </main>
+      <div class="panel">
+        <div class="panel-head">
+          <strong id="panelTitle">场景列表</strong>
+          <div class="hint" id="panelHint">准备加载中</div>
+        </div>
+        <div id="loading" class="loading">正在从 /api/scenarios 拉取场景...</div>
+        <div id="list"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const scenarios = [
-      {"methodName":"index_newgetlist","signature":"client.index_newgetlist()","sessionId":"15","title":"Index.NewGetList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Index","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Index","a":"NewGetList","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
-      {"methodName":"sysappversion_getlayout","signature":"client.sysappversion_getlayout()","sessionId":"16","title":"SysAppVersion.GetLaYout","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"SysAppVersion","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"SysAppVersion","a":"GetLaYout","apiv":"w44","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
-      {"methodName":"userinfo_appnews","signature":"client.userinfo_appnews(st=None, index=None)","sessionId":"17","title":"UserInfo.AppNews","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"UserInfo","params":{},"data":{"a":"AppNews","st":"1","c":"UserInfo","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","PhoneOS":"0","Token":"0","Index":"0","apiv":"w44","Version":"5.23.0.4","UserID":"0"}},
-      {"methodName":"system_moduleswitch","signature":"client.system_moduleswitch()","sessionId":"23","title":"System.ModuleSwitch","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"ModuleSwitch","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
-      {"methodName":"theme_infogr","signature":"client.theme_infogr()","sessionId":"27","title":"Theme.InfoGR","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Theme","params":{},"data":{"a":"InfoGR","c":"Theme","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
-      {"methodName":"system_adget","signature":"client.system_adget(type=None)","sessionId":"28","title":"System.AdGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"AdGet","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Scale":"0.5625","apiv":"w44","Type":"1"}},
-      {"methodName":"system_webjsget","signature":"client.system_webjsget()","sessionId":"37","title":"System.WebJsGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"WebJsGet","apiv":"w44","c":"System","PhoneOSNew":"1","UserID":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0"}},
-      {"methodName":"push_activepushmessageall","signature":"client.push_activepushmessageall()","sessionId":"40","title":"Push.ActivePushMessageAll","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"ActivePushMessageAll","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
-      {"methodName":"push_getnewpushmessageall","signature":"client.push_getnewpushmessageall()","sessionId":"41","title":"Push.GetNewPushMessageAll","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"GetNewPushMessageAll","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"}},
-      {"methodName":"system_focusfunget","signature":"client.system_focusfunget(fwebid=None)","sessionId":"42","title":"System.FocusFunGet","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"FocusFunGet","apiv":"w44","c":"System","PhoneOSNew":"1","FWebID":"1","UserID":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0"}},
-      {"methodName":"longhubangdongcai_getstate","signature":"client.longhubangdongcai_getstate()","sessionId":"47","title":"LongHuBangDongCai.GetState","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBangDongCai","params":{},"data":{"a":"GetState","apiv":"w44","c":"LongHuBangDongCai","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4"}},
-      {"methodName":"longhubang_toptitle","signature":"client.longhubang_toptitle()","sessionId":"48","title":"LongHuBang.TopTitle","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"TopTitle","apiv":"w44","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4"}},
-      {"methodName":"longhubang_getstocklist","signature":"client.longhubang_getstocklist(st=None, time=None, index=None, type=None)","sessionId":"50","title":"LongHuBang.GetStockList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"st":"500","a":"GetStockList","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"","Index":"0","apiv":"w44","Type":"2","UserID":"0"}},
-      {"methodName":"longhubang_add","signature":"client.longhubang_add(time=None, stockid=None)","sessionId":"51","title":"LongHuBang.Add","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"Add","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Time":"2026-06-11","apiv":"w44","StockID":"603616"}},
-      {"methodName":"stock_getnewonestockinfo","signature":"client.stock_getnewonestockinfo(type=None, time=None, stockid=None)","sessionId":"52","title":"Stock.GetNewOneStockInfo","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Stock","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Stock","a":"GetNewOneStockInfo","Type":"0","Time":"2026-06-11","StockID":"603616","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
-      {"methodName":"stock_getstockchart","signature":"client.stock_getstockchart(stockid=None, index=None, st=None)","sessionId":"53","title":"Stock.GetStockChart","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Stock","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Stock","a":"GetStockChart","StockID":"603616","Index":"0","st":"530","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
-      {"methodName":"comments_get","signature":"client.comments_get(index=None, st=None, stockid=None, day=None, type=None, tsort=None)","sessionId":"62","title":"Comments.Get","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Comments","params":{"apiv":"w44","PhoneOSNew":"1","VerSion":"5.23.0.4"},"data":{"c":"Comments","a":"Get","Index":"0","st":"30","StockID":"603616","Day":"2026-06-11","Type":"1","Tsort":"0","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232"}},
-      {"methodName":"longhubang_getagencylistv2","signature":"client.longhubang_getagencylistv2(st=None, time=None, index=None)","sessionId":"77","title":"LongHuBang.GetAgencyListV2","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetAgencyListV2","st":"500","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"2026-06-11","Index":"0","apiv":"w44","UserID":"0"}},
-      {"methodName":"longhubang_getagencykline","signature":"client.longhubang_getagencykline(st=None, index=None)","sessionId":"78","title":"LongHuBang.GetAgencyKline","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetAgencyKline","st":"499","apiv":"w44","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","index":"0"}},
-      {"methodName":"longhubang_getbusinesslist","signature":"client.longhubang_getbusinesslist(st=None, time=None, index=None, type=None)","sessionId":"79","title":"LongHuBang.GetBusinessList","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"LongHuBang","params":{},"data":{"a":"GetBusinessList","st":"100","c":"LongHuBang","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","Time":"2026-06-11","Index":"0","apiv":"w44","Type":"1","UserID":"0"}},
-      {"methodName":"system_adgetkhd","signature":"client.system_adgetkhd(type=None)","sessionId":"80","title":"System.AdGetKHD","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"System","params":{},"data":{"a":"AdGetKHD","apiv":"w44","Type":"8,11","c":"System","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Scale":"0.5625"}},
-      {"methodName":"userxinshouzhiyin_xszystate","signature":"client.userxinshouzhiyin_xszystate()","sessionId":"93","title":"UserXinShouZhiYin.XSZYState","httpMethod":"GET","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"UserXinShouZhiYin","params":{"a":"XSZYState","c":"UserXinShouZhiYin","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","Token":"0","apiv":"w44","UserID":"0"},"data":{}},
-      {"methodName":"push_devicetoken","signature":"client.push_devicetoken()","sessionId":"94","title":"Push.DeviceToken","httpMethod":"POST","url":"https://applhb.longhuvip.com/w1/api/index.php","controller":"Push","params":{},"data":{"a":"DeviceToken","c":"Push","PhoneOSNew":"1","DeviceID":"3db60e69-5e48-349e-b8a9-59fb164e3232","VerSion":"5.23.0.4","PhoneOS":"2","Token":"0","apiv":"w44","TokenType":"3","Version":"5.23.0.4","DeviceToken":"c5a3d9d1397b4fbf009d6004d77aee5c","UserID":"0"}}
-    ];
+    const API_BASE = location.origin && location.origin !== "null" ? location.origin : "http://127.0.0.1:8765";
+    const state = {
+      scenarios: [],
+      filtered: [],
+      group: "全部",
+      host: "all",
+      query: "",
+      loading: false,
+      busyId: null
+    };
 
-    const grid = document.getElementById("scenarioGrid");
-    const emptyState = document.getElementById("emptyState");
-    const searchInput = document.getElementById("searchInput");
-    const filters = document.getElementById("filters");
-    const visibleCount = document.getElementById("visibleCount");
-    let activeScene = "全部";
+    const el = {
+      stats: document.getElementById("stats"),
+      groupFilters: document.getElementById("groupFilters"),
+      panelTitle: document.getElementById("panelTitle"),
+      panelHint: document.getElementById("panelHint"),
+      loading: document.getElementById("loading"),
+      list: document.getElementById("list"),
+      searchInput: document.getElementById("searchInput"),
+      hostFilter: document.getElementById("hostFilter"),
+      reloadBtn: document.getElementById("reloadBtn"),
+      copyAllBtn: document.getElementById("copyAllBtn")
+    };
 
     function escapeHtml(value) {
       return String(value)
@@ -507,186 +311,295 @@
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll("'", "&#39;");
     }
 
-    function renderKv(items) {
-      const entries = Object.entries(items);
-      if (!entries.length) return "<div>无</div><div>-</div>";
-      return entries.map(([key, value]) => `<div>${escapeHtml(key)}</div><div>${escapeHtml(value)}</div>`).join("");
-    }
-
-    function codeBlock(item) {
-      return [
-        `GET ${apiUrl(item)}`,
-        "",
-        `POST ${apiUrl(item)}`
-      ].join("\\n");
-    }
-
-    function apiBase() {
-      if (location.protocol === "http:" || location.protocol === "https:") {
-        return location.origin;
+    function hostFromUrl(url) {
+      try {
+        return new URL(url).host || "";
+      } catch (_) {
+        return "";
       }
-      return "http://127.0.0.1:8765";
     }
 
-    function apiEndpoint(item) {
-      return `/api/${item.methodName}`;
+    function normalizeScenario(item) {
+      const host = item.host || hostFromUrl(item.target_url || item.url || "");
+      return {
+        sessionId: String(item.session_id ?? item.sessionId ?? ""),
+        title: item.title || item.name || "未命名场景",
+        methodName: item.method_name || item.methodName || "",
+        httpMethod: item.http_method || item.httpMethod || "POST",
+        targetUrl: item.target_url || item.url || "",
+        endpoint: item.endpoint || "",
+        aliasEndpoint: item.alias_endpoint || "",
+        params: item.params || {},
+        data: item.data || {},
+        host,
+        group: inferGroup(item, host)
+      };
     }
 
-    function apiUrl(item) {
-      return `${apiBase()}${apiEndpoint(item)}`;
+    function inferGroup(item, host) {
+      const title = String(item.title || "");
+      const text = `${host} ${title}`.toLowerCase();
+      if (text.includes("apphwhq")) return "行情核心";
+      if (text.includes("apphis")) return "历史数据";
+      if (text.includes("apparticle")) return "资讯内容";
+      if (text.includes("appuser") || text.includes("applog")) return "用户与埋点";
+      if (text.includes("getsockip")) return "网络配置";
+      if (text.includes("applhb")) {
+        if (text.includes("longhubang") || text.includes("龙虎榜")) return "龙虎榜";
+        if (text.includes("stock") || text.includes("个股") || text.includes("盘口")) return "个股详情";
+        return "龙虎榜";
+      }
+      return "其他";
     }
 
-    function aliasEndpoint(item) {
-      const [controller, action] = item.title.split(".");
-      const clean = value => value.toLowerCase().replace(/[^0-9a-z]+/g, "_").replace(/^_+|_+$/g, "");
-      return `/api/${clean(controller)}/${clean(action)}`;
+    function prettyKeyValueMap(obj) {
+      const entries = Object.entries(obj || {});
+      if (!entries.length) return "<div>无</div><div>-</div>";
+      return entries.map(([key, value]) => `<div>${escapeHtml(key)}</div><div><code>${escapeHtml(value)}</code></div>`).join("");
     }
 
-    function sampleOverrides(item) {
-      const keys = ["StockID", "stockid", "Time", "time", "Day", "day", "Index", "index", "Type", "type", "st"];
-      const source = {...item.params, ...item.data};
-      return Object.fromEntries(keys.filter(key => source[key] !== undefined).map(key => [key, source[key]]));
+    function statCard(label, value) {
+      return `<div class="stat"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div></div>`;
     }
 
-    function sceneInfo(item) {
-      const name = item.methodName;
-      const title = item.title;
-      if (name === "index_newgetlist") return ["启动与首页", "首页初始化数据"];
-      if (name === "sysappversion_getlayout") return ["启动与首页", "客户端布局配置"];
-      if (title.startsWith("System.")) return ["系统配置", title.replace("System.", "")];
-      if (title.startsWith("Push.")) return ["推送与通知", title.replace("Push.", "")];
-      if (title.startsWith("Theme.")) return ["主题与模块", title.replace("Theme.", "")];
-      if (title.startsWith("UserInfo.")) return ["用户消息", title.replace("UserInfo.", "")];
-      if (title.startsWith("UserXinShouZhiYin.")) return ["新手引导", title.replace("UserXinShouZhiYin.", "")];
-      if (title.startsWith("LongHuBangDongCai.")) return ["龙虎榜", "东财状态"];
-      if (title.startsWith("LongHuBang.")) return ["龙虎榜", title.replace("LongHuBang.", "")];
-      if (title.startsWith("Stock.")) return ["个股详情", title.replace("Stock.", "")];
-      if (title.startsWith("Comments.")) return ["评论", title.replace("Comments.", "")];
-      return ["其他场景", title];
+    function groupList(items, key) {
+      const map = new Map();
+      items.forEach((item) => {
+        const groupKey = item[key] || "其他";
+        if (!map.has(groupKey)) map.set(groupKey, []);
+        map.get(groupKey).push(item);
+      });
+      return map;
     }
 
-    function scenarioHtml(item) {
-      const httpClass = item.httpMethod.toLowerCase();
-      const [groupName, sceneName] = sceneInfo(item);
+    function renderStats(items) {
+      const hosts = new Set(items.map((item) => item.host).filter(Boolean));
+      const groups = new Set(items.map((item) => item.group));
+      el.stats.innerHTML = [
+        statCard("场景总数", items.length),
+        statCard("域名数量", hosts.size),
+        statCard("分组数量", groups.size),
+        statCard("当前筛选", state.group === "全部" ? "全部" : state.group)
+      ].join("");
+    }
+
+    function renderGroupFilters(items) {
+      const groups = ["全部", ...new Set(items.map((item) => item.group))];
+      el.groupFilters.innerHTML = groups.map((group) => {
+        const active = group === state.group ? "active" : "";
+        return `<button class="chip ${active}" data-group="${escapeHtml(group)}">${escapeHtml(group)}</button>`;
+      }).join("");
+    }
+
+    function renderHostOptions(items) {
+      const current = state.host;
+      const hosts = ["all", ...new Set(items.map((item) => item.host).filter(Boolean))];
+      el.hostFilter.innerHTML = hosts.map((host) => {
+        const label = host === "all" ? "全部域名" : host;
+        const selected = host === current ? " selected" : "";
+        return `<option value="${escapeHtml(host)}"${selected}>${escapeHtml(label)}</option>`;
+      }).join("");
+    }
+
+    function render(items) {
+      state.filtered = items.filter((item) => {
+        const matchGroup = state.group === "全部" || item.group === state.group;
+        const matchHost = state.host === "all" || item.host === state.host;
+        const haystack = [
+          item.sessionId,
+          item.title,
+          item.methodName,
+          item.endpoint,
+          item.aliasEndpoint,
+          item.host,
+          JSON.stringify(item.params),
+          JSON.stringify(item.data)
+        ].join(" ").toLowerCase();
+        const matchQuery = !state.query || haystack.includes(state.query.toLowerCase());
+        return matchGroup && matchHost && matchQuery;
+      });
+
+      renderStats(items);
+      renderGroupFilters(items);
+      renderHostOptions(items);
+
+      el.panelTitle.textContent = `场景列表 · ${state.filtered.length} / ${items.length}`;
+      el.panelHint.textContent = state.loading ? "加载中" : "单条点击即可调用对应接口";
+
+      const grouped = groupList(state.filtered, "group");
+      const groupNames = Array.from(grouped.keys());
+      if (!groupNames.length) {
+        el.list.innerHTML = `<div class="empty">没有找到匹配的场景。</div>`;
+        return;
+      }
+
+      el.list.innerHTML = groupNames.map((groupName) => {
+        const groupItems = grouped.get(groupName) || [];
+        return `
+          <section class="group">
+            <div class="group-title">
+              <div>${escapeHtml(groupName)}</div>
+              <span>${groupItems.length} 条</span>
+            </div>
+            <div class="cards">
+              ${groupItems.map(renderCard).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function renderCard(item) {
+      const endpoint = item.endpoint || item.aliasEndpoint || "";
+      const methodTag = item.httpMethod === "GET"
+        ? '<span class="tag blue">GET</span>'
+        : '<span class="tag green">POST</span>';
+      const busy = state.busyId === item.sessionId ? "disabled" : "";
       return `
-        <article class="scenario" data-controller="${escapeHtml(item.controller)}">
-          <div class="scenario-header">
+        <article class="card">
+          <div class="card-head">
             <div>
-              <div class="title-row">
-                <h2>${escapeHtml(sceneName)}</h2>
-                <span class="tag ${httpClass}">${escapeHtml(item.httpMethod)}</span>
-                <span class="tag session">#${escapeHtml(item.sessionId)}</span>
-                <span class="tag get">${escapeHtml(groupName)}</span>
+              <h3 class="title">${escapeHtml(item.title)}</h3>
+              <div class="meta">
+                <span class="tag gray">session ${escapeHtml(item.sessionId)}</span>
+                <span class="tag orange">${escapeHtml(item.host || "unknown host")}</span>
+                ${methodTag}
               </div>
-              <div class="scene-note">${escapeHtml(item.title)}</div>
-              <div class="meta">${escapeHtml(item.methodName)} · ${escapeHtml(item.url)}</div>
             </div>
-            <button class="copy" type="button" data-copy="${escapeHtml(apiEndpoint(item))}" title="复制 API 地址">⧉</button>
           </div>
-          <div class="scenario-body">
-            <div class="actions">
-              <div class="endpoint" title="${escapeHtml(apiEndpoint(item))}">${escapeHtml(apiEndpoint(item))}</div>
-              <button class="copy" type="button" data-copy="${escapeHtml(apiEndpoint(item))}" title="复制 API 地址">⧉</button>
-              <button class="call" type="button" data-endpoint="${escapeHtml(apiEndpoint(item))}">调用</button>
-            </div>
-            <pre class="result" aria-live="polite"></pre>
+          <div class="kv">
+            <div>接口</div><div class="endpoint">${escapeHtml(endpoint)}</div>
+            <div>目标</div><div>${escapeHtml(item.targetUrl || "-")}</div>
+            <div>别名</div><div class="endpoint">${escapeHtml(item.aliasEndpoint || "-")}</div>
+          </div>
+          <div class="kv" style="margin-top: 12px;">
+            <div>参数</div><div>${prettyKeyValueMap(item.params)}</div>
+            <div>表单</div><div>${prettyKeyValueMap(item.data)}</div>
+          </div>
+          <div class="actions">
+            <button class="tiny" data-action="copy-endpoint" data-id="${escapeHtml(item.sessionId)}" data-value="${escapeHtml(endpoint)}">复制接口</button>
+            <button class="tiny" data-action="copy-url" data-id="${escapeHtml(item.sessionId)}" data-value="${escapeHtml(item.targetUrl || "")}">复制目标</button>
+            <button class="tiny primary" data-action="call" data-id="${escapeHtml(item.sessionId)}" ${busy}>调用场景</button>
           </div>
         </article>
       `;
     }
 
-    function renderGroups(items) {
-      const groups = new Map();
-      items.forEach(item => {
-        const [groupName] = sceneInfo(item);
-        if (!groups.has(groupName)) groups.set(groupName, []);
-        groups.get(groupName).push(item);
-      });
-      return Array.from(groups.entries()).map(([groupName, groupItems]) => `
-        <section class="scene-group">
-          <div class="scene-heading">
-            <h2>${escapeHtml(groupName)}</h2>
-            <span>${groupItems.length} 个接口</span>
-          </div>
-          <div class="scene-grid">${groupItems.map(scenarioHtml).join("")}</div>
-        </section>
-      `).join("");
+    async function copyText(text) {
+      await navigator.clipboard.writeText(text);
     }
 
-    function buildFilters() {
-      const scenes = ["全部", ...Array.from(new Set(scenarios.map(item => sceneInfo(item)[0]))).sort()];
-      filters.innerHTML = scenes.map(name => (
-        `<button class="filter ${name === activeScene ? "active" : ""}" type="button" data-scene="${escapeHtml(name)}">${escapeHtml(name)}</button>`
-      )).join("");
+    function buildRequestUrl(item) {
+      const url = new URL(item.endpoint || item.aliasEndpoint, API_BASE);
+      const params = new URLSearchParams();
+      if ((item.httpMethod || "POST").toUpperCase() === "GET") {
+        Object.entries(item.params || {}).forEach(([k, v]) => params.set(k, v));
+        Object.entries(item.data || {}).forEach(([k, v]) => params.set(k, v));
+      } else {
+        Object.entries(item.params || {}).forEach(([k, v]) => params.set(k, v));
+      }
+      const query = params.toString();
+      if (query) url.search = query;
+      return url.toString();
     }
 
-    function applyFilters() {
-      const query = searchInput.value.trim().toLowerCase();
-      const filtered = scenarios.filter(item => {
-        const [groupName] = sceneInfo(item);
-        const matchScene = activeScene === "全部" || groupName === activeScene;
-        const haystack = JSON.stringify(item).toLowerCase();
-        return matchScene && (!query || haystack.includes(query));
-      });
-      grid.innerHTML = renderGroups(filtered);
-      visibleCount.textContent = filtered.length;
-      emptyState.style.display = filtered.length ? "none" : "block";
-    }
-
-    filters.addEventListener("click", event => {
-      const button = event.target.closest(".filter");
-      if (!button) return;
-      activeScene = button.dataset.scene;
-      buildFilters();
-      applyFilters();
-    });
-
-    grid.addEventListener("click", async event => {
-      const button = event.target.closest(".copy");
-      if (button) {
-        const value = button.dataset.copy;
-        try {
-          await navigator.clipboard.writeText(value);
-          button.textContent = "✓";
-          setTimeout(() => button.textContent = "⧉", 900);
-        } catch {
-          button.textContent = "!";
-          setTimeout(() => button.textContent = "⧉", 900);
+    async function callScenario(item, button) {
+      if (state.busyId) return;
+      state.busyId = item.sessionId;
+      button.disabled = true;
+      button.textContent = "调用中";
+      try {
+        const requestUrl = buildRequestUrl(item);
+        const init = {
+          method: item.httpMethod || "POST",
+          headers: { "Accept": "application/json" }
+        };
+        if ((item.httpMethod || "POST").toUpperCase() === "POST") {
+          const body = new URLSearchParams();
+          Object.entries(item.data || {}).forEach(([k, v]) => body.set(k, v));
+          init.headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8";
+          init.body = body.toString();
         }
+        const response = await fetch(requestUrl, init);
+        const text = await response.text();
+        alert(`调用完成: ${response.status}\n\n${text.slice(0, 900)}`);
+      } catch (error) {
+        alert(`调用失败: ${error.message}`);
+      } finally {
+        state.busyId = null;
+        button.disabled = false;
+        button.textContent = "调用场景";
+      }
+    }
+
+    async function loadScenarios() {
+      state.loading = true;
+      el.loading.textContent = "正在从 /api/scenarios 拉取场景...";
+      try {
+        const response = await fetch(new URL("/api/scenarios", API_BASE), { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        state.scenarios = (payload.scenarios || []).map(normalizeScenario);
+        state.loading = false;
+        el.loading.textContent = "";
+        render(state.scenarios);
+      } catch (error) {
+        state.loading = false;
+        el.loading.textContent = `加载失败：${error.message}`;
+        el.list.innerHTML = `<div class="empty">无法获取场景列表，请确认后端服务已启动。</div>`;
+        renderStats([]);
+      }
+    }
+
+    document.addEventListener("click", async (event) => {
+      const chip = event.target.closest("[data-group]");
+      if (chip) {
+        state.group = chip.getAttribute("data-group") || "全部";
+        render(state.scenarios);
         return;
       }
 
-      const callButton = event.target.closest(".call");
-      if (callButton) {
-        const card = callButton.closest(".scenario");
-        const result = card.querySelector(".result");
-        callButton.disabled = true;
-        callButton.textContent = "调用中";
-        result.style.display = "block";
-        result.textContent = "请求中...";
-        try {
-          const response = await fetch(`${apiBase()}${callButton.dataset.endpoint}`);
-          const text = await response.text();
-          result.textContent = text;
-        } catch (error) {
-          result.textContent = String(error);
-        } finally {
-          callButton.disabled = false;
-          callButton.textContent = "调用";
-        }
+      const action = event.target.closest("[data-action]");
+      if (!action) return;
+      const id = action.getAttribute("data-id");
+      const item = state.scenarios.find((scenario) => scenario.sessionId === id);
+      if (!item) return;
+      const kind = action.getAttribute("data-action");
+      if (kind === "copy-endpoint") {
+        await copyText(action.getAttribute("data-value") || "");
+        action.textContent = "已复制";
+        setTimeout(() => action.textContent = "复制接口", 1000);
+      } else if (kind === "copy-url") {
+        await copyText(action.getAttribute("data-value") || "");
+        action.textContent = "已复制";
+        setTimeout(() => action.textContent = "复制目标", 1000);
+      } else if (kind === "call") {
+        await callScenario(item, action);
       }
     });
 
-    searchInput.addEventListener("input", applyFilters);
+    el.searchInput.addEventListener("input", () => {
+      state.query = el.searchInput.value.trim();
+      render(state.scenarios);
+    });
 
-    document.getElementById("totalCount").textContent = scenarios.length;
-    document.getElementById("postCount").textContent = scenarios.filter(item => item.httpMethod === "POST").length;
-    document.getElementById("getCount").textContent = scenarios.filter(item => item.httpMethod === "GET").length;
-    buildFilters();
-    applyFilters();
+    el.hostFilter.addEventListener("change", () => {
+      state.host = el.hostFilter.value;
+      render(state.scenarios);
+    });
+
+    el.reloadBtn.addEventListener("click", loadScenarios);
+    el.copyAllBtn.addEventListener("click", async () => {
+      const text = state.filtered.map((item) => `${item.sessionId}\t${item.title}\t${item.endpoint}`).join("\n");
+      await copyText(text);
+      el.copyAllBtn.textContent = "已复制";
+      setTimeout(() => el.copyAllBtn.textContent = "复制当前列表", 1000);
+    });
+
+    loadScenarios();
   </script>
 </body>
 </html>
