@@ -2309,6 +2309,10 @@ class KaipanlaCapturedClient:
             merged_params.update({key: str(value) for key, value in params.items() if value is not None})
 
         merged_headers = dict(spec.get('headers') or {})
+        merged_headers.update({
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+        })
         if headers:
             merged_headers.update(headers)
 

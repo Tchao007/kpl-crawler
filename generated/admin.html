@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>用户管理</title>
+  <style>
+    :root { --bg:#f4f6f8; --panel:#fff; --ink:#17202a; --muted:#667380; --line:#d8dee6; --accent:#136f63; --blue:#205b9f; --danger:#b0302a; --radius:8px; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI","Microsoft YaHei",Arial,sans-serif; }
+    .wrap { width:min(1280px, calc(100% - 32px)); margin:0 auto; }
+    header { background:#fff; border-bottom:1px solid var(--line); box-shadow:0 10px 24px rgba(25,34,45,.08); }
+    header .wrap { padding:18px 0; display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+    h1 { margin:0; font-size:22px; }
+    .sub { margin-top:4px; color:var(--muted); }
+    .panel { margin:16px 0; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:0 10px 24px rgba(25,34,45,.08); }
+    .panel h2 { margin:0; padding:14px 16px; border-bottom:1px solid var(--line); font-size:16px; }
+    form { padding:16px; display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; align-items:end; }
+    label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    input, select { width:100%; height:38px; border:1px solid var(--line); border-radius:var(--radius); padding:0 10px; font:inherit; background:#fff; }
+    button, a.btn { height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); text-decoration:none; cursor:pointer; font:inherit; font-weight:600; }
+    button.primary { height:38px; background:var(--accent); border-color:var(--accent); color:#fff; }
+    button.danger { color:var(--danger); }
+    button.blue { color:var(--blue); }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px 12px; border-top:1px solid var(--line); text-align:left; vertical-align:middle; }
+    th { color:var(--muted); font-size:12px; background:#fafbfc; }
+    .actions { display:flex; gap:6px; flex-wrap:wrap; }
+    .badge { display:inline-flex; height:24px; align-items:center; padding:0 8px; border-radius:999px; background:#f2f4f7; color:#51606f; font-size:12px; }
+    .badge.admin { background:#eaf1fb; color:var(--blue); }
+    .badge.bad { background:#fff0df; color:#9f5b13; }
+    .msg { min-height:22px; margin:10px 0 0; color:var(--danger); }
+    .created-codes { padding:0 16px 16px; display:grid; gap:8px; }
+    .code-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; background:#f7f9fb; border:1px solid var(--line); border-radius:6px; }
+    code { font-family:Consolas,"Cascadia Mono",monospace; }
+    @media (max-width:980px) { form { grid-template-columns:1fr 1fr; } table { min-width:900px; } .table-wrap { overflow:auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div>
+        <h1>用户与激活码管理</h1>
+        <div class="sub">管理员创建用户、生成激活码，用户通过激活码开通或续期。</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/">返回场景</a>
+        <button id="logout" type="button">退出</button>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>创建用户</h2>
+      <form id="createUserForm">
+        <div><label>用户名</label><input name="username" required></div>
+        <div><label>密码</label><input name="password" type="password" required></div>
+        <div><label>角色</label><select name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
+        <div><label>初始有效期</label><input name="expires_at" type="date"></div>
+        <div><label>状态</label><select name="disabled"><option value="false">启用</option><option value="true">禁用</option></select></div>
+        <button class="primary" type="submit">创建</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>生成激活码</h2>
+      <form id="createCodeForm">
+        <div><label>有效天数</label><input name="days" type="number" min="1" max="3650" value="30" required></div>
+        <div><label>生成数量</label><input name="count" type="number" min="1" max="100" value="1" required></div>
+        <div style="grid-column:span 3;"><label>备注</label><input name="note" placeholder="例如：月卡、季度卡、指定客户"></div>
+        <button class="primary" type="submit">生成</button>
+      </form>
+      <div id="createdCodes" class="created-codes"></div>
+    </section>
+
+    <section class="panel">
+      <h2>现有用户</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>有效期</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody id="users"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>激活码列表</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>天数</th><th>状态</th><th>使用用户</th><th>使用时间</th><th>创建时间</th><th>备注</th><th>操作</th></tr></thead>
+          <tbody id="codes"></tbody>
+        </table>
+      </div>
+    </section>
+    <div id="msg" class="msg"></div>
+  </main>
+  <script>
+    const usersEl = document.getElementById("users");
+    const codesEl = document.getElementById("codes");
+    const createdCodesEl = document.getElementById("createdCodes");
+    const msg = document.getElementById("msg");
+    function showMsg(text) { msg.textContent = text || ""; }
+    function html(value) {
+      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+    async function request(url, options = {}) {
+      const response = await fetch(url, options);
+      if (response.status === 401) location.href = "/login.html?next=/admin.html";
+      if (response.status === 403) throw new Error("没有管理员权限");
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
+      return data;
+    }
+    async function loadUsers() {
+      const data = await request("/api/admin/users");
+      usersEl.innerHTML = data.users.map((user) => `
+        <tr>
+          <td>${html(user.username)}</td>
+          <td><span class="badge ${user.role === "admin" ? "admin" : ""}">${html(user.role)}</span></td>
+          <td><span class="badge ${user.disabled || user.expired ? "bad" : ""}">${user.disabled ? "禁用" : (user.expired ? "已过期" : "正常")}</span></td>
+          <td><input type="date" data-field="expires_at" data-user="${html(user.username)}" value="${html(user.expires_at || "")}"></td>
+          <td>${html(user.created_at || "")}</td>
+          <td class="actions">
+            <button class="blue" data-action="save-user" data-user="${html(user.username)}">保存有效期</button>
+            <button data-action="toggle-user" data-user="${html(user.username)}" data-disabled="${user.disabled ? "false" : "true"}">${user.disabled ? "启用" : "禁用"}</button>
+            <button class="danger" data-action="delete-user" data-user="${html(user.username)}" ${user.username === "admin" ? "disabled" : ""}>删除</button>
+          </td>
+        </tr>`).join("");
+    }
+    async function loadCodes() {
+      const data = await request("/api/admin/activation-codes");
+      codesEl.innerHTML = data.codes.map((code) => {
+        const status = code.used ? "已使用" : (code.disabled ? "已禁用" : "未使用");
+        return `
+          <tr>
+            <td>${html(code.days)} 天</td>
+            <td><span class="badge ${code.used || code.disabled ? "bad" : ""}">${status}</span></td>
+            <td>${html(code.used_by || "-")}</td>
+            <td>${html(code.used_at || "-")}</td>
+            <td>${html(code.created_at || "-")}</td>
+            <td>${html(code.note || "")}</td>
+            <td class="actions">
+              <button data-action="toggle-code" data-id="${html(code.id)}" data-disabled="${code.disabled ? "false" : "true"}" ${code.used ? "disabled" : ""}>${code.disabled ? "启用" : "禁用"}</button>
+              <button class="danger" data-action="delete-code" data-id="${html(code.id)}" ${code.used ? "disabled" : ""}>删除</button>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+    document.getElementById("createUserForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const payload = Object.fromEntries(new FormData(event.target).entries());
+      payload.disabled = payload.disabled === "true";
+      if (!payload.expires_at) payload.expires_at = null;
+      try {
+        await request("/api/admin/users", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload) });
+        event.target.reset();
+        showMsg("");
+        await loadUsers();
+      } catch (error) { showMsg(error.message); }
+    });
+    document.getElementById("createCodeForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const payload = Object.fromEntries(new FormData(event.target).entries());
+      try {
+        const data = await request("/api/admin/activation-codes", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload) });
+        createdCodesEl.innerHTML = data.codes.map((item) => `
+          <div class="code-line">
+            <code>${html(item.code)}</code>
+            <span>${html(item.days)} 天</span>
+            <button data-copy="${html(item.code)}">复制</button>
+          </div>`).join("");
+        showMsg("");
+        await loadCodes();
+      } catch (error) { showMsg(error.message); }
+    });
+    document.addEventListener("click", async (event) => {
+      const copy = event.target.closest("[data-copy]");
+      if (copy) {
+        await navigator.clipboard.writeText(copy.dataset.copy);
+        copy.textContent = "已复制";
+        return;
+      }
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+      try {
+        if (action === "delete-user") {
+          if (!confirm(`确认删除用户 ${button.dataset.user}？`)) return;
+          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"DELETE" });
+          await loadUsers();
+        } else if (action === "toggle-user") {
+          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ disabled: button.dataset.disabled === "true" }) });
+          await loadUsers();
+        } else if (action === "save-user") {
+          const input = document.querySelector(`input[data-field="expires_at"][data-user="${CSS.escape(button.dataset.user)}"]`);
+          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ expires_at: input.value || null }) });
+          await loadUsers();
+        } else if (action === "toggle-code") {
+          await request(`/api/admin/activation-codes/${encodeURIComponent(button.dataset.id)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ disabled: button.dataset.disabled === "true" }) });
+          await loadCodes();
+        } else if (action === "delete-code") {
+          await request(`/api/admin/activation-codes/${encodeURIComponent(button.dataset.id)}`, { method:"DELETE" });
+          await loadCodes();
+        }
+        showMsg("");
+      } catch (error) { showMsg(error.message); }
+    });
+    document.getElementById("logout").addEventListener("click", async () => {
+      await fetch("/api/auth/logout", { method:"POST" });
+      location.href = "/login.html";
+    });
+    Promise.all([loadUsers(), loadCodes()]).catch((error) => showMsg(error.message));
+  </script>
+</body>
+</html>
