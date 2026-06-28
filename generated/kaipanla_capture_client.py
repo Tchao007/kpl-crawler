@@ -2194,6 +2194,3273 @@ LOG_LOGUSERADDNEW_5 = {
     },
 }
 
+INDEX_GETINFO_HQ_VIEW_2_7_9_10 = {
+    'session_id': '1015',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+        "apiv": "w44",
+        "PhoneOSNew": "1",
+        "VerSion": "5.23.0.4"
+    },
+    'data': {
+        "c": "Index",
+        "a": "GetInfo",
+        "View": "2,7,9,10",
+        "UserID": "0",
+        "Token": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+    },
+    'headers': {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://apppage.longhuvip.com",
+        "X-Requested-With": "com.aiyu.kaipanla",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://apppage.longhuvip.com/",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    },
+}
+
+INDEX_GETINFO_HQ_VIEW_3 = {
+    'session_id': '1019',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+        "apiv": "w44",
+        "PhoneOSNew": "1",
+        "VerSion": "5.23.0.4"
+    },
+    'data': {
+        "c": "Index",
+        "a": "GetInfo",
+        "View": "3",
+        "UserID": "0",
+        "Token": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+    },
+    'headers': {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://apppage.longhuvip.com",
+        "X-Requested-With": "com.aiyu.kaipanla",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://apppage.longhuvip.com/",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    },
+}
+
+INDEX_GETINFO_HQ_VIEW_4_5_11 = {
+    'session_id': '1021',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+        "apiv": "w44",
+        "PhoneOSNew": "1",
+        "VerSion": "5.23.0.4"
+    },
+    'data': {
+        "c": "Index",
+        "a": "GetInfo",
+        "View": "4,5,11",
+        "UserID": "0",
+        "Token": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+    },
+    'headers': {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://apppage.longhuvip.com",
+        "X-Requested-With": "com.aiyu.kaipanla",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://apppage.longhuvip.com/",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    },
+}
+
+ZHISHUL2DATA_GETVOLTURINCREMENTAL = {
+    'session_id': '1031',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetVolTurIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801001",
+        "Day": ""
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUL2DATA_GETTRENDINCREMENTAL = {
+    'session_id': '1032',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetTrendIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801001",
+        "Day": ""
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUL2DATA_GETPARENTPLATECODE = {
+    'session_id': '1033',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetParentPlateCode",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801001"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_GETPLATE_INFO_QJ = {
+    'session_id': '1034',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetPlate_Info_QJ",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Date": "",
+        "apiv": "w44",
+        "PlateID": "801001"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+INDEX_GETARTTITLE_HQ_PLATE = {
+    'session_id': '1035',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetArtTitle",
+        "c": "Index",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "2",
+        "StockID": "801001",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_SONPLATE_INFO = {
+    'session_id': '1036',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "SonPlate_Info",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "PlateID": "801001"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_GETGPCPHBTS_TAG = {
+    'session_id': '1037',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetGPCPHBTS_Tag",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0",
+        "PlateID": "801001"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+CONCEPTIONPOINT_BKFENSHIZHIBO = {
+    'session_id': '1040',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "BKFenShiZhiBo",
+        "c": "ConceptionPoint",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Date": "",
+        "apiv": "w44",
+        "PlateID": "801001"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+INDEX_YOUZIDONGXIANGBYLIST = {
+    'session_id': '1880',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {
+        "apiv": "w44",
+        "PhoneOSNew": "1",
+        "VerSion": "5.23.0.4"
+    },
+    'data': {
+        "c": "Index",
+        "a": "YouZiDongXiangByList",
+        "Time": "2026-06-26",
+        "UserID": "0",
+        "Token": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+    },
+    'headers': {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://apppage.longhuvip.com",
+        "X-Requested-With": "com.aiyu.kaipanla",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://apppage.longhuvip.com/",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    },
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18001 = {
+    'session_id': '18001',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "19",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18003 = {
+    'session_id': '18003',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetFunction_Art_Last",
+    "apiv": "w44",
+    "c": "AppFuncExplain",
+    "PhoneOSNew": "1",
+    "UserID": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "FuncName": "市场风口",
+    "VerSion": "5.23.0.4",
+    "Token": "0"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+USERSELECTSTOCK_REFRESHSTOCKLIST_HAR_18012 = {
+    'session_id': '18012',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "UserSelectStock",
+    "a": "RefreshStockList",
+    "StockIDList": "SH000001,SZ399001,SZ399006",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+STOCKFENGKDATA_GETFENGKLIST_HAR_18013 = {
+    'session_id': '18013',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "StockFengKData",
+    "a": "GetFengKList",
+    "Index": "0",
+    "st": "500",
+    "Order": "17",
+    "Day": "",
+    "Time": "",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+STOCKFENGKDATA_GETFENGKYDPLATE_HAR_18019 = {
+    'session_id': '18019',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "StockFengKData",
+    "a": "GetFengKYDPlate",
+    "Day": "20260626",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+STOCKFENGKDATA_GETFENGKLIST_HAR_18021 = {
+    'session_id': '18021',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "StockFengKData",
+    "a": "GetFengKList",
+    "Index": "0",
+    "st": "500",
+    "Order": "17",
+    "Day": "20260626",
+    "Time": "1500",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATABATCHSTATISTICS_CALUSERPAGE_HAR_18026 = {
+    'session_id': '18026',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "CalUserPage",
+    "c": "DataBatchStatistics",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "PhoneOS": "1",
+    "ChannelID": "129",
+    "ClientSign": "418ee704ca70954075ab32132cbf8963",
+    "DataList": "[{\"U\":\"7764559\",\"S\":\"0,0,0,0,0\",\"Ct\":\"1782531378,1782531644,1782531698,1782533827,1782537486\",\"P0\":2},{\"U\":\"7764559\",\"S\":\"0,0,0\",\"Ct\":\"1782531623,1782531691,1782531734\",\"P0\":97},{\"U\":\"7764559\",\"S\":\"0,0,0\",\"Ct\":\"1782531623,1782531691,1782531734\",\"P0\":92}]",
+    "apiv": "w44",
+    "Version": "5.23.0.4"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18054 = {
+    'session_id': '18054',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "41",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18055 = {
+    'session_id': '18055',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetFunction_Art_Last",
+    "c": "AppFuncExplain",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0",
+    "FuncName": "上证指数"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_GETPLATE_INFO_QJ_HAR_18059 = {
+    'session_id': '18059',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetPlate_Info_QJ",
+    "c": "ZhiShuRanking",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Date": "",
+    "apiv": "w44",
+    "PlateID": "801225"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_SONPLATE_INFO_HAR_18061 = {
+    'session_id': '18061',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "SonPlate_Info",
+    "c": "ZhiShuRanking",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "apiv": "w44",
+    "PlateID": "801225"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_GETGPCPHBTS_TAG_HAR_18062 = {
+    'session_id': '18062',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetGPCPHBTS_Tag",
+    "c": "ZhiShuRanking",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0",
+    "PlateID": "801225"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+THEME_INFOBKR_HAR_18063 = {
+    'session_id': '18063',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "InfoBKR",
+    "apiv": "w44",
+    "c": "Theme",
+    "ZSCode": "801225",
+    "PhoneOSNew": "1",
+    "UserID": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+CONCEPTIONPOINT_BKFENSHIZHIBO_HAR_18065 = {
+    'session_id': '18065',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "BKFenShiZhiBo",
+    "c": "ConceptionPoint",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Date": "",
+    "apiv": "w44",
+    "PlateID": "801225"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+FORUMSTUYERE_GETBYSTOCK_HAR_18071 = {
+    'session_id': '18071',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetByStock",
+    "st": "30",
+    "c": "ForumsTuyere",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "Index": "0",
+    "Code": "801225",
+    "apiv": "w44",
+    "Type": "1",
+    "UserID": "0",
+    "Select": ""
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18080 = {
+    'session_id': '18080',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "85",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18083 = {
+    'session_id': '18083',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetFunction_Art_Last",
+    "c": "AppFuncExplain",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0",
+    "FuncName": "主题机会"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18090 = {
+    'session_id': '18090',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "140",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18091 = {
+    'session_id': '18091',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "176",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+THEMENEWS_GETLIST_HAR_18092 = {
+    'session_id': '18092',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "ThemeNews",
+    "a": "GetList",
+    "Type": "-1",
+    "st": "30",
+    "Index": "0",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18124 = {
+    'session_id': '18124',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "301",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18125 = {
+    'session_id': '18125',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "143",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+THEMENEWS_GETLIST_HAR_18126 = {
+    'session_id': '18126',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "ThemeNews",
+    "a": "GetList",
+    "Type": "3",
+    "st": "30",
+    "Index": "0",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18127 = {
+    'session_id': '18127',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "177",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+THEMENEWS_GETCOLLECTNEWS_HAR_18128 = {
+    'session_id': '18128',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "ThemeNews",
+    "a": "GetCollectNews",
+    "Type": "-1",
+    "st": "30",
+    "Index": "0",
+    "UserID": "0",
+    "Token": "0",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18139 = {
+    'session_id': '18139',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "40",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+STOCKBIDYIDONG_GETPIANLIZHI_MANY_HAR_18157 = {
+    'session_id': '18157',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetPianLiZhi_Many",
+    "c": "StockBidYiDong",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATABATCHSTATISTICS_CALUSERPAGE_HAR_18162 = {
+    'session_id': '18162',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "CalUserPage",
+    "c": "DataBatchStatistics",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "PhoneOS": "1",
+    "ChannelID": "129",
+    "ClientSign": "2aea54e2b6d4cec3b63ed5a4dda6f33f",
+    "DataList": "[{\"U\":\"7764559\",\"S\":0,\"Ct\":1782537513,\"P0\":85},{\"U\":\"7764559\",\"S\":\"0,0,0,0,0\",\"Ct\":\"1782537526,1782537559,1782537579,1782537598,1782537625\",\"P0\":2},{\"U\":\"7764559\",\"S\":0,\"Ct\":1782537555,\"P0\":111},{\"U\":\"7764559\",\"S\":\"0,0\",\"Ct\":\"1782537570,1782537589\",\"P0\":91},{\"U\":\"7764559\",\"S\":0,\"Ct\":1782537610,\"P0\":97},{\"U\":\"7764559\",\"S\":0,\"Ct\":1782537610,\"P0\":95}]",
+    "apiv": "w44",
+    "Version": "5.23.0.4"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18181 = {
+    'session_id': '18181',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetFunction_Art_Last",
+    "c": "AppFuncExplain",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0",
+    "FuncName": "严重异动提醒"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+STOCKBIDYIDONG_GETPIANLIZHI_INDEX_HAR_18182 = {
+    'session_id': '18182',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetPianLiZhi_Index",
+    "c": "StockBidYiDong",
+    "ZDJK_Type": "1",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "UserID": "0"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18190 = {
+    'session_id': '18190',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "174",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+INDEX_GETARTTITLE_HAR_18191 = {
+    'session_id': '18191',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+    "a": "GetArtTitle",
+    "c": "Index",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
+    "Token": "0",
+    "apiv": "w44",
+    "Type": "4",
+    "UserID": "0"
+},
+    'headers': {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+DATASTATISTICS_CALUSERCLICK_HAR_18207 = {
+    'session_id': '18207',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "VerSion": "5.23.0.4"
+},
+    'data': {
+    "c": "DataStatistics",
+    "a": "CalUserClick",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "Param0": "507",
+    "Param1": "1",
+    "UserID": "0",
+    "Token": "0"
+},
+    'headers': {
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin": "https://apppage.longhuvip.com",
+    "X-Requested-With": "com.aiyu.kaipanla",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://apppage.longhuvip.com/",
+    "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+},
+}
+
+
+HISHOMEDINGPAN_CHANGESTATISTICS_EMOTION_HAR_18208 = {
+    'session_id': '18208',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "ChangeStatistics",
+        "st": "100",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "Index": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HISHOMEDINGPAN_MARKETSCLNKLINE_EMOTION_HAR_18209 = {
+    'session_id': '18209',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "MarketSCLNKLine",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HISHOMEDINGPAN_MARKETVOLUMEBENCHMARKLINE_EMOTION_HAR_18210 = {
+    'session_id': '18210',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "MarketVolumeBenchmarkLine",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HOMEDINGPAN_MARKETCAPACITYKLINE_EMOTION_HAR_18211 = {
+    'session_id': '18211',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "MarketCapacityKLine",
+        "c": "HomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_EMOTION_HAR_18212 = {
+    'session_id': '18212',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetFunction_Art_Last",
+        "c": "AppFuncExplain",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0",
+        "FuncName": "????"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HOMEDINGPAN_DAILYLIMITINDEX_EMOTION_HAR_18213 = {
+    'session_id': '18213',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "DailyLimitIndex",
+        "c": "HomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HOMEDINGPAN_MARKETSTOCKZDNUM_EMOTION_HAR_18214 = {
+    'session_id': '18214',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "MarketStockZDNum",
+        "c": "HomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+XIANHUODATA_GETXIANHUOLIST_EMOTION_HAR_18215 = {
+    'session_id': '18215',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetXianHuoList",
+        "apiv": "w44",
+        "c": "XianHuoData",
+        "PhoneOSNew": "1",
+        "UserID": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "Time": "1782479163"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HOMEDINGPAN_SHARPWITHDRAWALLIST_EMOTION_HAR_18216 = {
+    'session_id': '18216',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "0",
+        "a": "SharpWithdrawalList",
+        "st": "20",
+        "apiv": "w44",
+        "Type": "5",
+        "c": "HomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HOMEDINGPAN_WEIGHTPERFORMANCELIST_EMOTION_HAR_18217 = {
+    'session_id': '18217',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "WeightPerformanceList",
+        "st": "20",
+        "apiv": "w44",
+        "Type": "2",
+        "c": "HomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+STOCKL2HISTORY_GETZSREAL_WITHDRAW_HISTORY_18218 = {
+    'session_id': '18218',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetZsReal",
+        "c": "StockL2History",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+HISHOMEDINGPAN_DAILYLIMITINDEX_HISTORY_18219 = {
+    'session_id': '18219',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "DailyLimitIndex",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HISHOMEDINGPAN_DAILYLIMITPERFORMANCE_HISTORY_18220 = {
+    'session_id': '18220',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "0",
+        "a": "DailyLimitPerformance",
+        "st": "2000",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "PidType": "1",
+        "apiv": "w44",
+        "Type": "4",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221 = {
+    'session_id': '18221',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "DailyLimitPerformance2",
+        "st": "20",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "PidType": "1",
+        "apiv": "w44",
+        "Type": "5",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222 = {
+    'session_id': '18222',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "HisDaBanList",
+        "st": "2000",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "PidType": "2",
+        "apiv": "w44",
+        "Type": "4",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUL2DATA_GETTRENDINCREMENTAL_HISTORY_18223 = {
+    'session_id': '18223',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetTrendIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801900",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUL2DATA_GETVOLTURINCREMENTAL_HISTORY_18224 = {
+    'session_id': '18224',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetVolTurIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801900",
+        "Day": "2026-06-25"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+STOCKLINEDATA_GETDADANKLINE2NEW_MARKET_VOLUME_18225 = {
+    'session_id': '18225',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetDaDanKLine2New",
+        "st": "850",
+        "c": "StockLineData",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "Index": "0",
+        "apiv": "w44",
+        "Type": "d",
+        "StockID": "SH000001",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUKLINE_GETZHISHUKLINE_LN_MARKET_VOLUME_18226 = {
+    'session_id': '18226',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetZhiShuKLine_LN",
+        "st": "610",
+        "apiv": "w44",
+        "Type": "d",
+        "c": "ZhiShuKLine",
+        "PhoneOSNew": "1",
+        "UserID": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "Index": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCKLINEDATA_GETKLINETODAYDADANNEW_MARKET_VOLUME_18227 = {
+    'session_id': '18227',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetKLineTodayDaDanNew",
+        "c": "StockLineData",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "d",
+        "StockID": "SH000001",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHUKLINE_GETZHISHUKLINETODAY_LN_MARKET_VOLUME_18228 = {
+    'session_id': '18228',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetZhiShuKLineToday_LN",
+        "c": "ZhiShuKLine",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "d",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_HISTORY_18229 = {
+    'session_id': '18229',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "GetInterviewsByDateStock",
+        "st": "30",
+        "c": "StockLineData",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "DEnd": "2026-03-03",
+        "Index": "0",
+        "DStart": "2024-05-16",
+        "apiv": "w44",
+        "Type": "2"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_REALTIME_18230 = {
+    'session_id': '18230',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "GetInterviewsByDateStock",
+        "st": "30",
+        "c": "StockLineData",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "DEnd": "2026-06-26",
+        "Index": "0",
+        "DStart": "2024-05-16",
+        "apiv": "w44",
+        "Type": "2"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCKLINEDATA_GETINTERVIEWSBYDATEZS_HISTORY_18231 = {
+    'session_id': '18231',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "a": "GetInterviewsByDateZS",
+        "st": "30",
+        "c": "StockLineData",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "DEnd": "2026-03-30",
+        "Index": "0",
+        "DStart": "2024-05-16",
+        "apiv": "w44",
+        "Type": "9"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+HISHOMEDINGPAN_MARKETSCLNKLINE_MARKET_VOLUME_HISTORY_18232 = {
+    'session_id': '18232',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "MarketSCLNKLine",
+        "c": "HisHomeDingPan",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "Type": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+
+PAYFUNCREMINDNEW_GETREMIND_LATEST_THEME_18233 = {
+    'session_id': '18233',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://appupchina.longhuvip.com/payw1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetRemind",
+        "c": "PayFuncRemindNew",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "NID": "26",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+TICAI_READERCOUNT_LATEST_THEME_18234 = {
+    'session_id': '18234',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://appres.longhuvip.com/tj/index.php',
+    'params': {},
+    'data': {
+        "c": "TiCai",
+        "a": "ReaderCount",
+        "u": "0",
+        "m": "0",
+        "t": "1",
+        "UserID": "0",
+        "Token": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"
+    },
+    'headers': {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://apppage.longhuvip.com",
+        "X-Requested-With": "com.aiyu.kaipanla",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://apppage.longhuvip.com/",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    },
+}
+
+ZHISHUL2DATA_GETPARENTPLATECODE_WINDVANE_18235 = {
+    'session_id': '18235',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetParentPlateCode",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801225"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_18236 = {
+    'session_id': '18236',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetVolTurIncremental",
+        "apiv": "w44",
+        "c": "ZhiShuL2Data",
+        "StockID": "801225",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Day": ""
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_18237 = {
+    'session_id': '18237',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetTrendIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801225",
+        "Day": ""
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+INDEX_GETARTTITLE_WINDVANE_18238 = {
+    'session_id': '18238',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetArtTitle",
+        "apiv": "w44",
+        "Type": "2",
+        "c": "Index",
+        "StockID": "801225",
+        "PhoneOSNew": "1",
+        "UserID": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_HISTORY_18239 = {
+    'session_id': '18239',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetTrendIncremental",
+        "c": "ZhiShuL2Data",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44",
+        "StockID": "801225",
+        "Day": "2026-06-25"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_GETPLATE_INFO_QJ_WINDVANE_HISTORY_18240 = {
+    'session_id': '18240',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetPlate_Info_QJ",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "PlateID": "801225"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_HISTORY_18241 = {
+    'session_id': '18241',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetVolTurIncremental",
+        "apiv": "w44",
+        "c": "ZhiShuL2Data",
+        "StockID": "801225",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Day": "2026-06-25"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_SONPLATE_INFO_WINDVANE_HISTORY_18242 = {
+    'session_id': '18242',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "SonPlate_Info",
+        "apiv": "w44",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "PlateID": "801225",
+        "IsShow": "1",
+        "Date": "2026-06-25"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_GETGPCPHBTS_TAG_WINDVANE_HISTORY_18243 = {
+    'session_id': '18243',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetGPCPHBTS_Tag",
+        "apiv": "w44",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "UserID": "0",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "PlateID": "801225",
+        "Date": "2026-06-25"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+HISCONCEPTIONPOINT_BKFENSHIZHIBO_WINDVANE_HISTORY_18244 = {
+    'session_id': '18244',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "BKFenShiZhiBo",
+        "apiv": "w44",
+        "c": "HisConceptionPoint",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "PlateID": "801225",
+        "Date": "2026-06-25"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_HISTORY_18245 = {
+    'session_id': '18245',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "TSZB": "0",
+        "a": "ZhiShuStockList_W8",
+        "st": "30",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "old": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "IsZZ": "0",
+        "Token": "0",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "6",
+        "IsKZZType": "0",
+        "UserID": "0",
+        "PlateID": "801225",
+        "TSZB_Type": "0",
+        "filterType": "0"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB72_18246 = {
+    'session_id': '18246',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "TSZB": "72",
+        "a": "ZhiShuStockList_W8",
+        "st": "30",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "SetLog": "1",
+        "old": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "IsZZ": "0",
+        "Token": "0",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "6",
+        "Filed_Type": "0",
+        "IsKZZType": "0",
+        "UserID": "0",
+        "PlateID": "801225",
+        "TSZB_Type": "0",
+        "filterType": "0"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB73_18247 = {
+    'session_id': '18247',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "TSZB": "73",
+        "a": "ZhiShuStockList_W8",
+        "st": "30",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "SetLog": "1",
+        "old": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "IsZZ": "0",
+        "Token": "0",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "6",
+        "Filed_Type": "0",
+        "IsKZZType": "0",
+        "UserID": "0",
+        "PlateID": "801225",
+        "TSZB_Type": "0",
+        "filterType": "0"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB74_18248 = {
+    'session_id': '18248',
+    'added_time': '2026-06-27',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "TSZB": "74",
+        "a": "ZhiShuStockList_W8",
+        "st": "30",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "SetLog": "1",
+        "old": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "IsZZ": "0",
+        "Token": "0",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "6",
+        "Filed_Type": "0",
+        "IsKZZType": "0",
+        "UserID": "0",
+        "PlateID": "801225",
+        "TSZB_Type": "0",
+        "filterType": "0"
+},
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+},
+}
+
+
+LONGHUBANG_GETSTOCKLIST_TODAY_BOARD_18249 = {
+    'session_id': '18249',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Index": "0",
+        "Time": "2026-06-26",
+        "Type": "2",
+        "st": "500",
+        "a": "GetStockList",
+        "c": "LongHuBang",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+LONGHUBANG_GETAGENCYLISTV2_TODAY_BOARD_18250 = {
+    'session_id': '18250',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Index": "0",
+        "Time": "2026-06-26",
+        "st": "500",
+        "a": "GetAgencyListV2",
+        "c": "LongHuBang",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+LONGHUBANG_GETAGENCYKLINE_TODAY_BOARD_18251 = {
+    'session_id': '18251',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "index": "0",
+        "st": "499",
+        "a": "GetAgencyKline",
+        "c": "LongHuBang",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+LONGHUBANG_GETBUSINESSLIST_TODAY_BOARD_18252 = {
+    'session_id': '18252',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Index": "0",
+        "Time": "2026-06-26",
+        "Type": "1",
+        "st": "100",
+        "a": "GetBusinessList",
+        "c": "LongHuBang",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+LONGHUBANG_GETAGENCYDAYLIST_TODAY_BOARD_18253 = {
+    'session_id': '18253',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "SDay": "2026-04-03",
+        "EDay": "2026-06-23",
+        "a": "GetAgencyDayList",
+        "c": "LongHuBang",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Token": "0",
+        "apiv": "w44",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_YOUZI_GROUP_18254 = {
+    'session_id': '18254',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "GID": "41",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_YOUZI_GROUP_18255 = {
+    'session_id': '18255',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Day": "3",
+        "GID": "41",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+USERBUSINESS_GETOFFICEV2_YOUZI_GROUP_18256 = {
+    'session_id': '18256',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "a": "GetOfficev2",
+        "c": "UserBusiness",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCK_GETSTOCKCHART_YOUZI_GROUP_18257 = {
+    'session_id': '18257',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "StockID": "000783",
+        "index": "0",
+        "st": "250",
+        "a": "GetStockChart",
+        "c": "Stock",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+USERBUSINESS_GETDAY_TOP_YOUZI_18258 = {
+    'session_id': '18258',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Day": "",
+        "a": "GetDay",
+        "c": "UserBusiness",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+STOCKL2HISTORY_GETZSTREND_NARROW_HISTORY_18285 = {
+    'session_id': '18285',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Day": "2026-06-25",
+        "a": "GetZsTrend_Narrow",
+        "c": "StockL2History",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "apiv": "w44"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_HISTORY_18286 = {
+    'session_id': '18286',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "1",
+        "ZSType": "7"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_TYPE1_ZSTYPE7_18287 = {
+    'session_id': '18287',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['Type', 'ZSType'],
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "1",
+        "ZSType": "7"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_TYPE2_ZSTYPE4_18288 = {
+    'session_id': '18288',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['Type', 'ZSType'],
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "2",
+        "ZSType": "4"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_TYPE2_ZSTYPE6_18289 = {
+    'session_id': '18289',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['Type', 'ZSType'],
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "apiv": "w44",
+        "Type": "2",
+        "ZSType": "6"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_TYPENEG4_ZSTYPE4_18290 = {
+    'session_id': '18290',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['Type', 'ZSType'],
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "RStart": "0925",
+        "REnd": "1445",
+        "apiv": "w44",
+        "Type": "-4",
+        "ZSType": "4"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+ZHISHURANKING_REALRANKINGINFO_TYPENEG4_ZSTYPE6_18291 = {
+    'session_id': '18291',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['Type', 'ZSType'],
+    'data': {
+        "Order": "1",
+        "st": "30",
+        "a": "RealRankingInfo",
+        "c": "ZhiShuRanking",
+        "PhoneOSNew": "1",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "VerSion": "5.23.0.4",
+        "Index": "0",
+        "Date": "2026-06-25",
+        "RStart": "0925",
+        "REnd": "1445",
+        "apiv": "w44",
+        "Type": "-4",
+        "ZSType": "6"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID7_18259 = {
+    'session_id': '18259',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "7",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID7_18272 = {
+    'session_id': '18272',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "7",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID10_18260 = {
+    'session_id': '18260',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "10",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID10_18273 = {
+    'session_id': '18273',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "10",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID20_18261 = {
+    'session_id': '18261',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "20",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID20_18274 = {
+    'session_id': '18274',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "20",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID25_18262 = {
+    'session_id': '18262',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "25",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID25_18275 = {
+    'session_id': '18275',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "25",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID33_18263 = {
+    'session_id': '18263',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "33",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID33_18276 = {
+    'session_id': '18276',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "33",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID35_18264 = {
+    'session_id': '18264',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "35",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID35_18277 = {
+    'session_id': '18277',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "35",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID41_18265 = {
+    'session_id': '18265',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "41",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID41_18278 = {
+    'session_id': '18278',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "41",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID57_18266 = {
+    'session_id': '18266',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "57",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID57_18279 = {
+    'session_id': '18279',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "57",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID64_18267 = {
+    'session_id': '18267',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "64",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID64_18280 = {
+    'session_id': '18280',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "64",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID81_18268 = {
+    'session_id': '18268',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "81",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID81_18281 = {
+    'session_id': '18281',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "81",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID82_18269 = {
+    'session_id': '18269',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "82",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID82_18282 = {
+    'session_id': '18282',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "82",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID93_18270 = {
+    'session_id': '18270',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "93",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID93_18283 = {
+    'session_id': '18283',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "93",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPINFO_GID999_18271 = {
+    'session_id': '18271',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "GID": "999",
+        "a": "GroupInfo",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
+BUSINESSGROUP_GROUPLOG_GID999_18284 = {
+    'session_id': '18284',
+    'added_time': '2026-06-28',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'hide_url_fields': ['GID'],
+    'data': {
+        "Day": "3",
+        "GID": "999",
+        "Index": "0",
+        "Money": "5000000",
+        "Order": "2",
+        "SDay": "0",
+        "st": "30",
+        "a": "GroupLog",
+        "c": "BusinessGroup",
+        "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+        "Token": "0",
+        "UserID": "0"
+    },
+    'headers': {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)"
+    },
+}
+
 
 REQUESTS = [
     USERINFO_APPNEWS,
@@ -2283,7 +5550,136 @@ REQUESTS = [
     FORUMSTUYERE_GETTAGLIST,
     FORUMSTUYERE_GETBYSTOCK,
     FORUMSTUYERE_GETBYSTOCK_2,
-    LOG_LOGUSERADDNEW_5
+    LOG_LOGUSERADDNEW_5,
+    INDEX_GETINFO_HQ_VIEW_2_7_9_10,
+    INDEX_GETINFO_HQ_VIEW_3,
+    INDEX_GETINFO_HQ_VIEW_4_5_11,
+    ZHISHUL2DATA_GETVOLTURINCREMENTAL,
+    ZHISHUL2DATA_GETTRENDINCREMENTAL,
+    ZHISHUL2DATA_GETPARENTPLATECODE,
+    ZHISHURANKING_GETPLATE_INFO_QJ,
+    INDEX_GETARTTITLE_HQ_PLATE,
+    ZHISHURANKING_SONPLATE_INFO,
+    ZHISHURANKING_GETGPCPHBTS_TAG,
+    CONCEPTIONPOINT_BKFENSHIZHIBO,
+    INDEX_YOUZIDONGXIANGBYLIST,
+    DATASTATISTICS_CALUSERCLICK_HAR_18001,
+    APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18003,
+    USERSELECTSTOCK_REFRESHSTOCKLIST_HAR_18012,
+    STOCKFENGKDATA_GETFENGKLIST_HAR_18013,
+    STOCKFENGKDATA_GETFENGKYDPLATE_HAR_18019,
+    STOCKFENGKDATA_GETFENGKLIST_HAR_18021,
+    DATABATCHSTATISTICS_CALUSERPAGE_HAR_18026,
+    DATASTATISTICS_CALUSERCLICK_HAR_18054,
+    APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18055,
+    ZHISHURANKING_GETPLATE_INFO_QJ_HAR_18059,
+    ZHISHURANKING_SONPLATE_INFO_HAR_18061,
+    ZHISHURANKING_GETGPCPHBTS_TAG_HAR_18062,
+    THEME_INFOBKR_HAR_18063,
+    CONCEPTIONPOINT_BKFENSHIZHIBO_HAR_18065,
+    FORUMSTUYERE_GETBYSTOCK_HAR_18071,
+    DATASTATISTICS_CALUSERCLICK_HAR_18080,
+    APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18083,
+    DATASTATISTICS_CALUSERCLICK_HAR_18090,
+    DATASTATISTICS_CALUSERCLICK_HAR_18091,
+    THEMENEWS_GETLIST_HAR_18092,
+    DATASTATISTICS_CALUSERCLICK_HAR_18124,
+    DATASTATISTICS_CALUSERCLICK_HAR_18125,
+    THEMENEWS_GETLIST_HAR_18126,
+    DATASTATISTICS_CALUSERCLICK_HAR_18127,
+    THEMENEWS_GETCOLLECTNEWS_HAR_18128,
+    DATASTATISTICS_CALUSERCLICK_HAR_18139,
+    STOCKBIDYIDONG_GETPIANLIZHI_MANY_HAR_18157,
+    DATABATCHSTATISTICS_CALUSERPAGE_HAR_18162,
+    APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_HAR_18181,
+    STOCKBIDYIDONG_GETPIANLIZHI_INDEX_HAR_18182,
+    DATASTATISTICS_CALUSERCLICK_HAR_18190,
+    INDEX_GETARTTITLE_HAR_18191,
+    DATASTATISTICS_CALUSERCLICK_HAR_18207,
+    HISHOMEDINGPAN_CHANGESTATISTICS_EMOTION_HAR_18208,
+    HISHOMEDINGPAN_MARKETSCLNKLINE_EMOTION_HAR_18209,
+    HISHOMEDINGPAN_MARKETVOLUMEBENCHMARKLINE_EMOTION_HAR_18210,
+    HOMEDINGPAN_MARKETCAPACITYKLINE_EMOTION_HAR_18211,
+    APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_EMOTION_HAR_18212,
+    HOMEDINGPAN_DAILYLIMITINDEX_EMOTION_HAR_18213,
+    HOMEDINGPAN_MARKETSTOCKZDNUM_EMOTION_HAR_18214,
+    XIANHUODATA_GETXIANHUOLIST_EMOTION_HAR_18215,
+    HOMEDINGPAN_SHARPWITHDRAWALLIST_EMOTION_HAR_18216,
+    HOMEDINGPAN_WEIGHTPERFORMANCELIST_EMOTION_HAR_18217,
+    STOCKL2HISTORY_GETZSREAL_WITHDRAW_HISTORY_18218,
+    HISHOMEDINGPAN_DAILYLIMITINDEX_HISTORY_18219,
+    HISHOMEDINGPAN_DAILYLIMITPERFORMANCE_HISTORY_18220,
+    HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221,
+    HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222,
+    ZHISHUL2DATA_GETTRENDINCREMENTAL_HISTORY_18223,
+    ZHISHUL2DATA_GETVOLTURINCREMENTAL_HISTORY_18224,
+    STOCKLINEDATA_GETDADANKLINE2NEW_MARKET_VOLUME_18225,
+    ZHISHUKLINE_GETZHISHUKLINE_LN_MARKET_VOLUME_18226,
+    STOCKLINEDATA_GETKLINETODAYDADANNEW_MARKET_VOLUME_18227,
+    ZHISHUKLINE_GETZHISHUKLINETODAY_LN_MARKET_VOLUME_18228,
+    STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_HISTORY_18229,
+    STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_REALTIME_18230,
+    STOCKLINEDATA_GETINTERVIEWSBYDATEZS_HISTORY_18231,
+    HISHOMEDINGPAN_MARKETSCLNKLINE_MARKET_VOLUME_HISTORY_18232,
+    PAYFUNCREMINDNEW_GETREMIND_LATEST_THEME_18233,
+    TICAI_READERCOUNT_LATEST_THEME_18234,
+    ZHISHUL2DATA_GETPARENTPLATECODE_WINDVANE_18235,
+    ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_18236,
+    ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_18237,
+    INDEX_GETARTTITLE_WINDVANE_18238,
+    ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_HISTORY_18239,
+    ZHISHURANKING_GETPLATE_INFO_QJ_WINDVANE_HISTORY_18240,
+    ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_HISTORY_18241,
+    ZHISHURANKING_SONPLATE_INFO_WINDVANE_HISTORY_18242,
+    ZHISHURANKING_GETGPCPHBTS_TAG_WINDVANE_HISTORY_18243,
+    HISCONCEPTIONPOINT_BKFENSHIZHIBO_WINDVANE_HISTORY_18244,
+    ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_HISTORY_18245,
+    ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB72_18246,
+    ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB73_18247,
+    ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB74_18248,
+    LONGHUBANG_GETSTOCKLIST_TODAY_BOARD_18249,
+    LONGHUBANG_GETAGENCYLISTV2_TODAY_BOARD_18250,
+    LONGHUBANG_GETAGENCYKLINE_TODAY_BOARD_18251,
+    LONGHUBANG_GETBUSINESSLIST_TODAY_BOARD_18252,
+    LONGHUBANG_GETAGENCYDAYLIST_TODAY_BOARD_18253,
+    BUSINESSGROUP_GROUPINFO_YOUZI_GROUP_18254,
+    BUSINESSGROUP_GROUPLOG_YOUZI_GROUP_18255,
+    USERBUSINESS_GETOFFICEV2_YOUZI_GROUP_18256,
+    STOCK_GETSTOCKCHART_YOUZI_GROUP_18257,
+    USERBUSINESS_GETDAY_TOP_YOUZI_18258,
+    STOCKL2HISTORY_GETZSTREND_NARROW_HISTORY_18285,
+    ZHISHURANKING_REALRANKINGINFO_HISTORY_18286,
+    ZHISHURANKING_REALRANKINGINFO_TYPE1_ZSTYPE7_18287,
+    ZHISHURANKING_REALRANKINGINFO_TYPE2_ZSTYPE4_18288,
+    ZHISHURANKING_REALRANKINGINFO_TYPE2_ZSTYPE6_18289,
+    ZHISHURANKING_REALRANKINGINFO_TYPENEG4_ZSTYPE4_18290,
+    ZHISHURANKING_REALRANKINGINFO_TYPENEG4_ZSTYPE6_18291,
+    BUSINESSGROUP_GROUPINFO_GID7_18259,
+    BUSINESSGROUP_GROUPLOG_GID7_18272,
+    BUSINESSGROUP_GROUPINFO_GID10_18260,
+    BUSINESSGROUP_GROUPLOG_GID10_18273,
+    BUSINESSGROUP_GROUPINFO_GID20_18261,
+    BUSINESSGROUP_GROUPLOG_GID20_18274,
+    BUSINESSGROUP_GROUPINFO_GID25_18262,
+    BUSINESSGROUP_GROUPLOG_GID25_18275,
+    BUSINESSGROUP_GROUPINFO_GID33_18263,
+    BUSINESSGROUP_GROUPLOG_GID33_18276,
+    BUSINESSGROUP_GROUPINFO_GID35_18264,
+    BUSINESSGROUP_GROUPLOG_GID35_18277,
+    BUSINESSGROUP_GROUPINFO_GID41_18265,
+    BUSINESSGROUP_GROUPLOG_GID41_18278,
+    BUSINESSGROUP_GROUPINFO_GID57_18266,
+    BUSINESSGROUP_GROUPLOG_GID57_18279,
+    BUSINESSGROUP_GROUPINFO_GID64_18267,
+    BUSINESSGROUP_GROUPLOG_GID64_18280,
+    BUSINESSGROUP_GROUPINFO_GID81_18268,
+    BUSINESSGROUP_GROUPLOG_GID81_18281,
+    BUSINESSGROUP_GROUPINFO_GID82_18269,
+    BUSINESSGROUP_GROUPLOG_GID82_18282,
+    BUSINESSGROUP_GROUPINFO_GID93_18270,
+    BUSINESSGROUP_GROUPLOG_GID93_18283,
+    BUSINESSGROUP_GROUPINFO_GID999_18271,
+    BUSINESSGROUP_GROUPLOG_GID999_18284,
 ]
 
 
@@ -3134,6 +6530,701 @@ class KaipanlaCapturedClient:
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(LOG_LOGUSERADDNEW_5, data=data)
 
+    def index_youzidongxiangbylist(self, time=None, **overrides):
+        """Replay session 1880: Index.YouZiDongXiangByList."""
+        data = dict(INDEX_YOUZIDONGXIANGBYLIST['data'])
+        if time is not None:
+            data['Time'] = str(time)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(INDEX_YOUZIDONGXIANGBYLIST, data=data)
+
+
+    def hishomedingpan_changestatistics_emotion(self, st=None, index=None, **overrides):
+        """Replay session 18208: HisHomeDingPan.ChangeStatistics."""
+        data = dict(HISHOMEDINGPAN_CHANGESTATISTICS_EMOTION_HAR_18208['data'])
+        if st is not None:
+            data['st'] = str(st)
+        if index is not None:
+            data['Index'] = str(index)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_CHANGESTATISTICS_EMOTION_HAR_18208, data=data)
+
+    def hishomedingpan_marketsclnkline_emotion(self, type=None, **overrides):
+        """Replay session 18209: HisHomeDingPan.MarketSCLNKLine."""
+        data = dict(HISHOMEDINGPAN_MARKETSCLNKLINE_EMOTION_HAR_18209['data'])
+        if type is not None:
+            data['Type'] = str(type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_MARKETSCLNKLINE_EMOTION_HAR_18209, data=data)
+
+    def hishomedingpan_marketvolumebenchmarkline_emotion(self, **overrides):
+        """Replay session 18210: HisHomeDingPan.MarketVolumeBenchmarkLine."""
+        data = dict(HISHOMEDINGPAN_MARKETVOLUMEBENCHMARKLINE_EMOTION_HAR_18210['data'])
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_MARKETVOLUMEBENCHMARKLINE_EMOTION_HAR_18210, data=data)
+
+    def homedingpan_marketcapacitykline_emotion(self, type=None, **overrides):
+        """Replay session 18211: HomeDingPan.MarketCapacityKLine."""
+        data = dict(HOMEDINGPAN_MARKETCAPACITYKLINE_EMOTION_HAR_18211['data'])
+        if type is not None:
+            data['Type'] = str(type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HOMEDINGPAN_MARKETCAPACITYKLINE_EMOTION_HAR_18211, data=data)
+
+    def appfuncexplain_getfunction_art_last_emotion(self, funcname=None, **overrides):
+        """Replay session 18212: AppFuncExplain.GetFunction_Art_Last."""
+        data = dict(APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_EMOTION_HAR_18212['data'])
+        if funcname is not None:
+            data['FuncName'] = str(funcname)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_EMOTION_HAR_18212, data=data)
+
+    def homedingpan_dailylimitindex_emotion(self, **overrides):
+        """Replay session 18213: HomeDingPan.DailyLimitIndex."""
+        data = dict(HOMEDINGPAN_DAILYLIMITINDEX_EMOTION_HAR_18213['data'])
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HOMEDINGPAN_DAILYLIMITINDEX_EMOTION_HAR_18213, data=data)
+
+    def homedingpan_marketstockzdnum_emotion(self, **overrides):
+        """Replay session 18214: HomeDingPan.MarketStockZDNum."""
+        data = dict(HOMEDINGPAN_MARKETSTOCKZDNUM_EMOTION_HAR_18214['data'])
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HOMEDINGPAN_MARKETSTOCKZDNUM_EMOTION_HAR_18214, data=data)
+
+    def xianhuodata_getxianhuolist_emotion(self, time=None, **overrides):
+        """Replay session 18215: XianHuoData.GetXianHuoList."""
+        data = dict(XIANHUODATA_GETXIANHUOLIST_EMOTION_HAR_18215['data'])
+        if time is not None:
+            data['Time'] = str(time)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(XIANHUODATA_GETXIANHUOLIST_EMOTION_HAR_18215, data=data)
+
+    def homedingpan_sharpwithdrawallist_emotion(self, index=None, order=None, st=None, type=None, **overrides):
+        """Replay session 18216: HomeDingPan.SharpWithdrawalList."""
+        data = dict(HOMEDINGPAN_SHARPWITHDRAWALLIST_EMOTION_HAR_18216['data'])
+        if index is not None:
+            data['Index'] = str(index)
+        if order is not None:
+            data['Order'] = str(order)
+        if st is not None:
+            data['st'] = str(st)
+        if type is not None:
+            data['Type'] = str(type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HOMEDINGPAN_SHARPWITHDRAWALLIST_EMOTION_HAR_18216, data=data)
+
+    def homedingpan_weightperformancelist_emotion(self, index=None, order=None, st=None, type=None, **overrides):
+        """Replay session 18217: HomeDingPan.WeightPerformanceList."""
+        data = dict(HOMEDINGPAN_WEIGHTPERFORMANCELIST_EMOTION_HAR_18217['data'])
+        if index is not None:
+            data['Index'] = str(index)
+        if order is not None:
+            data['Order'] = str(order)
+        if st is not None:
+            data['st'] = str(st)
+        if type is not None:
+            data['Type'] = str(type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HOMEDINGPAN_WEIGHTPERFORMANCELIST_EMOTION_HAR_18217, data=data)
+
+
+    def stockl2history_getzsreal_withdraw_history(self, Day=None, **overrides):
+        """Replay session 18218: StockL2History.GetZsReal."""
+        data = dict(STOCKL2HISTORY_GETZSREAL_WITHDRAW_HISTORY_18218['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2HISTORY_GETZSREAL_WITHDRAW_HISTORY_18218, data=data)
+
+
+    def hishomedingpan_dailylimitindex_history(self, Day=None, **overrides):
+        """Replay session 18219: HisHomeDingPan.DailyLimitIndex."""
+        data = dict(HISHOMEDINGPAN_DAILYLIMITINDEX_HISTORY_18219['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_DAILYLIMITINDEX_HISTORY_18219, data=data)
+
+    def hishomedingpan_dailylimitperformance_history(self, Day=None, PidType=None, Index=None, Order=None, st=None, Type=None, **overrides):
+        """Replay session 18220: HisHomeDingPan.DailyLimitPerformance."""
+        data = dict(HISHOMEDINGPAN_DAILYLIMITPERFORMANCE_HISTORY_18220['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        if PidType is not None:
+            data['PidType'] = str(PidType)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if st is not None:
+            data['st'] = str(st)
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_DAILYLIMITPERFORMANCE_HISTORY_18220, data=data)
+
+    def hishomedingpan_dailylimitperformance2_history(self, Day=None, PidType=None, Index=None, Order=None, st=None, Type=None, **overrides):
+        """Replay session 18221: HisHomeDingPan.DailyLimitPerformance2."""
+        data = dict(HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        if PidType is not None:
+            data['PidType'] = str(PidType)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if st is not None:
+            data['st'] = str(st)
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221, data=data)
+
+
+    def hishomedingpan_hisdabanlist_history(self, Day=None, PidType=None, Index=None, Order=None, st=None, Type=None, **overrides):
+        """Replay session 18222: HisHomeDingPan.HisDaBanList."""
+        data = dict(HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        if PidType is not None:
+            data['PidType'] = str(PidType)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if st is not None:
+            data['st'] = str(st)
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222, data=data)
+
+    def zhishul2data_gettrendincremental_history(self, Day=None, StockID=None, **overrides):
+        """Replay session 18223: ZhiShuL2Data.GetTrendIncremental."""
+        data = dict(ZHISHUL2DATA_GETTRENDINCREMENTAL_HISTORY_18223['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETTRENDINCREMENTAL_HISTORY_18223, data=data)
+
+    def zhishul2data_getvolturincremental_history(self, Day=None, StockID=None, **overrides):
+        """Replay session 18224: ZhiShuL2Data.GetVolTurIncremental."""
+        data = dict(ZHISHUL2DATA_GETVOLTURINCREMENTAL_HISTORY_18224['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETVOLTURINCREMENTAL_HISTORY_18224, data=data)
+
+
+    def stocklinedata_getdadankline2new_market_volume(self, StockID=None, Index=None, Type=None, st=None, **overrides):
+        """Replay session 18225: StockLineData.GetDaDanKLine2New."""
+        data = dict(STOCKLINEDATA_GETDADANKLINE2NEW_MARKET_VOLUME_18225['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKLINEDATA_GETDADANKLINE2NEW_MARKET_VOLUME_18225, data=data)
+
+    def zhishukline_getzhishukline_ln_market_volume(self, Index=None, Type=None, st=None, **overrides):
+        """Replay session 18226: ZhiShuKLine.GetZhiShuKLine_LN."""
+        data = dict(ZHISHUKLINE_GETZHISHUKLINE_LN_MARKET_VOLUME_18226['data'])
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUKLINE_GETZHISHUKLINE_LN_MARKET_VOLUME_18226, data=data)
+
+    def stocklinedata_getklinetodaydadannew_market_volume(self, StockID=None, Type=None, **overrides):
+        """Replay session 18227: StockLineData.GetKLineTodayDaDanNew."""
+        data = dict(STOCKLINEDATA_GETKLINETODAYDADANNEW_MARKET_VOLUME_18227['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKLINEDATA_GETKLINETODAYDADANNEW_MARKET_VOLUME_18227, data=data)
+
+    def zhishukline_getzhishuklinetoday_ln_market_volume(self, Type=None, **overrides):
+        """Replay session 18228: ZhiShuKLine.GetZhiShuKLineToday_LN."""
+        data = dict(ZHISHUKLINE_GETZHISHUKLINETODAY_LN_MARKET_VOLUME_18228['data'])
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUKLINE_GETZHISHUKLINETODAY_LN_MARKET_VOLUME_18228, data=data)
+
+    def stocklinedata_getinterviewsbydatestock_history(self, DStart=None, DEnd=None, Index=None, Order=None, Type=None, st=None, **overrides):
+        """Replay session 18229: StockLineData.GetInterviewsByDateStock."""
+        data = dict(STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_HISTORY_18229['data'])
+        if DStart is not None:
+            data['DStart'] = str(DStart)
+        if DEnd is not None:
+            data['DEnd'] = str(DEnd)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_HISTORY_18229, data=data)
+
+    def stocklinedata_getinterviewsbydatestock_realtime(self, DStart=None, DEnd=None, Index=None, Order=None, Type=None, st=None, **overrides):
+        """Replay session 18230: StockLineData.GetInterviewsByDateStock."""
+        data = dict(STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_REALTIME_18230['data'])
+        if DStart is not None:
+            data['DStart'] = str(DStart)
+        if DEnd is not None:
+            data['DEnd'] = str(DEnd)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKLINEDATA_GETINTERVIEWSBYDATESTOCK_REALTIME_18230, data=data)
+
+    def stocklinedata_getinterviewsbydatezs_history(self, DStart=None, DEnd=None, Index=None, Order=None, Type=None, st=None, **overrides):
+        """Replay session 18231: StockLineData.GetInterviewsByDateZS."""
+        data = dict(STOCKLINEDATA_GETINTERVIEWSBYDATEZS_HISTORY_18231['data'])
+        if DStart is not None:
+            data['DStart'] = str(DStart)
+        if DEnd is not None:
+            data['DEnd'] = str(DEnd)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKLINEDATA_GETINTERVIEWSBYDATEZS_HISTORY_18231, data=data)
+
+
+    def hishomedingpan_marketsclnkline_market_volume_history(self, Type=None, **overrides):
+        """Replay session 18232: HisHomeDingPan.MarketSCLNKLine."""
+        data = dict(HISHOMEDINGPAN_MARKETSCLNKLINE_MARKET_VOLUME_HISTORY_18232['data'])
+        if Type is not None:
+            data['Type'] = str(Type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_MARKETSCLNKLINE_MARKET_VOLUME_HISTORY_18232, data=data)
+
+
+    def payfuncremindnew_getremind_latest_theme(self, NID=None, **overrides):
+        """Replay session 18233: PayFuncRemindNew.GetRemind."""
+        data = dict(PAYFUNCREMINDNEW_GETREMIND_LATEST_THEME_18233['data'])
+        if NID is not None:
+            data['NID'] = str(NID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAYFUNCREMINDNEW_GETREMIND_LATEST_THEME_18233, data=data)
+
+    def ticai_readercount_latest_theme(self, u=None, m=None, t=None, **overrides):
+        """Replay session 18234: TiCai.ReaderCount."""
+        data = dict(TICAI_READERCOUNT_LATEST_THEME_18234['data'])
+        if u is not None:
+            data['u'] = str(u)
+        if m is not None:
+            data['m'] = str(m)
+        if t is not None:
+            data['t'] = str(t)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(TICAI_READERCOUNT_LATEST_THEME_18234, data=data)
+
+    def zhishul2data_getparentplatecode_windvane(self, StockID=None, **overrides):
+        """Replay session 18235: ZhiShuL2Data.GetParentPlateCode."""
+        data = dict(ZHISHUL2DATA_GETPARENTPLATECODE_WINDVANE_18235['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETPARENTPLATECODE_WINDVANE_18235, data=data)
+
+    def zhishul2data_getvolturincremental_windvane(self, StockID=None, Day=None, **overrides):
+        """Replay session 18236: ZhiShuL2Data.GetVolTurIncremental."""
+        data = dict(ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_18236['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_18236, data=data)
+
+    def zhishul2data_gettrendincremental_windvane(self, StockID=None, Day=None, **overrides):
+        """Replay session 18237: ZhiShuL2Data.GetTrendIncremental."""
+        data = dict(ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_18237['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_18237, data=data)
+
+    def index_getarttitle_windvane(self, Type=None, StockID=None, **overrides):
+        """Replay session 18238: Index.GetArtTitle."""
+        data = dict(INDEX_GETARTTITLE_WINDVANE_18238['data'])
+        if Type is not None:
+            data['Type'] = str(Type)
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(INDEX_GETARTTITLE_WINDVANE_18238, data=data)
+
+    def zhishul2data_gettrendincremental_windvane_history(self, StockID=None, Day=None, **overrides):
+        """Replay session 18239: ZhiShuL2Data.GetTrendIncremental."""
+        data = dict(ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_HISTORY_18239['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETTRENDINCREMENTAL_WINDVANE_HISTORY_18239, data=data)
+
+    def zhishuranking_getplate_info_qj_windvane_history(self, Date=None, PlateID=None, **overrides):
+        """Replay session 18240: ZhiShuRanking.GetPlate_Info_QJ."""
+        data = dict(ZHISHURANKING_GETPLATE_INFO_QJ_WINDVANE_HISTORY_18240['data'])
+        if Date is not None:
+            data['Date'] = str(Date)
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_GETPLATE_INFO_QJ_WINDVANE_HISTORY_18240, data=data)
+
+    def zhishul2data_getvolturincremental_windvane_history(self, StockID=None, Day=None, **overrides):
+        """Replay session 18241: ZhiShuL2Data.GetVolTurIncremental."""
+        data = dict(ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_HISTORY_18241['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHUL2DATA_GETVOLTURINCREMENTAL_WINDVANE_HISTORY_18241, data=data)
+
+    def zhishuranking_sonplate_info_windvane_history(self, PlateID=None, IsShow=None, Date=None, **overrides):
+        """Replay session 18242: ZhiShuRanking.SonPlate_Info."""
+        data = dict(ZHISHURANKING_SONPLATE_INFO_WINDVANE_HISTORY_18242['data'])
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if IsShow is not None:
+            data['IsShow'] = str(IsShow)
+        if Date is not None:
+            data['Date'] = str(Date)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_SONPLATE_INFO_WINDVANE_HISTORY_18242, data=data)
+
+    def zhishuranking_getgpcphbts_tag_windvane_history(self, PlateID=None, Date=None, **overrides):
+        """Replay session 18243: ZhiShuRanking.GetGPCPHBTS_Tag."""
+        data = dict(ZHISHURANKING_GETGPCPHBTS_TAG_WINDVANE_HISTORY_18243['data'])
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if Date is not None:
+            data['Date'] = str(Date)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_GETGPCPHBTS_TAG_WINDVANE_HISTORY_18243, data=data)
+
+    def hisconceptionpoint_bkfenshizhibo_windvane_history(self, PlateID=None, Date=None, **overrides):
+        """Replay session 18244: HisConceptionPoint.BKFenShiZhiBo."""
+        data = dict(HISCONCEPTIONPOINT_BKFENSHIZHIBO_WINDVANE_HISTORY_18244['data'])
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if Date is not None:
+            data['Date'] = str(Date)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISCONCEPTIONPOINT_BKFENSHIZHIBO_WINDVANE_HISTORY_18244, data=data)
+
+    def zhishuranking_zhishustocklist_w8_windvane_history(self, Order=None, TSZB=None, st=None, old=None, IsZZ=None, Index=None, Date=None, Type=None, IsKZZType=None, PlateID=None, TSZB_Type=None, filterType=None, **overrides):
+        """Replay session 18245: ZhiShuRanking.ZhiShuStockList_W8."""
+        data = dict(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_HISTORY_18245['data'])
+        if Order is not None:
+            data['Order'] = str(Order)
+        if TSZB is not None:
+            data['TSZB'] = str(TSZB)
+        if st is not None:
+            data['st'] = str(st)
+        if old is not None:
+            data['old'] = str(old)
+        if IsZZ is not None:
+            data['IsZZ'] = str(IsZZ)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Date is not None:
+            data['Date'] = str(Date)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if IsKZZType is not None:
+            data['IsKZZType'] = str(IsKZZType)
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if TSZB_Type is not None:
+            data['TSZB_Type'] = str(TSZB_Type)
+        if filterType is not None:
+            data['filterType'] = str(filterType)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_HISTORY_18245, data=data)
+
+    def zhishuranking_zhishustocklist_w8_windvane_tszb72_history(self, Order=None, TSZB=None, st=None, SetLog=None, old=None, IsZZ=None, Index=None, Date=None, Type=None, Filed_Type=None, IsKZZType=None, PlateID=None, TSZB_Type=None, filterType=None, **overrides):
+        """Replay session 18246: ZhiShuRanking.ZhiShuStockList_W8 (???-????????)."""
+        data = dict(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB72_18246['data'])
+        if Order is not None:
+            data['Order'] = str(Order)
+        if TSZB is not None:
+            data['TSZB'] = str(TSZB)
+        if st is not None:
+            data['st'] = str(st)
+        if SetLog is not None:
+            data['SetLog'] = str(SetLog)
+        if old is not None:
+            data['old'] = str(old)
+        if IsZZ is not None:
+            data['IsZZ'] = str(IsZZ)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Date is not None:
+            data['Date'] = str(Date)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if Filed_Type is not None:
+            data['Filed_Type'] = str(Filed_Type)
+        if IsKZZType is not None:
+            data['IsKZZType'] = str(IsKZZType)
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if TSZB_Type is not None:
+            data['TSZB_Type'] = str(TSZB_Type)
+        if filterType is not None:
+            data['filterType'] = str(filterType)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB72_18246, data=data)
+
+    def zhishuranking_zhishustocklist_w8_windvane_tszb73_history(self, Order=None, TSZB=None, st=None, SetLog=None, old=None, IsZZ=None, Index=None, Date=None, Type=None, Filed_Type=None, IsKZZType=None, PlateID=None, TSZB_Type=None, filterType=None, **overrides):
+        """Replay session 18247: ZhiShuRanking.ZhiShuStockList_W8 (???-????????)."""
+        data = dict(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB73_18247['data'])
+        if Order is not None:
+            data['Order'] = str(Order)
+        if TSZB is not None:
+            data['TSZB'] = str(TSZB)
+        if st is not None:
+            data['st'] = str(st)
+        if SetLog is not None:
+            data['SetLog'] = str(SetLog)
+        if old is not None:
+            data['old'] = str(old)
+        if IsZZ is not None:
+            data['IsZZ'] = str(IsZZ)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Date is not None:
+            data['Date'] = str(Date)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if Filed_Type is not None:
+            data['Filed_Type'] = str(Filed_Type)
+        if IsKZZType is not None:
+            data['IsKZZType'] = str(IsKZZType)
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if TSZB_Type is not None:
+            data['TSZB_Type'] = str(TSZB_Type)
+        if filterType is not None:
+            data['filterType'] = str(filterType)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB73_18247, data=data)
+
+    def zhishuranking_zhishustocklist_w8_windvane_tszb74_history(self, Order=None, TSZB=None, st=None, SetLog=None, old=None, IsZZ=None, Index=None, Date=None, Type=None, Filed_Type=None, IsKZZType=None, PlateID=None, TSZB_Type=None, filterType=None, **overrides):
+        """Replay session 18248: ZhiShuRanking.ZhiShuStockList_W8 (???-????????)."""
+        data = dict(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB74_18248['data'])
+        if Order is not None:
+            data['Order'] = str(Order)
+        if TSZB is not None:
+            data['TSZB'] = str(TSZB)
+        if st is not None:
+            data['st'] = str(st)
+        if SetLog is not None:
+            data['SetLog'] = str(SetLog)
+        if old is not None:
+            data['old'] = str(old)
+        if IsZZ is not None:
+            data['IsZZ'] = str(IsZZ)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Date is not None:
+            data['Date'] = str(Date)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if Filed_Type is not None:
+            data['Filed_Type'] = str(Filed_Type)
+        if IsKZZType is not None:
+            data['IsKZZType'] = str(IsKZZType)
+        if PlateID is not None:
+            data['PlateID'] = str(PlateID)
+        if TSZB_Type is not None:
+            data['TSZB_Type'] = str(TSZB_Type)
+        if filterType is not None:
+            data['filterType'] = str(filterType)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_ZHISHUSTOCKLIST_W8_WINDVANE_TSZB74_18248, data=data)
+
+
+    def longhubang_getstocklist_today_board_18249(self, Index=None, Time=None, Type=None, st=None, **overrides):
+        """Replay session 18249: LongHuBang.GetStockList."""
+        data = dict(LONGHUBANG_GETSTOCKLIST_TODAY_BOARD_18249['data'])
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Time is not None:
+            data['Time'] = str(Time)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_GETSTOCKLIST_TODAY_BOARD_18249, data=data)
+
+    def longhubang_getagencylistv2_today_board_18250(self, Index=None, Time=None, st=None, **overrides):
+        """Replay session 18250: LongHuBang.GetAgencyListV2."""
+        data = dict(LONGHUBANG_GETAGENCYLISTV2_TODAY_BOARD_18250['data'])
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Time is not None:
+            data['Time'] = str(Time)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_GETAGENCYLISTV2_TODAY_BOARD_18250, data=data)
+
+    def longhubang_getagencykline_today_board_18251(self, index=None, st=None, **overrides):
+        """Replay session 18251: LongHuBang.GetAgencyKline."""
+        data = dict(LONGHUBANG_GETAGENCYKLINE_TODAY_BOARD_18251['data'])
+        if index is not None:
+            data['index'] = str(index)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_GETAGENCYKLINE_TODAY_BOARD_18251, data=data)
+
+    def longhubang_getbusinesslist_today_board_18252(self, Index=None, Time=None, Type=None, st=None, **overrides):
+        """Replay session 18252: LongHuBang.GetBusinessList."""
+        data = dict(LONGHUBANG_GETBUSINESSLIST_TODAY_BOARD_18252['data'])
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Time is not None:
+            data['Time'] = str(Time)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_GETBUSINESSLIST_TODAY_BOARD_18252, data=data)
+
+    def longhubang_getagencydaylist_today_board_18253(self, SDay=None, EDay=None, **overrides):
+        """Replay session 18253: LongHuBang.GetAgencyDayList."""
+        data = dict(LONGHUBANG_GETAGENCYDAYLIST_TODAY_BOARD_18253['data'])
+        if SDay is not None:
+            data['SDay'] = str(SDay)
+        if EDay is not None:
+            data['EDay'] = str(EDay)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_GETAGENCYDAYLIST_TODAY_BOARD_18253, data=data)
+
+    def businessgroup_groupinfo_youzi_group(self, GID=None, **overrides):
+        """Replay session 18254: BusinessGroup.GroupInfo."""
+        data = dict(BUSINESSGROUP_GROUPINFO_YOUZI_GROUP_18254['data'])
+        if GID is not None:
+            data['GID'] = str(GID)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(BUSINESSGROUP_GROUPINFO_YOUZI_GROUP_18254, data=data)
+
+    def businessgroup_grouplog_youzi_group(self, GID=None, Day=None, SDay=None, Money=None, Order=None, Index=None, st=None, **overrides):
+        """Replay session 18255: BusinessGroup.GroupLog."""
+        data = dict(BUSINESSGROUP_GROUPLOG_YOUZI_GROUP_18255['data'])
+        if GID is not None:
+            data['GID'] = str(GID)
+        if Day is not None:
+            data['Day'] = str(Day)
+        if SDay is not None:
+            data['SDay'] = str(SDay)
+        if Money is not None:
+            data['Money'] = str(Money)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(BUSINESSGROUP_GROUPLOG_YOUZI_GROUP_18255, data=data)
+
+    def userbusiness_getofficev2_youzi_group(self, **overrides):
+        """Replay session 18256: UserBusiness.GetOfficev2."""
+        data = dict(USERBUSINESS_GETOFFICEV2_YOUZI_GROUP_18256['data'])
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(USERBUSINESS_GETOFFICEV2_YOUZI_GROUP_18256, data=data)
+
+    def stock_getstockchart_youzi_group(self, StockID=None, index=None, st=None, **overrides):
+        """Replay session 18257: Stock.GetStockChart."""
+        data = dict(STOCK_GETSTOCKCHART_YOUZI_GROUP_18257['data'])
+        if StockID is not None:
+            data['StockID'] = str(StockID)
+        if index is not None:
+            data['index'] = str(index)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCK_GETSTOCKCHART_YOUZI_GROUP_18257, data=data)
+
+    def userbusiness_getday_top_youzi(self, Day=None, **overrides):
+        """Replay session 18258: UserBusiness.GetDay."""
+        data = dict(USERBUSINESS_GETDAY_TOP_YOUZI_18258['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(USERBUSINESS_GETDAY_TOP_YOUZI_18258, data=data)
+
+    def stockl2history_getzstrend_narrow_history(self, Day=None, **overrides):
+        """Replay session 18285: StockL2History.GetZsTrend_Narrow."""
+        data = dict(STOCKL2HISTORY_GETZSTREND_NARROW_HISTORY_18285['data'])
+        if Day is not None:
+            data['Day'] = str(Day)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2HISTORY_GETZSTREND_NARROW_HISTORY_18285, data=data)
+
+    def zhishuranking_realrankinginfo_history(self, Date=None, Type=None, ZSType=None, RStart=None, REnd=None, Index=None, Order=None, st=None, **overrides):
+        """Replay session 18286: ZhiShuRanking.RealRankingInfo."""
+        data = dict(ZHISHURANKING_REALRANKINGINFO_HISTORY_18286['data'])
+        if Date is not None:
+            data['Date'] = str(Date)
+        if Type is not None:
+            data['Type'] = str(Type)
+        if ZSType is not None:
+            data['ZSType'] = str(ZSType)
+        if RStart is not None:
+            data['RStart'] = str(RStart)
+        if REnd is not None:
+            data['REnd'] = str(REnd)
+        if Index is not None:
+            data['Index'] = str(Index)
+        if Order is not None:
+            data['Order'] = str(Order)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_REALRANKINGINFO_HISTORY_18286, data=data)
 
 if __name__ == '__main__':
     client = KaipanlaCapturedClient()

@@ -30,6 +30,20 @@
     .badge { display:inline-flex; height:24px; align-items:center; padding:0 8px; border-radius:999px; background:#f2f4f7; color:#51606f; font-size:12px; }
     .badge.admin { background:#eaf1fb; color:var(--blue); }
     .badge.bad { background:#fff0df; color:#9f5b13; }
+    .badge.level-normal { background:#f2f4f7; color:#51606f; }
+    .badge.level-important { background:#fff0df; color:#9f5b13; }
+    .badge.level-rare { background:#fdecec; color:#b0302a; }
+    .badge.level-pending_delete { background:#f4e8ff; color:#7c3aad; }
+    .scenario-tools { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
+    .scenario-tools input { max-width:360px; }
+    .level-select { min-width:96px; }
+    .scenario-name-input { min-width:220px; height:34px; }
+    .scenario-cn-input { min-width:180px; height:34px; }
+    .scenario-maintenance-input { min-width:150px; height:34px; }
+    .endpoint { font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); word-break:break-all; }
+    .log-tools { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
+    .log-tools input { max-width:220px; }
+    .log-detail { max-width:260px; word-break:break-all; font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); }
     .msg { min-height:22px; margin:10px 0 0; color:var(--danger); }
     .created-codes { padding:0 16px 16px; display:grid; gap:8px; }
     .code-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; background:#f7f9fb; border:1px solid var(--line); border-radius:6px; }
@@ -75,6 +89,20 @@
     </section>
 
     <section class="panel">
+      <h2>接口分级管理</h2>
+      <div class="scenario-tools">
+        <input id="scenarioSearch" type="search" placeholder="搜索接口、中文名、session、URL">
+        <button id="reloadScenarioLevels" type="button">刷新接口</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Session</th><th>英文名</th><th>中文名</th><th>维护时间</th><th>等级</th><th>调用 URL</th><th>操作</th></tr></thead>
+          <tbody id="scenarioLevels"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
       <h2>现有用户</h2>
       <div class="table-wrap">
         <table>
@@ -93,11 +121,35 @@
         </table>
       </div>
     </section>
+
+        <section id="call-logs" class="panel">
+      <h2>&#25509;&#21475;&#35843;&#29992;&#35760;&#24405;</h2>
+      <div class="log-tools">
+        <input id="callLogSearch" type="search" placeholder="&#25628;&#32034;&#29992;&#25143;&#12289;&#25509;&#21475;&#12289;session">
+        <input id="callLogUser" type="search" placeholder="&#29992;&#25143;">
+        <input id="callLogSession" type="search" placeholder="Session">
+        <button id="reloadCallLogs" type="button">&#21047;&#26032;&#35760;&#24405;</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>&#26102;&#38388;</th><th>&#29992;&#25143;</th><th>Session</th><th>&#25509;&#21475;</th><th>&#29366;&#24577;</th><th>&#32791;&#26102;</th><th>&#35843;&#29992; URL</th><th>&#21442;&#25968;</th></tr></thead>
+          <tbody id="callLogs"></tbody>
+        </table>
+      </div>
+    </section>
     <div id="msg" class="msg"></div>
   </main>
   <script>
     const usersEl = document.getElementById("users");
     const codesEl = document.getElementById("codes");
+    const scenarioLevelsEl = document.getElementById("scenarioLevels");
+    const scenarioSearchEl = document.getElementById("scenarioSearch");
+    const callLogsEl = document.getElementById("callLogs");
+    const callLogSearchEl = document.getElementById("callLogSearch");
+    const callLogUserEl = document.getElementById("callLogUser");
+    const callLogSessionEl = document.getElementById("callLogSession");
+    let scenarioLevelOptions = [];
+    let scenarioLevelRows = [];
     const createdCodesEl = document.getElementById("createdCodes");
     const msg = document.getElementById("msg");
     function showMsg(text) { msg.textContent = text || ""; }
@@ -112,6 +164,63 @@
       if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
       return data;
     }
+
+    function levelBadgeClass(level) {
+      return `level-${level || "normal"}`;
+    }
+    function renderScenarioLevels() {
+      const query = (scenarioSearchEl?.value || "").trim().toLowerCase();
+      const rows = scenarioLevelRows.filter((item) => {
+        const haystack = [item.session_id, item.title, item.title_cn, item.maintenance_time, item.level_label, item.endpoint, item.target_url].join(" ").toLowerCase();
+        return !query || haystack.includes(query);
+      });
+      scenarioLevelsEl.innerHTML = rows.map((item) => {
+        const options = scenarioLevelOptions.map((option) => `<option value="${html(option.value)}" ${option.value === item.level ? "selected" : ""}>${html(option.label)}</option>`).join("");
+        return `
+          <tr>
+            <td>${html(item.session_id)}</td>
+            <td><input class="scenario-name-input" data-field="scenario-title" data-session="${html(item.session_id)}" value="${html(item.title)}"></td>
+            <td><input class="scenario-cn-input" data-field="scenario-title-cn" data-session="${html(item.session_id)}" value="${html(item.title_cn || "")}"></td>
+            <td><input class="scenario-maintenance-input" data-field="scenario-maintenance-time" data-session="${html(item.session_id)}" value="${html(item.maintenance_time || "")}"></td>
+            <td>
+              <select class="level-select" data-action="save-scenario-level" data-session="${html(item.session_id)}">${options}</select>
+              <span class="badge ${levelBadgeClass(item.level)}">${html(item.level_label)}</span>
+            </td>
+            <td class="endpoint">${html(item.endpoint)}</td>
+            <td class="actions"><button class="blue" data-action="save-scenario-name" data-session="${html(item.session_id)}">保存名称</button></td>
+          </tr>`;
+      }).join("");
+    }
+    async function loadScenarioLevels() {
+      const data = await request("/api/admin/scenario-levels");
+      scenarioLevelOptions = data.level_options || [];
+      scenarioLevelRows = data.scenarios || [];
+      renderScenarioLevels();
+    }
+
+    async function loadCallLogs() {
+      const params = new URLSearchParams({ limit: "200" });
+      if (callLogSearchEl?.value.trim()) params.set("q", callLogSearchEl.value.trim());
+      if (callLogUserEl?.value.trim()) params.set("username", callLogUserEl.value.trim());
+      if (callLogSessionEl?.value.trim()) params.set("session_id", callLogSessionEl.value.trim());
+      const data = await request(`/api/admin/call-logs?${params.toString()}`);
+      callLogsEl.innerHTML = (data.logs || []).map((item) => {
+        const overrides = item.overrides ? JSON.stringify(item.overrides) : "";
+        const statusClass = item.status === "ok" ? "" : "bad";
+        return `
+          <tr>
+            <td>${html(item.requested_at_text || "")}</td>
+            <td>${html(item.username || "")}</td>
+            <td>${html(item.session_id || "")}</td>
+            <td>${html(item.title_cn || item.title || "")}</td>
+            <td><span class="badge ${statusClass}">${html(item.status || "")} ${html(item.status_code || "")}</span></td>
+            <td>${html(item.duration_ms ?? "")} ms</td>
+            <td class="endpoint">${html(item.endpoint || "")}</td>
+            <td class="log-detail">${html(overrides)}</td>
+          </tr>`;
+      }).join("");
+    }
+
     async function loadUsers() {
       const data = await request("/api/admin/users");
       usersEl.innerHTML = data.users.map((user) => `
@@ -181,11 +290,38 @@
         copy.textContent = "已复制";
         return;
       }
+      const levelSelect = event.target.closest('select[data-action="save-scenario-level"]');
+      if (levelSelect) {
+        try {
+          const sessionId = levelSelect.dataset.session;
+          const row = levelSelect.closest("tr");
+          const title = row.querySelector(`[data-field="scenario-title"]`).value.trim();
+          const titleCn = row.querySelector(`[data-field="scenario-title-cn"]`).value.trim();
+          const maintenanceTime = row.querySelector(`[data-field="scenario-maintenance-time"]`).value.trim();
+          const data = await request(`/api/admin/scenario-meta/${encodeURIComponent(sessionId)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ level: levelSelect.value, title, title_cn: titleCn, maintenance_time: maintenanceTime }) });
+          const index = scenarioLevelRows.findIndex((item) => String(item.session_id) === String(sessionId));
+          if (index >= 0) scenarioLevelRows[index] = data.scenario;
+          renderScenarioLevels();
+          showMsg("");
+        } catch (error) { showMsg(error.message); }
+        return;
+      }
       const button = event.target.closest("[data-action]");
       if (!button) return;
       const action = button.dataset.action;
       try {
-        if (action === "delete-user") {
+        if (action === "save-scenario-name") {
+          const sessionId = button.dataset.session;
+          const row = button.closest("tr");
+          const title = row.querySelector(`[data-field="scenario-title"]`).value.trim();
+          const titleCn = row.querySelector(`[data-field="scenario-title-cn"]`).value.trim();
+          const maintenanceTime = row.querySelector(`[data-field="scenario-maintenance-time"]`).value.trim();
+          const select = row.querySelector(`[data-action="save-scenario-level"]`);
+          const data = await request(`/api/admin/scenario-meta/${encodeURIComponent(sessionId)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ title, title_cn: titleCn, maintenance_time: maintenanceTime, level: select.value }) });
+          const index = scenarioLevelRows.findIndex((item) => String(item.session_id) === String(sessionId));
+          if (index >= 0) scenarioLevelRows[index] = data.scenario;
+          renderScenarioLevels();
+        } else if (action === "delete-user") {
           if (!confirm(`确认删除用户 ${button.dataset.user}？`)) return;
           await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"DELETE" });
           await loadUsers();
@@ -206,11 +342,25 @@
         showMsg("");
       } catch (error) { showMsg(error.message); }
     });
+    document.getElementById("reloadScenarioLevels").addEventListener("click", () => loadScenarioLevels().catch((error) => showMsg(error.message)));
+    scenarioSearchEl.addEventListener("input", renderScenarioLevels);
+    document.getElementById("reloadCallLogs")?.addEventListener("click", async () => {
+      try { await loadCallLogs(); showMsg("???????"); } catch (error) { showMsg(error.message); }
+    });
+    callLogSearchEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
+    callLogUserEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
+    callLogSessionEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
     document.getElementById("logout").addEventListener("click", async () => {
       await fetch("/api/auth/logout", { method:"POST" });
       location.href = "/login.html";
     });
-    Promise.all([loadUsers(), loadCodes()]).catch((error) => showMsg(error.message));
+    Promise.all([loadUsers(), loadCodes(), loadScenarioLevels(), loadCallLogs()])
+      .then(() => {
+        if (location.hash === "#call-logs") {
+          document.getElementById("call-logs")?.scrollIntoView({ block: "start" });
+        }
+      })
+      .catch((error) => showMsg(error.message));
   </script>
 </body>
 </html>

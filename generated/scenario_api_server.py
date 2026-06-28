@@ -9,6 +9,7 @@ import mimetypes
 import os
 import sys
 import time
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
@@ -22,7 +23,11 @@ ROOT = Path(__file__).resolve().parent
 TOOLS_DIR = ROOT.parent / "tools"
 if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
-from crawl_topic_library import crawl_topic_library, write_outputs
+try:
+    from crawl_topic_library import crawl_topic_library, write_outputs
+except ModuleNotFoundError:
+    crawl_topic_library = None
+    write_outputs = None
 
 CLIENT_FILE = "kaipanla_capture_client.py"
 PAGE_FILE = "capture_scenarios.html"
@@ -31,12 +36,437 @@ REGISTER_FILE = "register.html"
 EXPIRED_FILE = "expired.html"
 ADMIN_FILE = "admin.html"
 AUTH_DB_FILE = ROOT / "users.json"
+SCENARIO_LEVEL_FILE = ROOT / "scenario_levels.json"
+SCENARIO_META_FILE = ROOT / "scenario_meta.json"
+CALL_LOG_FILE = ROOT / "scenario_call_logs.jsonl"
+DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
 SESSION_COOKIE = "kpl_session"
 AUTH = AuthStore(AUTH_DB_FILE)
+SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist"}
+MAX_CALL_LOGS = 1000
 
 
 def _safe_route_part(value: str) -> str:
     return "".join(ch.lower() if ch.isalnum() else "_" for ch in value).strip("_")
+
+
+SCENARIO_LEVELS = {
+    "normal": "一般",
+    "important": "重要",
+    "rare": "稀缺",
+    "pending_delete": "待删除",
+}
+
+
+def _load_scenario_meta_data() -> dict[str, dict[str, str]]:
+    payload: object = {}
+    if SCENARIO_META_FILE.exists():
+        try:
+            payload = json.loads(SCENARIO_META_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+    elif SCENARIO_LEVEL_FILE.exists():
+        # Backward compatibility for installs that already saved level tags.
+        try:
+            level_payload = json.loads(SCENARIO_LEVEL_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            level_payload = {}
+        raw_levels = level_payload.get("levels", level_payload) if isinstance(level_payload, dict) else {}
+        if isinstance(raw_levels, dict):
+            payload = {
+                "scenarios": {
+                    str(session_id): {"level": str(level)}
+                    for session_id, level in raw_levels.items()
+                }
+            }
+    raw_scenarios = payload.get("scenarios", payload) if isinstance(payload, dict) else {}
+    if not isinstance(raw_scenarios, dict):
+        return {}
+    normalized: dict[str, dict[str, str]] = {}
+    for session_id, meta in raw_scenarios.items():
+        if not isinstance(meta, dict):
+            continue
+        item: dict[str, str] = {}
+        level = str(meta.get("level", "normal"))
+        if level in SCENARIO_LEVELS:
+            item["level"] = level
+        title = str(meta.get("title", "")).strip()
+        title_cn = str(meta.get("title_cn", "")).strip()
+        maintenance_time = str(meta.get("maintenance_time", "")).strip()
+        if title:
+            item["title"] = title
+        if title_cn:
+            item["title_cn"] = title_cn
+        if maintenance_time:
+            item["maintenance_time"] = maintenance_time
+        if item:
+            normalized[str(session_id)] = item
+    return normalized
+
+
+def _save_scenario_meta_data(meta: dict[str, dict[str, str]]) -> None:
+    scenarios: dict[str, dict[str, str]] = {}
+    for session_id, values in sorted(meta.items(), key=lambda item: item[0]):
+        clean: dict[str, str] = {}
+        level = values.get("level", "normal")
+        if level in SCENARIO_LEVELS and level != "normal":
+            clean["level"] = level
+        title = str(values.get("title", "")).strip()
+        title_cn = str(values.get("title_cn", "")).strip()
+        maintenance_time = str(values.get("maintenance_time", "")).strip()
+        if title:
+            clean["title"] = title
+        if title_cn:
+            clean["title_cn"] = title_cn
+        if maintenance_time:
+            clean["maintenance_time"] = maintenance_time
+        if clean:
+            scenarios[session_id] = clean
+    payload = {"scenarios": scenarios}
+    tmp_path = SCENARIO_META_FILE.with_suffix(".tmp")
+    tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp_path.replace(SCENARIO_META_FILE)
+
+
+SCENARIO_META_DATA = _load_scenario_meta_data()
+
+
+def _scenario_meta_for(session_id: object) -> dict[str, str]:
+    return SCENARIO_META_DATA.get(str(session_id), {})
+
+
+def _load_scenario_level_data() -> dict[str, str]:
+    if SCENARIO_META_DATA:
+        return {
+            session_id: meta["level"]
+            for session_id, meta in SCENARIO_META_DATA.items()
+            if meta.get("level") in SCENARIO_LEVELS
+        }
+    if not SCENARIO_LEVEL_FILE.exists():
+        return {}
+    try:
+        payload = json.loads(SCENARIO_LEVEL_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    raw_levels = payload.get("levels", payload) if isinstance(payload, dict) else {}
+    if not isinstance(raw_levels, dict):
+        return {}
+    return {
+        str(session_id): str(level)
+        for session_id, level in raw_levels.items()
+        if str(level) in SCENARIO_LEVELS
+    }
+
+
+def _save_scenario_level_data(levels: dict[str, str]) -> None:
+    for session_id, level in levels.items():
+        meta = SCENARIO_META_DATA.setdefault(session_id, {})
+        meta["level"] = level
+    for session_id in list(SCENARIO_META_DATA):
+        if session_id not in levels and SCENARIO_META_DATA[session_id].get("level"):
+            SCENARIO_META_DATA[session_id].pop("level", None)
+        if not SCENARIO_META_DATA.get(session_id):
+            SCENARIO_META_DATA.pop(session_id, None)
+    _save_scenario_meta_data(SCENARIO_META_DATA)
+
+
+SCENARIO_LEVEL_DATA = _load_scenario_level_data()
+
+
+def _scenario_level_for(session_id: object) -> str:
+    level = SCENARIO_LEVEL_DATA.get(str(session_id), "normal")
+    return level if level in SCENARIO_LEVELS else "normal"
+
+
+def _safe_log_values(values: dict[str, object]) -> dict[str, str]:
+    clean: dict[str, str] = {}
+    for key, value in values.items():
+        if key.lower() in SENSITIVE_LOG_KEYS:
+            clean[key] = "***"
+        else:
+            clean[key] = str(value)
+    return clean
+
+
+def _append_call_log(record: dict[str, object]) -> None:
+    try:
+        with CALL_LOG_FILE.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+    except OSError:
+        return
+
+
+def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
+    if not CALL_LOG_FILE.exists():
+        return []
+    try:
+        lines = CALL_LOG_FILE.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    records: list[dict[str, object]] = []
+    for line in reversed(lines[-MAX_CALL_LOGS:]):
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict):
+            records.append(item)
+        if len(records) >= limit:
+            break
+    return records
+
+
+def _interface_added_time_for(spec: dict[str, object]) -> str:
+    return str(
+        spec.get("added_time")
+        or spec.get("created_at")
+        or spec.get("capture_time")
+        or DEFAULT_INTERFACE_ADDED_TIME
+    ).strip()
+
+
+def _maintenance_time_for(spec: dict[str, object]) -> str:
+    session_id = str(spec.get("session_id") or "")
+    return _scenario_meta_for(session_id).get("maintenance_time", "") or _interface_added_time_for(spec)
+
+
+TITLE_CN_BY_SESSION = {
+    "1": "应用资讯",
+    "2": "题材个股关联",
+    "4": "用户登录埋点",
+    "7": "用户消息",
+    "10": "广告配置",
+    "14": "现货列表",
+    "15": "最新评论用户",
+    "19": "自选股状态更新",
+    "23": "原始行情请求",
+    "52": "首页指数信息",
+    "53": "应用布局配置",
+    "54": "首页新列表",
+    "56": "指数板块列表",
+    "108": "日K线",
+    "111": "当日K线",
+    "112": "首页盯盘模块",
+    "119": "功能使用记录",
+    "120": "全部自选股",
+    "121": "L2日期显示控制",
+    "122": "龙虎榜标题",
+    "123": "龙虎榜东财状态",
+    "126": "龙虎榜股票列表",
+    "128": "龙虎榜添加",
+    "146": "股票图表",
+    "147": "个股最新信息",
+    "159": "评论列表",
+    "193": "个股最新信息",
+    "194": "用户点击统计",
+    "196": "股票走势",
+    "197": "用户点击统计",
+    "199": "营业部趋势",
+    "200": "模块开关",
+    "209": "批量点击统计",
+    "210": "用户日志上报",
+    "211": "营业部趋势",
+    "213": "最新交易日",
+    "214": "龙虎榜更新列表",
+    "215": "股票留言栏信息",
+    "216": "涨停基因",
+    "217": "股票所属板块",
+    "218": "文章标题",
+    "265": "用户页面统计",
+    "267": "用户日志上报",
+    "272": "论坛栏目列表",
+    "273": "焦点消息",
+    "274": "焦点消息",
+    "277": "精选消息列表",
+    "278": "客户端广告",
+    "287": "论坛栏目详情",
+    "298": "首页信息",
+    "310": "功能说明",
+    "311": "新股指数变化",
+    "312": "ETF排行",
+    "313": "指数K线",
+    "319": "功能说明",
+    "325": "用户点击统计",
+    "326": "主力持仓列表",
+    "329": "主力持仓列表",
+    "335": "用户点击统计",
+    "336": "功能说明",
+    "337": "文章标题",
+    "342": "用户点击统计",
+    "343": "题材库功能说明",
+    "352": "用户页面统计",
+    "354": "用户日志上报",
+    "374": "十日换手率",
+    "375": "委托盘口",
+    "383": "用户日志上报",
+    "387": "用户页面统计",
+    "407": "指数走势",
+    "413": "异动看盘实时数据",
+    "414": "用户权限",
+    "415": "异动看盘说明",
+    "418": "F10基础首页",
+    "419": "重要提醒",
+    "420": "历史涨停复盘",
+    "421": "涨停K线",
+    "422": "公司公告列表",
+    "423": "公司研报列表",
+    "424": "研报字段导出",
+    "425": "研报字段列表",
+    "426": "机构持仓日期",
+    "427": "机构持仓明细",
+    "428": "基金持仓",
+    "429": "风口标签列表",
+    "430": "个股风口",
+    "432": "个股风口",
+    "446": "用户日志上报",
+    "1015": "行情首页信息",
+    "1019": "行情首页信息",
+    "1021": "行情首页信息",
+    "1031": "指数量额增量",
+    "1032": "指数走势增量",
+    "1033": "父级板块代码",
+    "1034": "板块区间信息",
+    "1035": "板块文章标题",
+    "1036": "子板块信息",
+    "1037": "股票池标签",
+    "1040": "板块分时直播",
+    "1880": "游资动向列表",
+    '18001': '?????? P19',
+    '18003': '市场风口????',
+    '18012': '???????',
+    '18013': '??????',
+    '18019': '????????',
+    '18021': '??????',
+    '18026': '????????',
+    '18054': '?????? P41',
+    '18055': '上证指数????',
+    '18059': '??????',
+    '18061': '?????',
+    '18062': '?????',
+    '18063': '??????',
+    '18065': '??????',
+    '18071': '??????',
+    '18080': '?????? P85',
+    '18083': '主题机会????',
+    '18090': '?????? P140',
+    '18091': '?????? P176',
+    '18092': '????????',
+    '18124': '?????? P301',
+    '18125': '?????? P143',
+    '18126': '????????',
+    '18127': '?????? P177',
+    '18128': '????????',
+    '18139': '?????? P40',
+    '18157': '?????????',
+    '18162': '????????',
+    '18181': '严重异动提醒????',
+    '18182': '??????',
+    '18190': '?????? P174',
+    '18191': '????',
+    '18207': '?????? P507',
+    "18208": "情绪-变化统计",
+    "18209": "情绪-市场连板K线",
+    "18210": "情绪-市场量能基准线",
+    "18211": "情绪-市场容量K线",
+    "18212": "情绪-涨停表现说明",
+    "18213": "情绪-涨停指数",
+    "18214": "情绪-涨跌家数",
+    "18215": "情绪-现货列表",
+    "18216": "情绪-急跌列表",
+    "18217": "情绪-权重表现列表",
+    "18218": "大幅回撤-查询历史",
+    "18219": "涨停表现-历史指数",
+    "18220": "涨停表现-历史列表",
+    "18221": "涨停表现-历史连板列表",
+    "18222": "涨停表现-历史打板列表",
+    "18223": "涨停表现-历史走势增量",
+    "18224": "涨停表现-历史量额增量",
+    "18225": "市场量能-大单历史K线",
+    "18226": "市场量能-指数历史K线",
+    "18227": "市场量能-大单当日K线",
+    "18228": "市场量能-指数当日K线",
+    "18229": "市场量能-个股区间访谈历史",
+    "18230": "市场量能-个股区间访谈实时",
+    "18231": "市场量能-指数区间访谈历史",
+    "18232": "市场量能-历史量能",
+    "18233": "市场情绪-最新主题提醒",
+    "18234": "市场情绪-最新主题阅读计数",
+    "18235": "风向标-父级板块代码",
+    "18236": "风向标-实时量额增量",
+    "18237": "风向标-实时走势增量",
+    "18238": "风向标-文章标题",
+    "18239": "风向标-历史走势增量",
+    "18240": "风向标-历史板块行情",
+    "18241": "风向标-历史量额增量",
+    "18242": "风向标-历史子板块",
+    "18243": "风向标-历史题材标签",
+    "18244": "风向标-历史分时直播",
+    "18245": "风向标-历史股票列表",
+    "18246": "风向标-强势题材股票列表",
+    "18247": "风向标-高强题材股票列表",
+    "18248": "风向标-活跃题材股票列表",
+    "18249": "龙虎榜-今日上榜股票列表",
+    "18250": "龙虎榜-今日上榜营业部列表",
+    "18251": "龙虎榜-营业部K线",
+    "18252": "龙虎榜-营业部买卖列表",
+    "18253": "龙虎榜-营业部区间统计",
+    "18254": "龙虎榜-游资组合信息",
+    "18255": "龙虎榜-游资组合流水",
+    "18256": "龙虎榜-营业部基础列表",
+    "18257": "龙虎榜-游资组合股票图表",
+    "18258": "龙虎榜-游资日期列表",
+    "18285": "行情-历史指数窄幅走势",
+    "18286": "行情-历史排名信息",
+    "18287": "行情-历史题材指数排名",
+    "18288": "行情-历史行业指数排名",
+    "18289": "行情-历史地域指数排名",
+    "18290": "行情-历史行业指数时间段排名",
+    "18291": "行情-历史地域指数时间段排名",
+    "18259": "龙虎榜-游资组合信息-成都系",
+    "18272": "龙虎榜-游资组合流水-成都系",
+    "18260": "龙虎榜-游资组合信息-佛山系",
+    "18273": "龙虎榜-游资组合流水-佛山系",
+    "18261": "龙虎榜-游资组合信息-炒股养家",
+    "18274": "龙虎榜-游资组合流水-炒股养家",
+    "18262": "龙虎榜-游资组合信息-赵老哥",
+    "18275": "龙虎榜-游资组合流水-赵老哥",
+    "18263": "龙虎榜-游资组合信息-小鳄鱼",
+    "18276": "龙虎榜-游资组合流水-小鳄鱼",
+    "18264": "龙虎榜-游资组合信息-作手新一",
+    "18277": "龙虎榜-游资组合流水-作手新一",
+    "18265": "龙虎榜-游资组合信息-章盟主",
+    "18278": "龙虎榜-游资组合流水-章盟主",
+    "18266": "龙虎榜-游资组合信息-量化基金",
+    "18279": "龙虎榜-游资组合流水-量化基金",
+    "18267": "龙虎榜-游资组合信息-上塘路",
+    "18280": "龙虎榜-游资组合流水-上塘路",
+    "18268": "龙虎榜-游资组合信息-北京光华路",
+    "18281": "龙虎榜-游资组合流水-北京光华路",
+    "18269": "龙虎榜-游资组合信息-思明南路",
+    "18282": "龙虎榜-游资组合流水-思明南路",
+    "18270": "龙虎榜-游资组合信息-南京帮",
+    "18283": "龙虎榜-游资组合流水-南京帮",
+    "18271": "龙虎榜-游资组合信息-机构",
+    "18284": "龙虎榜-游资组合流水-机构",
+}
+
+
+def _title_cn_for(spec: dict[str, object], controller: object, action: object) -> str:
+    session_id = str(spec.get("session_id") or "")
+    meta_title = _scenario_meta_for(session_id).get("title_cn", "")
+    if meta_title:
+        return meta_title
+    if session_id in TITLE_CN_BY_SESSION:
+        return TITLE_CN_BY_SESSION[session_id]
+    return f"{controller}.{action}"
+
+
+def _title_for(spec: dict[str, object], controller: object, action: object) -> str:
+    session_id = str(spec.get("session_id") or "")
+    meta_title = _scenario_meta_for(session_id).get("title", "")
+    if meta_title:
+        return meta_title
+    return f"{controller}.{action}"
 
 
 def _build_scenarios() -> list[dict[str, object]]:
@@ -65,7 +495,12 @@ def _build_scenarios() -> list[dict[str, object]]:
         scenarios.append(
             {
                 "session_id": spec["session_id"],
-                "title": f"{controller}.{action}",
+                "title": _title_for(spec, controller, action),
+                "title_cn": _title_cn_for(spec, controller, action),
+                "added_time": _interface_added_time_for(spec),
+                "maintenance_time": _maintenance_time_for(spec),
+                "level": _scenario_level_for(spec["session_id"]),
+                "level_label": SCENARIO_LEVELS[_scenario_level_for(spec["session_id"])],
                 "method_name": method_name,
                 "http_method": spec["method"],
                 "target_url": spec["url"],
@@ -73,6 +508,7 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "alias_endpoint": alias_endpoint,
                 "params": params,
                 "data": data,
+                "hide_url_fields": spec.get("hide_url_fields", []),
             }
         )
     return scenarios
@@ -80,9 +516,18 @@ def _build_scenarios() -> list[dict[str, object]]:
 
 SCENARIOS = _build_scenarios()
 ROUTES: dict[str, dict[str, object]] = {}
-for scenario, spec in zip(SCENARIOS, REQUESTS):
-    ROUTES[scenario["endpoint"]] = {"scenario": scenario, "spec": spec}
-    ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "spec": spec}
+
+
+def _refresh_routes() -> None:
+    global SCENARIOS, ROUTES
+    SCENARIOS = _build_scenarios()
+    ROUTES = {}
+    for scenario, spec in zip(SCENARIOS, REQUESTS):
+        ROUTES[scenario["endpoint"]] = {"scenario": scenario, "spec": spec}
+        ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "spec": spec}
+
+
+_refresh_routes()
 
 
 class ScenarioApiHandler(BaseHTTPRequestHandler):
@@ -167,7 +612,17 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if error:
                 self._send_auth_failure(error, json_response=True)
                 return
-            self._send_json({"count": len(SCENARIOS), "scenarios": SCENARIOS, "user": user})
+            self._send_json(
+                {
+                    "count": len(SCENARIOS),
+                    "scenarios": SCENARIOS,
+                    "level_options": [
+                        {"value": value, "label": label}
+                        for value, label in SCENARIO_LEVELS.items()
+                    ],
+                    "user": user,
+                }
+            )
             return
 
         if path.startswith("/api/topic-library"):
@@ -191,13 +646,14 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             body_values = self._read_body_values()
             overrides = {**query_values, **body_values}
             overrides.pop("_ts", None)
-            self._call_scene(route["scenario"], route["spec"], overrides)
+            self._call_scene(user, route["scenario"], route["spec"], overrides)
             return
 
         self._send_json({"error": "not_found", "path": path}, status=404)
 
-    def _call_scene(self, scenario: dict[str, object], spec: dict[str, object], overrides: dict[str, str]) -> None:
+    def _call_scene(self, user: dict[str, object], scenario: dict[str, object], spec: dict[str, object], overrides: dict[str, str]) -> None:
         requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         client = KaipanlaCapturedClient()
         client.session.trust_env = False
         data = dict(spec.get("data") or {})
@@ -222,6 +678,25 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         try:
             response = client.request(spec, data=data, params=params)
         except Exception as exc:
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": scenario.get("session_id", ""),
+                    "title": scenario.get("title", ""),
+                    "title_cn": scenario.get("title_cn", ""),
+                    "endpoint": scenario.get("endpoint", ""),
+                    "target_url": scenario.get("target_url", spec.get("url", "")),
+                    "http_method": scenario.get("http_method", spec.get("method", "")),
+                    "status": "failed",
+                    "status_code": 502,
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "overrides": _safe_log_values(overrides),
+                    "error": str(exc),
+                }
+            )
             self._send_json(
                 {
                     "error": "upstream_request_failed",
@@ -239,6 +714,26 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             payload = response.json()
         except ValueError:
             payload = response.text
+
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": scenario.get("session_id", ""),
+                "title": scenario.get("title", ""),
+                "title_cn": scenario.get("title_cn", ""),
+                "endpoint": scenario.get("endpoint", ""),
+                "target_url": scenario.get("target_url", spec.get("url", "")),
+                "http_method": scenario.get("http_method", spec.get("method", "")),
+                "status": "ok" if response.ok else "upstream_error",
+                "status_code": response.status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "content_type": content_type,
+                "overrides": _safe_log_values(overrides),
+            }
+        )
 
         self._send_json(
             {
@@ -319,6 +814,129 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         self._send_json({"error": "not_found", "path": path}, status=404)
 
     def _handle_admin_api(self, path: str) -> None:
+        if path == "/api/admin/call-logs" and self.command == "GET":
+            parsed = urlparse(self.path)
+            query = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+            try:
+                limit = max(1, min(1000, int(query.get("limit", "200"))))
+            except ValueError:
+                limit = 200
+            username = query.get("username", "").strip().lower()
+            session_id = query.get("session_id", "").strip()
+            keyword = query.get("q", "").strip().lower()
+            logs = _load_call_logs(limit=1000)
+            filtered: list[dict[str, object]] = []
+            for item in logs:
+                if username and username not in str(item.get("username", "")).lower():
+                    continue
+                if session_id and session_id != str(item.get("session_id", "")):
+                    continue
+                if keyword:
+                    haystack = " ".join(
+                        str(item.get(key, ""))
+                        for key in ("username", "session_id", "title", "title_cn", "endpoint", "status", "status_code")
+                    ).lower()
+                    if keyword not in haystack:
+                        continue
+                filtered.append(item)
+                if len(filtered) >= limit:
+                    break
+            self._send_json({"logs": filtered, "count": len(filtered)})
+            return
+
+        if path in {"/api/admin/scenario-levels", "/api/admin/scenario-meta"} and self.command == "GET":
+            self._send_json(
+                {
+                    "level_options": [
+                        {"value": value, "label": label}
+                        for value, label in SCENARIO_LEVELS.items()
+                    ],
+                    "scenarios": [
+                        {
+                            "session_id": scenario["session_id"],
+                            "title": scenario["title"],
+                            "title_cn": scenario.get("title_cn", ""),
+                            "added_time": scenario.get("added_time", ""),
+                            "maintenance_time": scenario.get("maintenance_time", ""),
+                            "level": scenario.get("level", "normal"),
+                            "level_label": scenario.get("level_label", SCENARIO_LEVELS["normal"]),
+                            "endpoint": scenario["endpoint"],
+                            "target_url": scenario["target_url"],
+                        }
+                        for scenario in SCENARIOS
+                    ],
+                }
+            )
+            return
+
+        level_prefix = "/api/admin/scenario-levels/"
+        meta_prefix = "/api/admin/scenario-meta/"
+        if (
+            (path.startswith(level_prefix) or path.startswith(meta_prefix))
+            and self.command == "PATCH"
+        ):
+            prefix = level_prefix if path.startswith(level_prefix) else meta_prefix
+            session_id = unquote(path[len(prefix) :])
+            if not any(str(scenario["session_id"]) == session_id for scenario in SCENARIOS):
+                self._send_json({"error": "not_found", "message": "scenario not found"}, status=404)
+                return
+            payload = self._read_json_body()
+            current = next(item for item in SCENARIOS if str(item["session_id"]) == session_id)
+            level = str(payload.get("level", current.get("level", "normal")))
+            if level not in SCENARIO_LEVELS:
+                self._send_json(
+                    {
+                        "error": "invalid_level",
+                        "message": f"level must be one of: {', '.join(SCENARIO_LEVELS)}",
+                    },
+                    status=400,
+                )
+                return
+            title = str(payload.get("title", current.get("title", ""))).strip()
+            title_cn = str(payload.get("title_cn", current.get("title_cn", ""))).strip()
+            maintenance_time = str(
+                payload.get("maintenance_time", current.get("maintenance_time", ""))
+            ).strip()
+            if not title:
+                self._send_json({"error": "invalid_title", "message": "English title cannot be empty"}, status=400)
+                return
+            if not title_cn:
+                self._send_json({"error": "invalid_title_cn", "message": "Chinese title cannot be empty"}, status=400)
+                return
+            meta = SCENARIO_META_DATA.setdefault(session_id, {})
+            if level == "normal":
+                meta.pop("level", None)
+                SCENARIO_LEVEL_DATA.pop(session_id, None)
+            else:
+                meta["level"] = level
+                SCENARIO_LEVEL_DATA[session_id] = level
+            spec = next(item for item in REQUESTS if str(item.get("session_id")) == session_id)
+            spec_params = spec.get("params") or {}
+            spec_data = spec.get("data") or {}
+            default_maintenance_time = _interface_added_time_for(spec)
+            default_controller = spec_data.get("c") or spec_params.get("c") or "request"
+            default_action = spec_data.get("a") or spec_params.get("a") or spec.get("session_id")
+            default_title = f"{default_controller}.{default_action}"
+            if title == default_title:
+                meta.pop("title", None)
+            else:
+                meta["title"] = title
+            if title_cn == TITLE_CN_BY_SESSION.get(session_id, ""):
+                meta.pop("title_cn", None)
+            else:
+                meta["title_cn"] = title_cn
+            if maintenance_time and maintenance_time != default_maintenance_time:
+                meta["maintenance_time"] = maintenance_time
+            else:
+                meta.pop("maintenance_time", None)
+            if not meta:
+                SCENARIO_META_DATA.pop(session_id, None)
+            _save_scenario_meta_data(SCENARIO_META_DATA)
+            _refresh_routes()
+            scenario = next(item for item in SCENARIOS if str(item["session_id"]) == session_id)
+            self._send_json({"scenario": scenario})
+            return
+
         if path == "/api/admin/users" and self.command == "GET":
             self._send_json({"users": AUTH.list_users()})
             return
@@ -411,6 +1029,15 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/topic-library/crawl" and self.command == "POST":
+            if crawl_topic_library is None or write_outputs is None:
+                self._send_json(
+                    {
+                        "error": "topic_library_tool_missing",
+                        "message": "tools/crawl_topic_library.py is not available in this workspace.",
+                    },
+                    status=501,
+                )
+                return
             body = self._read_json_body()
             args = argparse.Namespace(
                 func_name=str(body.get("func_name") or "题材库"),

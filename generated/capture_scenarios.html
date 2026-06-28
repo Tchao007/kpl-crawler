@@ -191,10 +191,28 @@
       justify-content: space-between;
     }
     .title {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      flex-wrap: wrap;
       font-size: 15px;
       font-weight: 700;
       margin: 0;
       word-break: break-word;
+    }
+    .title-cn {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .maintenance-time {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      background: #edf7f5;
+      border: 1px solid #cfeae5;
+      border-radius: 999px;
+      padding: 2px 8px;
+      white-space: nowrap;
     }
     .meta {
       margin-top: 8px;
@@ -216,6 +234,10 @@
     .tag.green { background: var(--accent-soft); color: var(--accent); border-color: #cfeae5; }
     .tag.orange { background: var(--amber-soft); color: var(--amber); border-color: #f5d5b2; }
     .tag.gray { background: #f2f4f7; color: #51606f; border-color: #e1e6ec; }
+    .tag.level-normal { background: #f2f4f7; color: #51606f; border-color: #e1e6ec; }
+    .tag.level-important { background: #fff0df; color: #9f5b13; border-color: #f5d5b2; }
+    .tag.level-rare { background: #fdecec; color: #b0302a; border-color: #f2b8b5; }
+    .tag.level-pending_delete { background: #f4e8ff; color: #7c3aad; border-color: #dfc5f7; }
     .kv {
       margin-top: 10px;
       display: grid;
@@ -254,6 +276,49 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+    .name-editor {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 148px 128px auto;
+      gap: 8px;
+      align-items: end;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+    }
+    .name-editor label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .name-editor input {
+      width: 100%;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 12px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      min-width: 0;
+    }
+    .name-editor select {
+      width: 100%;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 12px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .name-editor input:focus,
+    .name-editor select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(44, 123, 229, .12);
     }
     .tiny {
       height: 30px;
@@ -307,15 +372,33 @@
       font-family: Consolas, "Cascadia Mono", monospace;
       font-size: 12px;
     }
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 20;
+      display: none;
+      max-width: min(360px, calc(100vw - 40px));
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #18202a;
+      color: #fff;
+      box-shadow: 0 16px 36px rgba(17, 24, 39, .18);
+      font-size: 13px;
+    }
+    .toast.show { display: block; }
+    .toast.error { background: #b0302a; }
     @media (max-width: 1120px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .cards { grid-template-columns: 1fr; }
       .search { width: 100%; }
       .toolbar { width: 100%; justify-content: flex-start; }
+      .name-editor { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div class="shell">
     <div class="topbar">
       <div class="wrap">
@@ -330,6 +413,7 @@
           </select>
           <span id="currentUser" class="userbar">未登录</span>
           <a id="adminLink" class="navlink" href="/admin.html" style="display:none;">用户管理</a>
+          <a id="callLogsLink" class="navlink" href="/admin.html#call-logs" style="display:none;">&#35843;&#29992;&#35760;&#24405;</a>
           <button id="reloadBtn" class="btn ghost">重新加载</button>
           <button id="copyAllBtn" class="btn primary">复制当前列表</button>
           <button id="logoutBtn" class="btn ghost">退出</button>
@@ -373,9 +457,11 @@
       filtered: [],
       group: "全部",
       host: "all",
+      levelOptions: [],
       query: "",
       loading: false,
       busyId: null,
+      nameBusyId: null,
       user: null
     };
 
@@ -390,13 +476,15 @@
       hostFilter: document.getElementById("hostFilter"),
       currentUser: document.getElementById("currentUser"),
       adminLink: document.getElementById("adminLink"),
+      callLogsLink: document.getElementById("callLogsLink"),
       reloadBtn: document.getElementById("reloadBtn"),
       copyAllBtn: document.getElementById("copyAllBtn"),
       logoutBtn: document.getElementById("logoutBtn"),
       crawlTopicBtn: document.getElementById("crawlTopicBtn"),
       loadTopicBtn: document.getElementById("loadTopicBtn"),
       topicHint: document.getElementById("topicHint"),
-      topicResult: document.getElementById("topicResult")
+      topicResult: document.getElementById("topicResult"),
+      toast: document.getElementById("toast")
     };
 
     function escapeHtml(value) {
@@ -421,11 +509,16 @@
       return {
         sessionId: String(item.session_id ?? item.sessionId ?? ""),
         title: item.title || item.name || "未命名场景",
+        titleCn: item.title_cn || item.titleCn || "",
+        addedTime: item.added_time || item.addedTime || "",
+        maintenanceTime: item.maintenance_time || item.maintenanceTime || "",
         methodName: item.method_name || item.methodName || "",
         httpMethod: item.http_method || item.httpMethod || "POST",
         targetUrl: item.target_url || item.url || "",
         endpoint: item.endpoint || "",
         aliasEndpoint: item.alias_endpoint || "",
+        level: item.level || "normal",
+        levelLabel: item.level_label || item.levelLabel || "一般",
         params: item.params || {},
         data: item.data || {},
         host,
@@ -435,7 +528,11 @@
 
     function inferGroup(item, host) {
       const title = String(item.title || "");
-      const text = `${host} ${title}`.toLowerCase();
+      const titleCn = String(item.title_cn || item.titleCn || "");
+      const sessionId = String(item.session_id || item.sessionId || "");
+      const text = `${host} ${title} ${titleCn}`.toLowerCase();
+      if (text.includes("市场量能") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "市场量能";
+      if (text.includes("情绪") || text.includes("大幅回撤") || text.includes("涨停表现") || text.includes("风向标") || /^1820[8-9]$|^1821[0-9]$|^1822[0-4]$|^1823[3-9]$|^1824[0-8]$/.test(sessionId)) return "情绪模块";
       if (text.includes("apphwhq")) return "行情核心";
       if (text.includes("apphis")) return "历史数据";
       if (text.includes("apparticle")) return "资讯内容";
@@ -473,15 +570,30 @@
       return false;
     }
 
+    function showToast(message, type = "success") {
+      if (!el.toast) {
+        alert(message);
+        return;
+      }
+      el.toast.textContent = message;
+      el.toast.className = `toast show${type === "error" ? " error" : ""}`;
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        el.toast.className = "toast";
+      }, 1800);
+    }
+
     function renderUser() {
       if (!state.user) {
         el.currentUser.textContent = "未登录";
         el.adminLink.style.display = "none";
+        el.callLogsLink.style.display = "none";
         return;
       }
       const expires = state.user.expires_at ? ` · 有效期 ${state.user.expires_at}` : "";
       el.currentUser.textContent = `${state.user.username} · ${state.user.role}${expires}`;
       el.adminLink.style.display = state.user.role === "admin" ? "inline-flex" : "none";
+      el.callLogsLink.style.display = state.user.role === "admin" ? "inline-flex" : "none";
     }
 
     function summarizeTopicResult(payload) {
@@ -588,6 +700,9 @@
         const haystack = [
           item.sessionId,
           item.title,
+          item.titleCn,
+          item.maintenanceTime,
+          item.levelLabel,
           item.methodName,
           item.endpoint,
           item.aliasEndpoint,
@@ -634,14 +749,50 @@
         ? '<span class="tag blue">GET</span>'
         : '<span class="tag green">POST</span>';
       const busy = state.busyId === item.sessionId ? "disabled" : "";
+      const canEditName = state.user && state.user.role === "admin";
+      const savingName = state.nameBusyId === item.sessionId;
       const requestUrl = buildRequestUrl(item);
+      const levelOptions = (state.levelOptions.length ? state.levelOptions : [
+        { value: "normal", label: "一般" },
+        { value: "important", label: "重要" },
+        { value: "rare", label: "稀缺" },
+        { value: "pending_delete", label: "待删除" }
+      ]).map((option) => (
+        `<option value="${escapeHtml(option.value)}" ${option.value === item.level ? "selected" : ""}>${escapeHtml(option.label)}</option>`
+      )).join("");
+      const nameEditor = canEditName ? `
+          <div class="name-editor">
+            <label>
+              <span>英文名</span>
+              <input type="text" data-name-field="title" value="${escapeHtml(item.title)}" autocomplete="off">
+            </label>
+            <label>
+              <span>中文名</span>
+              <input type="text" data-name-field="title_cn" value="${escapeHtml(item.titleCn)}" autocomplete="off">
+            </label>
+            <label>
+              <span>维护时间</span>
+              <input type="text" data-name-field="maintenance_time" value="${escapeHtml(item.maintenanceTime)}" placeholder="例如 2026-06-25" autocomplete="off">
+            </label>
+            <label>
+              <span>分级</span>
+              <select data-name-field="level">${levelOptions}</select>
+            </label>
+            <button class="tiny" data-action="save-name" data-id="${escapeHtml(item.sessionId)}" ${savingName ? "disabled" : ""}>${savingName ? "保存中" : "保存管理"}</button>
+          </div>
+        ` : "";
       return `
         <article class="card">
           <div class="card-head">
             <div>
-              <h3 class="title">${escapeHtml(item.title)}</h3>
+              <h3 class="title">
+                <span>${escapeHtml(item.title)}</span>
+                ${item.titleCn ? `<span class="title-cn">${escapeHtml(item.titleCn)}</span>` : ""}
+                ${canEditName && item.maintenanceTime ? `<span class="maintenance-time">${escapeHtml(item.maintenanceTime)}</span>` : ""}
+              </h3>
               <div class="meta">
                 <span class="tag gray">session ${escapeHtml(item.sessionId)}</span>
+                <span class="tag level-${escapeHtml(item.level)}">${escapeHtml(item.levelLabel)}</span>
                 <span class="tag orange">${escapeHtml(item.host || "unknown host")}</span>
                 ${methodTag}
               </div>
@@ -651,6 +802,7 @@
             <span>调用 URL</span>
             <code>${escapeHtml(requestUrl)}</code>
           </div>
+          ${nameEditor}
           <div class="actions">
             <button class="tiny primary" data-action="call" data-id="${escapeHtml(item.sessionId)}" ${busy}>调用场景</button>
           </div>
@@ -670,10 +822,19 @@
         Object.entries(item.data || {}).forEach(([k, v]) => params.set(k, v));
       } else {
         Object.entries(item.params || {}).forEach(([k, v]) => params.set(k, v));
+        getUrlManagedFields(item).forEach((key) => params.set(key, item.data[key]));
       }
       const query = params.toString();
       if (query) url.search = query;
       return url.toString();
+    }
+
+    function getUrlManagedFields(item) {
+      if (!item.data) return [];
+      const hiddenFields = new Set(item.hideUrlFields || item.hide_url_fields || []);
+      const fields = ["Day", "Date", "DStart", "DEnd", "SDay", "EDay", "GID", "Type", "ZSType"].filter((key) => item.data[key] && !hiddenFields.has(key));
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(item.data.Time || ""))) fields.push("Time");
+      return fields;
     }
 
     async function callScenario(item, button) {
@@ -689,7 +850,11 @@
         };
         if ((item.httpMethod || "POST").toUpperCase() === "POST") {
           const body = new URLSearchParams();
-          Object.entries(item.data || {}).forEach(([k, v]) => body.set(k, v));
+          const urlManagedFields = new Set(getUrlManagedFields(item));
+          Object.entries(item.data || {}).forEach(([k, v]) => {
+            if (urlManagedFields.has(k)) return;
+            body.set(k, v);
+          });
           init.headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8";
           init.body = body.toString();
         }
@@ -706,6 +871,72 @@
       }
     }
 
+    async function saveScenarioName(item, button) {
+      if (!state.user || state.user.role !== "admin") {
+        showToast("只有管理员可以修改名称", "error");
+        return;
+      }
+      const editor = button.closest(".name-editor");
+      const titleInput = editor && editor.querySelector('[data-name-field="title"]');
+      const titleCnInput = editor && editor.querySelector('[data-name-field="title_cn"]');
+      const maintenanceTimeInput = editor && editor.querySelector('[data-name-field="maintenance_time"]');
+      const levelSelect = editor && editor.querySelector('[data-name-field="level"]');
+      const title = titleInput ? titleInput.value.trim() : "";
+      const titleCn = titleCnInput ? titleCnInput.value.trim() : "";
+      const maintenanceTime = maintenanceTimeInput ? maintenanceTimeInput.value.trim() : "";
+      const level = levelSelect ? levelSelect.value : (item.level || "normal");
+      if (!title || !titleCn) {
+        showToast("中英文名称不能为空", "error");
+        return;
+      }
+      state.nameBusyId = item.sessionId;
+      button.disabled = true;
+      button.textContent = "保存中";
+      try {
+        const response = await fetch(new URL(`/api/admin/scenario-meta/${encodeURIComponent(item.sessionId)}`, API_BASE), {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            title_cn: titleCn,
+            maintenance_time: maintenanceTime,
+            level
+          })
+        });
+        if (handleAuthFailure(response)) return;
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.message || payload.error || `HTTP ${response.status}`);
+        const updated = normalizeScenario(payload.scenario || {});
+        const index = state.scenarios.findIndex((scenario) => scenario.sessionId === item.sessionId);
+        if (index >= 0) {
+          state.scenarios[index] = {
+            ...state.scenarios[index],
+            title: updated.title,
+            titleCn: updated.titleCn,
+            addedTime: updated.addedTime,
+            maintenanceTime: updated.maintenanceTime,
+            level: updated.level,
+            levelLabel: updated.levelLabel,
+            endpoint: updated.endpoint || state.scenarios[index].endpoint,
+            aliasEndpoint: updated.aliasEndpoint || state.scenarios[index].aliasEndpoint
+          };
+        }
+        state.nameBusyId = null;
+        showToast("接口管理信息修改成功");
+        render(state.scenarios);
+      } catch (error) {
+        showToast(`接口管理信息修改失败：${error.message}`, "error");
+      } finally {
+        if (state.nameBusyId === item.sessionId) {
+          state.nameBusyId = null;
+        }
+        if (button.isConnected) {
+          button.disabled = false;
+          button.textContent = "保存管理";
+        }
+      }
+    }
+
     async function loadScenarios() {
       state.loading = true;
       el.loading.textContent = "正在从 /api/scenarios 拉取场景...";
@@ -715,6 +946,7 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload = await response.json();
         state.user = payload.user || state.user;
+        state.levelOptions = payload.level_options || state.levelOptions;
         renderUser();
         state.scenarios = (payload.scenarios || []).map(normalizeScenario);
         state.loading = false;
@@ -744,6 +976,8 @@
       const kind = action.getAttribute("data-action");
       if (kind === "call") {
         await callScenario(item, action);
+      } else if (kind === "save-name") {
+        await saveScenarioName(item, action);
       }
     });
 
@@ -765,7 +999,7 @@
       location.href = "/login.html";
     });
     el.copyAllBtn.addEventListener("click", async () => {
-      const text = state.filtered.map((item) => `${item.sessionId}\t${item.title}\t${item.endpoint}`).join("\n");
+      const text = state.filtered.map((item) => `${item.sessionId}\t${item.title}\t${item.titleCn || ""}\t${item.endpoint}`).join("\n");
       await copyText(text);
       el.copyAllBtn.textContent = "已复制";
       setTimeout(() => el.copyAllBtn.textContent = "复制当前列表", 1000);
