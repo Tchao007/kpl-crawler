@@ -17,6 +17,14 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from auth_store import AuthStore
 from kaipanla_capture_client import KaipanlaCapturedClient, REQUESTS
+from kpl_core_client import CORE_API_KEYS, CORE_LOCAL_API_KEYS, KaipanlaCoreClient
+from kpl_hqstock_decoder import (
+    DEFAULT_LOG as HQSTOCK_LOG,
+    HQ_API_KEYS,
+    latest_five_level,
+    latest_time_sales,
+    normalize_stock_id,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -511,6 +519,30 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "hide_url_fields": spec.get("hide_url_fields", []),
             }
         )
+    for name, (host, controller, action) in CORE_API_KEYS.items():
+        if name not in {"five_level", "time_sales"}:
+            continue
+        scenarios.append(
+            {
+                "session_id": f"core:{name}",
+                "title": f"{controller}.{action}",
+                "title_cn": f"核心接口 {name}",
+                "added_time": DEFAULT_INTERFACE_ADDED_TIME,
+                "maintenance_time": DEFAULT_INTERFACE_ADDED_TIME,
+                "level": "important",
+                "level_label": SCENARIO_LEVELS["important"],
+                "method_name": name,
+                "http_method": "GET",
+                "target_url": str(HQSTOCK_LOG),
+                "endpoint": f"/api/core/{name}",
+                "alias_endpoint": f"/api/core/{name}",
+                "params": {"StockID": "000620"},
+                "data": {},
+                "host": host,
+                "is_core": True,
+                "hide_url_fields": [],
+            }
+        )
     return scenarios
 
 
@@ -631,6 +663,22 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 self._send_auth_failure(error, json_response=True)
                 return
             self._handle_topic_library_api(path)
+            return
+
+        if path == "/api/core" or path.startswith("/api/core/"):
+            user, error = self._require_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            self._handle_core_api(user, path)
+            return
+
+        if path == "/api/hq" or path.startswith("/api/hq/"):
+            user, error = self._require_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            self._handle_hq_api(user, path)
             return
 
         if path in ROUTES:
@@ -1063,6 +1111,269 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         self._send_json({"error": "not_found", "path": path}, status=404)
+
+    def _handle_hq_api(self, user: dict[str, object], path: str) -> None:
+        if self.command not in {"GET", "POST"}:
+            self._send_json({"error": "method_not_allowed"}, status=405)
+            return
+        if path == "/api/hq":
+            self._send_json(
+                {
+                    "apis": [
+                        {
+                            "name": name,
+                            "source": meta["source"],
+                            "packet_code": meta["packet_code"],
+                            "endpoint": meta["endpoint"],
+                            "description": meta["description"],
+                        }
+                        for name, meta in HQ_API_KEYS.items()
+                    ],
+                    "log": str(HQSTOCK_LOG),
+                }
+            )
+            return
+        name = path[len("/api/hq/") :].strip("/")
+        if name == "five-level":
+            name = "five_level"
+        if name not in HQ_API_KEYS:
+            self._send_json({"error": "not_found", "message": f"unknown hq api: {name}"}, status=404)
+            return
+        parsed = urlparse(self.path)
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values()
+        values = {**query_values, **body_values}
+        stock_id = normalize_stock_id(
+            str(values.get("StockID") or values.get("stock_id") or values.get("stock") or "")
+        )
+        if not stock_id:
+            self._send_json({"error": "missing_stock_id", "message": "Pass StockID=000620"}, status=400)
+            return
+
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        if name == "five_level":
+            result = latest_five_level(stock_id)
+            packet_code = "2015"
+            not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
+        else:
+            try:
+                limit = max(1, min(1000, int(values.get("limit", "100"))))
+            except ValueError:
+                limit = 100
+            result = latest_time_sales(stock_id, limit=limit)
+            packet_code = "2006"
+            not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": f"hq:{name}",
+                "title": f"hqStock.{packet_code}",
+                "title_cn": "五档行情",
+                "endpoint": f"/api/hq/{name}",
+                "target_url": str(HQSTOCK_LOG),
+                "http_method": self.command,
+                "status": "ok" if result else "not_found",
+                "status_code": 200 if result else 404,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(values),
+            }
+        )
+        if not result:
+            self._send_json(
+                {
+                    "error": "not_found",
+                    "message": not_found_message,
+                    "stock": stock_id,
+                    "log": str(HQSTOCK_LOG),
+                    "hint": "Start Frida capture and open the stock quote page before calling this API.",
+                },
+                status=404,
+            )
+            return
+        self._send_json({"requested_at": requested_at, "body": result})
+
+    def _handle_core_api(self, user: dict[str, object], path: str) -> None:
+        if self.command not in {"GET", "POST"}:
+            self._send_json({"error": "method_not_allowed"}, status=405)
+            return
+
+        if path == "/api/core":
+            self._send_json(
+                {
+                    "apis": [
+                        {
+                            "name": name,
+                            "host": host,
+                            "controller": controller,
+                            "action": action,
+                            "endpoint": f"/api/core/{name}",
+                        }
+                        for name, (host, controller, action) in CORE_API_KEYS.items()
+                    ]
+                }
+            )
+            return
+
+        name = path[len("/api/core/") :].strip("/")
+        if name not in CORE_API_KEYS:
+            self._send_json({"error": "not_found", "message": f"unknown core api: {name}"}, status=404)
+            return
+
+        parsed = urlparse(self.path)
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values()
+        overrides = {**query_values, **body_values}
+        overrides.pop("_ts", None)
+
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        host, controller, action = CORE_API_KEYS[name]
+        if name in CORE_LOCAL_API_KEYS:
+            stock_id = normalize_stock_id(
+                str(overrides.get("StockID") or overrides.get("stock_id") or overrides.get("stock") or "")
+            )
+            if not stock_id:
+                self._send_json({"error": "missing_stock_id", "message": "Pass StockID=000620"}, status=400)
+                return
+            if name == "five_level":
+                result = latest_five_level(stock_id)
+                packet_code = "2015"
+                not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
+            else:
+                try:
+                    limit = max(1, min(1000, int(overrides.get("limit", "100"))))
+                except ValueError:
+                    limit = 100
+                result = latest_time_sales(stock_id, limit=limit)
+                packet_code = "2006"
+                not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": f"core:{name}",
+                    "title": f"{controller}.{action}",
+                    "title_cn": f"核心接口 {name}",
+                    "endpoint": f"/api/core/{name}",
+                    "target_url": str(HQSTOCK_LOG),
+                    "http_method": self.command,
+                    "status": "ok" if result else "not_found",
+                    "status_code": 200 if result else 404,
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "overrides": _safe_log_values(overrides),
+                }
+            )
+            if not result:
+                self._send_json(
+                    {
+                        "error": "not_found",
+                        "message": not_found_message,
+                        "stock": stock_id,
+                        "log": str(HQSTOCK_LOG),
+                        "hint": "Start Frida capture and open the stock quote page before calling this API.",
+                    },
+                    status=404,
+                )
+                return
+            self._send_json(
+                {
+                    "requested_at": requested_at,
+                    "status_code": 200,
+                    "content_type": "application/json",
+                    "upstream_url": str(HQSTOCK_LOG),
+                    "core_api": {
+                        "name": name,
+                        "host": host,
+                        "controller": controller,
+                        "action": action,
+                        "packet_code": packet_code,
+                    },
+                    "body": result,
+                }
+            )
+            return
+
+        client = KaipanlaCoreClient()
+        try:
+            response = client.request_core(name, **overrides)
+        except Exception as exc:
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": f"core:{name}",
+                    "title": f"{controller}.{action}",
+                    "title_cn": f"核心接口 {name}",
+                    "endpoint": f"/api/core/{name}",
+                    "target_url": f"https://{host}/w1/api/index.php",
+                    "http_method": "POST",
+                    "status": "failed",
+                    "status_code": 502,
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "overrides": _safe_log_values(overrides),
+                    "error": str(exc),
+                }
+            )
+            self._send_json(
+                {
+                    "error": "upstream_request_failed",
+                    "message": str(exc),
+                    "core_api": name,
+                    "overrides": overrides,
+                },
+                status=502,
+            )
+            return
+
+        duration_ms = int((time.time() - requested_at) * 1000)
+        content_type = response.headers.get("Content-Type", "")
+        try:
+            body: object = response.json()
+        except ValueError:
+            body = response.text
+
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": f"core:{name}",
+                "title": f"{controller}.{action}",
+                "title_cn": f"核心接口 {name}",
+                "endpoint": f"/api/core/{name}",
+                "target_url": response.url,
+                "http_method": "POST",
+                "status": "ok" if response.ok else "upstream_error",
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+                "overrides": _safe_log_values(overrides),
+            }
+        )
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "status_code": response.status_code,
+                "content_type": content_type,
+                "upstream_url": response.url,
+                "core_api": {
+                    "name": name,
+                    "host": host,
+                    "controller": controller,
+                    "action": action,
+                },
+                "body": body,
+            },
+            status=200 if response.ok else 502,
+        )
 
     def _require_user(self) -> tuple[dict[str, object] | None, str | None]:
         return AUTH.session_user(self._session_token())

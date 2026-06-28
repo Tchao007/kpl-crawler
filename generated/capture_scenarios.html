@@ -521,6 +521,7 @@
         levelLabel: item.level_label || item.levelLabel || "一般",
         params: item.params || {},
         data: item.data || {},
+        isCore: Boolean(item.is_core || item.isCore),
         host,
         group: inferGroup(item, host)
       };
@@ -531,6 +532,7 @@
       const titleCn = String(item.title_cn || item.titleCn || "");
       const sessionId = String(item.session_id || item.sessionId || "");
       const text = `${host} ${title} ${titleCn}`.toLowerCase();
+      if (text.includes("local_hqstock") || text.includes("hqstock")) return "行情核心";
       if (text.includes("市场量能") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "市场量能";
       if (text.includes("情绪") || text.includes("大幅回撤") || text.includes("涨停表现") || text.includes("风向标") || /^1820[8-9]$|^1821[0-9]$|^1822[0-4]$|^1823[3-9]$|^1824[0-8]$/.test(sessionId)) return "情绪模块";
       if (text.includes("apphwhq")) return "行情核心";
@@ -749,7 +751,7 @@
         ? '<span class="tag blue">GET</span>'
         : '<span class="tag green">POST</span>';
       const busy = state.busyId === item.sessionId ? "disabled" : "";
-      const canEditName = state.user && state.user.role === "admin";
+      const canEditName = state.user && state.user.role === "admin" && !item.isCore;
       const savingName = state.nameBusyId === item.sessionId;
       const requestUrl = buildRequestUrl(item);
       const levelOptions = (state.levelOptions.length ? state.levelOptions : [

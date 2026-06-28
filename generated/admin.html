@@ -350,16 +350,21 @@
     callLogSearchEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
     callLogUserEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
     callLogSessionEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
+    function scrollToHashPanel() {
+      if (!location.hash) return;
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (!target) return;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: Math.max(0, target.offsetTop - 12), behavior: "auto" });
+      });
+    }
+    window.addEventListener("hashchange", scrollToHashPanel);
     document.getElementById("logout").addEventListener("click", async () => {
       await fetch("/api/auth/logout", { method:"POST" });
       location.href = "/login.html";
     });
     Promise.all([loadUsers(), loadCodes(), loadScenarioLevels(), loadCallLogs()])
-      .then(() => {
-        if (location.hash === "#call-logs") {
-          document.getElementById("call-logs")?.scrollIntoView({ block: "start" });
-        }
-      })
+      .then(scrollToHashPanel)
       .catch((error) => showMsg(error.message));
   </script>
 </body>
