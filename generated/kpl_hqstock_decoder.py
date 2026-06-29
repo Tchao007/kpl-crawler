@@ -30,7 +30,6 @@ HQ_API_KEYS = {
     }
 }
 
-
 @dataclass
 class ProtoField:
     number: int
@@ -250,6 +249,14 @@ def normalize_stock_id(value: str) -> str:
     if stock_id.startswith(("SH", "SZ", "BJ")) and len(stock_id) > 2:
         stock_id = stock_id[2:]
     return stock_id
+
+
+def latest_stock_for_code(code: str, *, log_path: Path = DEFAULT_LOG) -> str:
+    latest = ""
+    for packet in iter_hqstock_packets(log_path) or []:
+        if packet["code"] == str(code):
+            latest = str(packet["stock"])
+    return latest
 
 
 def latest_five_level(stock_id: str, *, log_path: Path = DEFAULT_LOG) -> dict[str, Any] | None:

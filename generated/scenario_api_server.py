@@ -22,6 +22,7 @@ from kpl_hqstock_decoder import (
     DEFAULT_LOG as HQSTOCK_LOG,
     HQ_API_KEYS,
     latest_five_level,
+    latest_stock_for_code,
     latest_time_sales,
     normalize_stock_id,
 )
@@ -47,11 +48,26 @@ AUTH_DB_FILE = ROOT / "users.json"
 SCENARIO_LEVEL_FILE = ROOT / "scenario_levels.json"
 SCENARIO_META_FILE = ROOT / "scenario_meta.json"
 CALL_LOG_FILE = ROOT / "scenario_call_logs.jsonl"
+FRIDA_CAPTURE_LOG = ROOT.parent / "outputs" / "frida" / "kpl_capture.ndjson"
 DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
 SESSION_COOKIE = "kpl_session"
 AUTH = AuthStore(AUTH_DB_FILE)
 SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist"}
 MAX_CALL_LOGS = 1000
+UPSTREAM_IDENTITY_CACHE: dict[str, object] = {"mtime": 0.0, "identity": {}}
+CORE_LOCAL_ADDED_TIME = "2026-06-28"
+CORE_LOCAL_TITLES = {
+    "five_level": {
+        "method_name": "hqstock_five_level",
+        "title_cn": "行情核心-五档盘口",
+        "params": {"StockID": "688008"},
+    },
+    "time_sales": {
+        "method_name": "hqstock_time_sales",
+        "title_cn": "行情核心-分时成交",
+        "params": {"StockID": "688008", "limit": "100"},
+    },
+}
 
 
 def _safe_route_part(value: str) -> str:
@@ -194,6 +210,61 @@ def _safe_log_values(values: dict[str, object]) -> dict[str, str]:
         else:
             clean[key] = str(value)
     return clean
+
+
+def _is_placeholder_value(value: object) -> bool:
+    return value is None or str(value).strip() in {"", "0", "null", "None"}
+
+
+def _form_values_from_hex(hex_text: str) -> dict[str, str]:
+    try:
+        raw = bytes(int(part, 16) for part in hex_text.split())
+    except ValueError:
+        return {}
+    _, separator, body = raw.partition(b"\r\n\r\n")
+    if not separator:
+        return {}
+    try:
+        query = body.decode("utf-8", errors="replace")
+    except UnicodeDecodeError:
+        return {}
+    return {key: values[-1] if values else "" for key, values in parse_qs(query, keep_blank_values=True).items()}
+
+
+def _latest_upstream_identity() -> dict[str, str]:
+    try:
+        stat = FRIDA_CAPTURE_LOG.stat()
+    except OSError:
+        return {}
+    cached_mtime = float(UPSTREAM_IDENTITY_CACHE.get("mtime") or 0)
+    if stat.st_mtime == cached_mtime:
+        cached = UPSTREAM_IDENTITY_CACHE.get("identity")
+        return dict(cached) if isinstance(cached, dict) else {}
+    identity: dict[str, str] = {}
+    try:
+        lines = FRIDA_CAPTURE_LOG.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except OSError:
+        lines = []
+    for line in reversed(lines[-5000:]):
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        payload = item.get("payload") if isinstance(item, dict) else {}
+        if not isinstance(payload, dict) or payload.get("direction") != "ssl_write":
+            continue
+        values = _form_values_from_hex(str(payload.get("hex") or ""))
+        token = str(values.get("Token") or "").strip()
+        user_id = str(values.get("UserID") or "").strip()
+        device_id = str(values.get("DeviceID") or "").strip()
+        if token and user_id and not _is_placeholder_value(token) and not _is_placeholder_value(user_id):
+            identity = {"Token": token, "UserID": user_id}
+            if device_id and not _is_placeholder_value(device_id):
+                identity["DeviceID"] = device_id
+            break
+    UPSTREAM_IDENTITY_CACHE["mtime"] = stat.st_mtime
+    UPSTREAM_IDENTITY_CACHE["identity"] = identity
+    return dict(identity)
 
 
 def _append_call_log(record: dict[str, object]) -> None:
@@ -464,6 +535,9 @@ def _title_cn_for(spec: dict[str, object], controller: object, action: object) -
     meta_title = _scenario_meta_for(session_id).get("title_cn", "")
     if meta_title:
         return meta_title
+    spec_title = str(spec.get("title_cn", "")).strip()
+    if spec_title:
+        return spec_title
     if session_id in TITLE_CN_BY_SESSION:
         return TITLE_CN_BY_SESSION[session_id]
     return f"{controller}.{action}"
@@ -520,25 +594,35 @@ def _build_scenarios() -> list[dict[str, object]]:
             }
         )
     for name, (host, controller, action) in CORE_API_KEYS.items():
-        if name not in {"five_level", "time_sales"}:
+        if name not in CORE_LOCAL_API_KEYS:
             continue
+        session_id = f"core:{name}"
+        defaults = CORE_LOCAL_TITLES.get(name, {})
+        core_meta = _scenario_meta_for(session_id)
+        method_name = str(defaults.get("method_name") or name)
+        title = core_meta.get("title", f"{controller}.{action}")
+        title_cn = core_meta.get("title_cn", str(defaults.get("title_cn") or f"{controller}.{action}"))
+        maintenance_time = core_meta.get("maintenance_time", CORE_LOCAL_ADDED_TIME)
+        added_time = CORE_LOCAL_ADDED_TIME
+        level = _scenario_level_for(session_id)
         scenarios.append(
             {
-                "session_id": f"core:{name}",
-                "title": f"{controller}.{action}",
-                "title_cn": f"核心接口 {name}",
-                "added_time": DEFAULT_INTERFACE_ADDED_TIME,
-                "maintenance_time": DEFAULT_INTERFACE_ADDED_TIME,
-                "level": "important",
-                "level_label": SCENARIO_LEVELS["important"],
-                "method_name": name,
+                "session_id": session_id,
+                "title": title,
+                "title_cn": title_cn,
+                "added_time": added_time,
+                "maintenance_time": maintenance_time,
+                "level": level,
+                "level_label": SCENARIO_LEVELS[level],
+                "method_name": method_name,
                 "http_method": "GET",
                 "target_url": str(HQSTOCK_LOG),
-                "endpoint": f"/api/core/{name}",
+                "endpoint": f"/api/{method_name}",
                 "alias_endpoint": f"/api/core/{name}",
-                "params": {"StockID": "000620"},
+                "params": dict(defaults.get("params") or {"StockID": "000620"}),
                 "data": {},
                 "host": host,
+                "core_name": name,
                 "is_core": True,
                 "hide_url_fields": [],
             }
@@ -557,6 +641,11 @@ def _refresh_routes() -> None:
     for scenario, spec in zip(SCENARIOS, REQUESTS):
         ROUTES[scenario["endpoint"]] = {"scenario": scenario, "spec": spec}
         ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "spec": spec}
+    for scenario in SCENARIOS[len(REQUESTS) :]:
+        if not scenario.get("is_core"):
+            continue
+        ROUTES[scenario["endpoint"]] = {"scenario": scenario, "core_name": scenario.get("core_name")}
+        ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "core_name": scenario.get("core_name")}
 
 
 _refresh_routes()
@@ -694,6 +783,9 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             body_values = self._read_body_values()
             overrides = {**query_values, **body_values}
             overrides.pop("_ts", None)
+            if route.get("core_name"):
+                self._call_core_scene(user, route["scenario"], str(route["core_name"]), overrides)
+                return
             self._call_scene(user, route["scenario"], route["spec"], overrides)
             return
 
@@ -706,21 +798,22 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         client.session.trust_env = False
         data = dict(spec.get("data") or {})
         params = dict(spec.get("params") or {})
-        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID")
-        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN")
-        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID")
-        if upstream_user_id and data.get("UserID") in {None, "", "0"}:
-            data["UserID"] = upstream_user_id
-        if upstream_token and data.get("Token") in {None, "", "0"}:
-            data["Token"] = upstream_token
-        if upstream_device_id and data.get("DeviceID") in {None, "", "0"}:
-            data["DeviceID"] = upstream_device_id
+        captured_identity = _latest_upstream_identity()
+        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
+        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
+        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
 
         for key, value in overrides.items():
             if key in params and key not in data:
                 params[key] = value
             else:
                 data[key] = value
+        if upstream_user_id and _is_placeholder_value(data.get("UserID")):
+            data["UserID"] = upstream_user_id
+        if upstream_token and _is_placeholder_value(data.get("Token")):
+            data["Token"] = upstream_token
+        if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
+            data["DeviceID"] = upstream_device_id
         params["_ts"] = str(int(requested_at * 1000))
 
         try:
@@ -958,18 +1051,31 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             else:
                 meta["level"] = level
                 SCENARIO_LEVEL_DATA[session_id] = level
-            spec = next(item for item in REQUESTS if str(item.get("session_id")) == session_id)
-            spec_params = spec.get("params") or {}
-            spec_data = spec.get("data") or {}
-            default_maintenance_time = _interface_added_time_for(spec)
-            default_controller = spec_data.get("c") or spec_params.get("c") or "request"
-            default_action = spec_data.get("a") or spec_params.get("a") or spec.get("session_id")
-            default_title = f"{default_controller}.{default_action}"
+            spec = next((item for item in REQUESTS if str(item.get("session_id")) == session_id), None)
+            if spec is None:
+                core_name = session_id.split(":", 1)[1] if session_id.startswith("core:") else ""
+                if core_name in CORE_API_KEYS:
+                    _, default_controller, default_action = CORE_API_KEYS[core_name]
+                    default_maintenance_time = CORE_LOCAL_ADDED_TIME
+                    default_title = f"{default_controller}.{default_action}"
+                    default_title_cn = str(CORE_LOCAL_TITLES.get(core_name, {}).get("title_cn", ""))
+                else:
+                    default_maintenance_time = str(current.get("added_time") or CORE_LOCAL_ADDED_TIME)
+                    default_title = str(current.get("title") or "")
+                    default_title_cn = str(current.get("title_cn") or "")
+            else:
+                spec_params = spec.get("params") or {}
+                spec_data = spec.get("data") or {}
+                default_maintenance_time = _interface_added_time_for(spec)
+                default_controller = spec_data.get("c") or spec_params.get("c") or "request"
+                default_action = spec_data.get("a") or spec_params.get("a") or spec.get("session_id")
+                default_title = f"{default_controller}.{default_action}"
+                default_title_cn = str(spec.get("title_cn") or TITLE_CN_BY_SESSION.get(session_id, ""))
             if title == default_title:
                 meta.pop("title", None)
             else:
                 meta["title"] = title
-            if title_cn == TITLE_CN_BY_SESSION.get(session_id, ""):
+            if title_cn == default_title_cn:
                 meta.pop("title_cn", None)
             else:
                 meta["title_cn"] = title_cn
@@ -1143,11 +1249,17 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
         body_values = self._read_body_values()
         values = {**query_values, **body_values}
+        default_code = "2015" if name == "five_level" else "2006"
         stock_id = normalize_stock_id(
-            str(values.get("StockID") or values.get("stock_id") or values.get("stock") or "")
+            str(
+                values.get("StockID")
+                or values.get("stock_id")
+                or values.get("stock")
+                or latest_stock_for_code(default_code)
+            )
         )
         if not stock_id:
-            self._send_json({"error": "missing_stock_id", "message": "Pass StockID=000620"}, status=400)
+            self._send_json({"error": "missing_stock_id", "message": "Pass StockID=688008"}, status=400)
             return
 
         requested_at = time.time()
@@ -1196,6 +1308,90 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
         self._send_json({"requested_at": requested_at, "body": result})
 
+    def _call_core_scene(
+        self,
+        user: dict[str, object],
+        scenario: dict[str, object],
+        name: str,
+        overrides: dict[str, str],
+    ) -> None:
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        host, controller, action = CORE_API_KEYS[name]
+        packet_code_for_default = "2015" if name == "five_level" else "2006"
+        stock_id = normalize_stock_id(
+            str(
+                overrides.get("StockID")
+                or overrides.get("stock_id")
+                or overrides.get("stock")
+                or latest_stock_for_code(packet_code_for_default)
+            )
+        )
+        if not stock_id:
+            self._send_json({"error": "missing_stock_id", "message": "Pass StockID=688008"}, status=400)
+            return
+        if name == "five_level":
+            result = latest_five_level(stock_id)
+            packet_code = "2015"
+            not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
+        elif name == "time_sales":
+            try:
+                limit = max(1, min(1000, int(overrides.get("limit", "100"))))
+            except ValueError:
+                limit = 100
+            result = latest_time_sales(stock_id, limit=limit)
+            packet_code = "2006"
+            not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
+        else:
+            self._send_json({"error": "not_found", "message": f"unknown local core api: {name}"}, status=404)
+            return
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": scenario.get("session_id", f"core:{name}"),
+                "title": scenario.get("title", f"{controller}.{action}"),
+                "title_cn": scenario.get("title_cn", ""),
+                "endpoint": scenario.get("endpoint", f"/api/core/{name}"),
+                "target_url": scenario.get("target_url", str(HQSTOCK_LOG)),
+                "http_method": self.command,
+                "status": "ok" if result else "not_found",
+                "status_code": 200 if result else 404,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(overrides),
+            }
+        )
+        if not result:
+            self._send_json(
+                {
+                    "error": "not_found",
+                    "message": not_found_message,
+                    "stock": stock_id,
+                    "log": str(HQSTOCK_LOG),
+                    "hint": "Start Frida capture and open the stock quote page before calling this API.",
+                },
+                status=404,
+            )
+            return
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "status_code": 200,
+                "content_type": "application/json",
+                "upstream_url": str(HQSTOCK_LOG),
+                "core_api": {
+                    "name": name,
+                    "host": host,
+                    "controller": controller,
+                    "action": action,
+                    "packet_code": packet_code,
+                },
+                "body": result,
+            }
+        )
+
     def _handle_core_api(self, user: dict[str, object], path: str) -> None:
         if self.command not in {"GET", "POST"}:
             self._send_json({"error": "method_not_allowed"}, status=405)
@@ -1233,70 +1429,17 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         host, controller, action = CORE_API_KEYS[name]
         if name in CORE_LOCAL_API_KEYS:
-            stock_id = normalize_stock_id(
-                str(overrides.get("StockID") or overrides.get("stock_id") or overrides.get("stock") or "")
-            )
-            if not stock_id:
-                self._send_json({"error": "missing_stock_id", "message": "Pass StockID=000620"}, status=400)
-                return
-            if name == "five_level":
-                result = latest_five_level(stock_id)
-                packet_code = "2015"
-                not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
-            else:
-                try:
-                    limit = max(1, min(1000, int(overrides.get("limit", "100"))))
-                except ValueError:
-                    limit = 100
-                result = latest_time_sales(stock_id, limit=limit)
-                packet_code = "2006"
-                not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
-            _append_call_log(
+            scenario = next(
+                (item for item in SCENARIOS if item.get("core_name") == name),
                 {
-                    "requested_at": requested_at,
-                    "requested_at_text": started_iso,
-                    "username": user.get("username", ""),
-                    "role": user.get("role", ""),
                     "session_id": f"core:{name}",
                     "title": f"{controller}.{action}",
-                    "title_cn": f"核心接口 {name}",
+                    "title_cn": CORE_LOCAL_TITLES.get(name, {}).get("title_cn", ""),
                     "endpoint": f"/api/core/{name}",
                     "target_url": str(HQSTOCK_LOG),
-                    "http_method": self.command,
-                    "status": "ok" if result else "not_found",
-                    "status_code": 200 if result else 404,
-                    "duration_ms": int((time.time() - requested_at) * 1000),
-                    "overrides": _safe_log_values(overrides),
-                }
+                },
             )
-            if not result:
-                self._send_json(
-                    {
-                        "error": "not_found",
-                        "message": not_found_message,
-                        "stock": stock_id,
-                        "log": str(HQSTOCK_LOG),
-                        "hint": "Start Frida capture and open the stock quote page before calling this API.",
-                    },
-                    status=404,
-                )
-                return
-            self._send_json(
-                {
-                    "requested_at": requested_at,
-                    "status_code": 200,
-                    "content_type": "application/json",
-                    "upstream_url": str(HQSTOCK_LOG),
-                    "core_api": {
-                        "name": name,
-                        "host": host,
-                        "controller": controller,
-                        "action": action,
-                        "packet_code": packet_code,
-                    },
-                    "body": result,
-                }
-            )
+            self._call_core_scene(user, scenario, name, overrides)
             return
 
         client = KaipanlaCoreClient()

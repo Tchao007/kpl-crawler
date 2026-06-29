@@ -5462,6 +5462,486 @@ BUSINESSGROUP_GROUPLOG_GID999_18284 = {
 }
 
 
+STOCKF10BASIC_GETCOMPANYINFO_FRIDA_18292 = {
+    'session_id': '18292',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-F10公司信息',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetCompanyInfo', 'c': 'StockF10Basic', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44', 'StockID': '688008'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+STOCKF10BASIC_GETCONCEPTJXBKW23_FRIDA_18293 = {
+    'session_id': '18293',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-F10概念解析',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetConceptJXBKw23', 'c': 'StockF10Basic', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44', 'StockID': '688008'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+STOCKF10BASIC_GETFINANCEINFO_FRIDA_18294 = {
+    'session_id': '18294',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-F10财务信息',
+    'method': 'POST',
+    'url': 'https://apparticle.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetFinanceInfo', 'c': 'StockF10Basic', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'DL': '0', 'apiv': 'w44', 'Type': '0', 'StockID': '688008', 'State': '1'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+HISHOMEDINGPAN_GETNUM_FRIDA_18295 = {
+    'session_id': '18295',
+    'added_time': '2026-06-29',
+    'title_cn': '行情历史-盯盘数量',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetNum', 'c': 'HisHomeDingPan', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Is_st': '1', 'apiv': 'w44', 'FilterMotherboard': '0', 'Filter': '0', 'FilterTIB': '0', 'Day': '2026-06-26', 'FilterGem': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+YIDIANCANGWEI_GETGUDONG_FRIDA_18296 = {
+    'session_id': '18296',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-股东信息',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetGuDong', 'c': 'YiDianCangWei', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44', 'Type': '2', 'StockID': '688008'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+YIDONGKANPAN_GETHOLIDAY_FRIDA_18297 = {
+    'session_id': '18297',
+    'added_time': '2026-06-29',
+    'title_cn': '行情历史-交易日历',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetHoliday', 'apiv': 'w44', 'c': 'YiDongKanPan', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+CONCEPTIONPOINT_GETPOINT_FRIDA_18298 = {
+    'session_id': '18298',
+    'added_time': '2026-06-29',
+    'title_cn': '题材板块-观点信息',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetPoint', 'c': 'ConceptionPoint', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+CONCEPTIONPOINT_ZHIBOCONTENT_FRIDA_18299 = {
+    'session_id': '18299',
+    'added_time': '2026-06-29',
+    'title_cn': '题材板块-直播内容',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'ZhiBoContent', 'c': 'ConceptionPoint', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'index': '0', 'apiv': 'w44'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+GLOBALINDEX_GETSEARCHLIST_FRIDA_18300 = {
+    'session_id': '18300',
+    'added_time': '2026-06-29',
+    'title_cn': '全球指数-搜索列表',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetSearchList', 'c': 'GlobalIndex', 'IndicesFuturesTime': '1730860824', 'CommoditiesTime': '1769564192', 'PhoneOSNew': '1', 'CurrenciesTime': '1730860824', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0', 'USTime': '1782740260', 'IndicesTime': '1730860824', 'apiv': 'w44', 'Type': '1,2,3,4,5,6', 'HKTime': '1782739373', 'UserID': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+GLOBALINDEX_GLOBALCOMMON_FRIDA_18301 = {
+    'session_id': '18301',
+    'added_time': '2026-06-29',
+    'title_cn': '全球指数-通用数据',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GlobalCommon', 'apiv': 'w44', 'c': 'GlobalIndex', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0', 'View': '1,2,3,4,5,6'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+INDEX_GETRQZ_DATA_FRIDA_18302 = {
+    'session_id': '18302',
+    'added_time': '2026-06-29',
+    'title_cn': '首页指数-人气值数据',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetRQZ_Data', 'apiv': 'w44', 'c': 'Index', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+MARKETMOOD_MOODNUMCOUNT_FRIDA_18303 = {
+    'session_id': '18303',
+    'added_time': '2026-06-29',
+    'title_cn': '市场情绪-情绪数量统计',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'MoodNumCount', 'c': 'MarketMood', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+STOCKL2DATA_GETSTOCKDUIDAOTRENDINCREMENTAL_FRIDA_18304 = {
+    'session_id': '18304',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-堆道走势增量',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetStockDuiDaoTrendIncremental', 'UserID': '0', 'apiv': 'w44', 'c': 'StockL2Data', 'VerSion': '5.23.0.4', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'StockID': '688008', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+STOCKL2DATA_GETZSTREND_FRIDA_18305 = {
+    'session_id': '18305',
+    'added_time': '2026-06-29',
+    'title_cn': '行情核心-指数走势',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetZsTrend', 'c': 'StockL2Data', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'apiv': 'w44', 'StockID': 'SH000001'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+STOCKYIDONGKANPAN_STOCKMAINMONITOR_FRIDA_18306 = {
+    'session_id': '18306',
+    'added_time': '2026-06-29',
+    'title_cn': '个股详情-主力监控',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'Order': '0', 'a': 'StockMainMonitor', 'st': '30', 'c': 'StockYiDongKanPan', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0', 'Index': '0', 'apiv': 'w44', 'Type': '1', 'StockID': '688008', 'UserID': '0', 'Sort': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+ZHISHURANKING_PLATETCCONFIG_FRIDA_18307 = {
+    'session_id': '18307',
+    'added_time': '2026-06-29',
+    'title_cn': '指数排行-板块弹窗配置',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'PlateTCConfig', 'apiv': 'w44', 'c': 'ZhiShuRanking', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+LEADINGTIMESOPTION_GETFENSHIKLINECOMMONOPTION_FRIDA_18308 = {
+    'session_id': '18308',
+    'added_time': '2026-06-29',
+    'title_cn': '领先次数-分时K线公共配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetFenShiKLineCommonOption', 'apiv': 'w44', 'c': 'LeadingTimesOption', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+LEADINGTIMESOPTION_GETUSERLEADINGTIMESOPTION_FRIDA_18309 = {
+    'session_id': '18309',
+    'added_time': '2026-06-29',
+    'title_cn': '领先次数-用户配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetUserLeadingTimesOption', 'apiv': 'w44', 'c': 'LeadingTimesOption', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+LOG_LOGSTATE_FRIDA_18310 = {
+    'session_id': '18310',
+    'added_time': '2026-06-29',
+    'title_cn': '用户日志-状态上报',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'LogState', 'apiv': 'w44', 'c': 'Log', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+LONGHUBANG_BEIJIAOSUOGET_FRIDA_18311 = {
+    'session_id': '18311',
+    'added_time': '2026-06-29',
+    'title_cn': '龙虎榜-北交所数据',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'BeiJiaoSuoGet', 'apiv': 'w44', 'BJMD5': '7a1fa16633ab1c94d8f0a357f0d2044d', 'c': 'LongHuBang', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PAIHANGBANGOPTION_GETCONVERTIBLEBONDSSTOCKOPTION_FRIDA_18312 = {
+    'session_id': '18312',
+    'added_time': '2026-06-29',
+    'title_cn': '排行榜配置-可转债股票选项',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetConvertibleBondsStockOption', 'apiv': 'w44', 'Type': '0', 'c': 'PaiHangBangOption', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PAIHANGBANGOPTION_GETUSEROPTIONB_FRIDA_18313 = {
+    'session_id': '18313',
+    'added_time': '2026-06-29',
+    'title_cn': '排行榜配置-用户选项B',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetUserOptionB', 'apiv': 'w44', 'c': 'PaiHangBangOption', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PAIHANGBANGOPTION_GETUSEROPTIONC_FRIDA_18314 = {
+    'session_id': '18314',
+    'added_time': '2026-06-29',
+    'title_cn': '排行榜配置-用户选项C',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetUserOptionC', 'apiv': 'w44', 'c': 'PaiHangBangOption', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PAIHANGBANGOPTION_STOCKMARKETVALUESCREENINGOPTION_FRIDA_18315 = {
+    'session_id': '18315',
+    'added_time': '2026-06-29',
+    'title_cn': '排行榜配置-市值筛选选项',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'StocKMarketValueScreeningOption', 'apiv': 'w44', 'c': 'PaiHangBangOption', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PUSH_ACTIVEPUSHMESSAGEALL_FRIDA_18316 = {
+    'session_id': '18316',
+    'added_time': '2026-06-29',
+    'title_cn': '推送-激活全部消息',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'ActivePushMessageAll', 'apiv': 'w44', 'c': 'Push', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PUSH_DEVICETOKEN_FRIDA_18317 = {
+    'session_id': '18317',
+    'added_time': '2026-06-29',
+    'title_cn': '推送-设备Token上报',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'DeviceToken', 'c': 'Push', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'PhoneOS': '2', 'Token': '0', 'apiv': 'w44', 'TokenType': '3', 'Version': '5.23.0.4', 'DeviceToken': 'f17af21a225845080c162d6d2b864edc', 'UserID': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+PUSH_GETNEWPUSHMESSAGEALL_FRIDA_18318 = {
+    'session_id': '18318',
+    'added_time': '2026-06-29',
+    'title_cn': '推送-最新消息',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetNewPushMessageAll', 'apiv': 'w44', 'c': 'Push', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SEARCH_FUNCLIST_FRIDA_18319 = {
+    'session_id': '18319',
+    'added_time': '2026-06-29',
+    'title_cn': '搜索-功能列表',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'FuncList', 'apiv': 'w44', 'c': 'Search', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SINGLESTOCKNOTIFY_GETSTOCKNOTIFY_FRIDA_18320 = {
+    'session_id': '18320',
+    'added_time': '2026-06-29',
+    'title_cn': '个股提醒-提醒配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetStockNotify', 'c': 'SingleStockNotify', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0', 'apiv': 'w44', 'StockID': '000988', 'UserID': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSAPPVERSION_ADVGUIDE_FRIDA_18321 = {
+    'session_id': '18321',
+    'added_time': '2026-06-29',
+    'title_cn': '系统版本-引导配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'AdvGuide', 'apiv': 'w44', 'c': 'SysAppVersion', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSAPPVERSION_ARTICLESHAREURL_FRIDA_18322 = {
+    'session_id': '18322',
+    'added_time': '2026-06-29',
+    'title_cn': '系统版本-文章分享地址',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'ArticleShareUrl', 'apiv': 'w44', 'c': 'SysAppVersion', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSAPPVERSION_GETSEARCHSORT_FRIDA_18323 = {
+    'session_id': '18323',
+    'added_time': '2026-06-29',
+    'title_cn': '系统版本-搜索排序',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetSearchSort', 'apiv': 'w44', 'c': 'SysAppVersion', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSAPPVERSION_GETSERVERINFO_FRIDA_18324 = {
+    'session_id': '18324',
+    'added_time': '2026-06-29',
+    'title_cn': '系统版本-服务端配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetServerInfo', 'apiv': 'w44', 'c': 'SysAppVersion', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSTEM_FOCUSFUNGET_FRIDA_18325 = {
+    'session_id': '18325',
+    'added_time': '2026-06-29',
+    'title_cn': '系统配置-关注功能',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'FocusFunGet', 'apiv': 'w44', 'c': 'System', 'PhoneOSNew': '1', 'FWebID': '4', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSTEM_FUNLAYOUTGET_FRIDA_18326 = {
+    'session_id': '18326',
+    'added_time': '2026-06-29',
+    'title_cn': '系统配置-功能布局',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'FunLayoutGet', 'apiv': 'w44', 'c': 'System', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+SYSTEM_ONESWITCH_FRIDA_18327 = {
+    'session_id': '18327',
+    'added_time': '2026-06-29',
+    'title_cn': '系统配置-单项开关',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'OneSwitch', 'apiv': 'w44', 'c': 'System', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0', 'Key': 'Dadan_kai'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+USERINFO_GETBROWSECOUNTS_FRIDA_18328 = {
+    'session_id': '18328',
+    'added_time': '2026-06-29',
+    'title_cn': '用户信息-浏览统计',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetBrowseCounts', 'apiv': 'w44', 'c': 'UserInfo', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+USERINFO_GETINFO_FRIDA_18329 = {
+    'session_id': '18329',
+    'added_time': '2026-06-29',
+    'title_cn': '用户信息-账号信息',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'GetInfo', 'apiv': 'w44', 'c': 'UserInfo', 'EncryptType': 'RSA', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+USERINFO_MESSAGEGET_FRIDA_18330 = {
+    'session_id': '18330',
+    'added_time': '2026-06-29',
+    'title_cn': '用户信息-消息中心',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'MessageGet', 'apiv': 'w44', 'c': 'UserInfo', 'PhoneOSNew': '1', 'UserID': '0', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Token': '0'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
+DATASTATISTICS_CALDEVICEINFO_FRIDA_18331 = {
+    'session_id': '18331',
+    'added_time': '2026-06-29',
+    'title_cn': '埋点统计-设备信息',
+    'method': 'POST',
+    'url': 'https://applog.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {'a': 'CalDeviceInfo', 'Fingerprint': 'samsung/z3qksx/z3q:7.1.2/NRD90M/700250224:user/release-keys', 'c': 'DataStatistics', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'Device': 'z3q', 'VerSion': '5.23.0.4', 'Product': 'z3qksx', 'Token': '0', 'Brand': 'samsung', 'apiv': 'w44', 'UserID': '0', 'Manufacturer': 'samsung', 'SDK': '25', 'GTResult': '0', 'Display': 'z3qksx-user 7.1.2 NRD90M 700250224 release-keys'},
+    'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
+}
+
+
 REQUESTS = [
     USERINFO_APPNEWS,
     THEME_INFOGR,
@@ -5680,6 +6160,46 @@ REQUESTS = [
     BUSINESSGROUP_GROUPLOG_GID93_18283,
     BUSINESSGROUP_GROUPINFO_GID999_18271,
     BUSINESSGROUP_GROUPLOG_GID999_18284,
+    STOCKF10BASIC_GETCOMPANYINFO_FRIDA_18292,
+    STOCKF10BASIC_GETCONCEPTJXBKW23_FRIDA_18293,
+    STOCKF10BASIC_GETFINANCEINFO_FRIDA_18294,
+    HISHOMEDINGPAN_GETNUM_FRIDA_18295,
+    YIDIANCANGWEI_GETGUDONG_FRIDA_18296,
+    YIDONGKANPAN_GETHOLIDAY_FRIDA_18297,
+    CONCEPTIONPOINT_GETPOINT_FRIDA_18298,
+    CONCEPTIONPOINT_ZHIBOCONTENT_FRIDA_18299,
+    GLOBALINDEX_GETSEARCHLIST_FRIDA_18300,
+    GLOBALINDEX_GLOBALCOMMON_FRIDA_18301,
+    INDEX_GETRQZ_DATA_FRIDA_18302,
+    MARKETMOOD_MOODNUMCOUNT_FRIDA_18303,
+    STOCKL2DATA_GETSTOCKDUIDAOTRENDINCREMENTAL_FRIDA_18304,
+    STOCKL2DATA_GETZSTREND_FRIDA_18305,
+    STOCKYIDONGKANPAN_STOCKMAINMONITOR_FRIDA_18306,
+    ZHISHURANKING_PLATETCCONFIG_FRIDA_18307,
+    LEADINGTIMESOPTION_GETFENSHIKLINECOMMONOPTION_FRIDA_18308,
+    LEADINGTIMESOPTION_GETUSERLEADINGTIMESOPTION_FRIDA_18309,
+    LOG_LOGSTATE_FRIDA_18310,
+    LONGHUBANG_BEIJIAOSUOGET_FRIDA_18311,
+    PAIHANGBANGOPTION_GETCONVERTIBLEBONDSSTOCKOPTION_FRIDA_18312,
+    PAIHANGBANGOPTION_GETUSEROPTIONB_FRIDA_18313,
+    PAIHANGBANGOPTION_GETUSEROPTIONC_FRIDA_18314,
+    PAIHANGBANGOPTION_STOCKMARKETVALUESCREENINGOPTION_FRIDA_18315,
+    PUSH_ACTIVEPUSHMESSAGEALL_FRIDA_18316,
+    PUSH_DEVICETOKEN_FRIDA_18317,
+    PUSH_GETNEWPUSHMESSAGEALL_FRIDA_18318,
+    SEARCH_FUNCLIST_FRIDA_18319,
+    SINGLESTOCKNOTIFY_GETSTOCKNOTIFY_FRIDA_18320,
+    SYSAPPVERSION_ADVGUIDE_FRIDA_18321,
+    SYSAPPVERSION_ARTICLESHAREURL_FRIDA_18322,
+    SYSAPPVERSION_GETSEARCHSORT_FRIDA_18323,
+    SYSAPPVERSION_GETSERVERINFO_FRIDA_18324,
+    SYSTEM_FOCUSFUNGET_FRIDA_18325,
+    SYSTEM_FUNLAYOUTGET_FRIDA_18326,
+    SYSTEM_ONESWITCH_FRIDA_18327,
+    USERINFO_GETBROWSECOUNTS_FRIDA_18328,
+    USERINFO_GETINFO_FRIDA_18329,
+    USERINFO_MESSAGEGET_FRIDA_18330,
+    DATASTATISTICS_CALDEVICEINFO_FRIDA_18331,
 ]
 
 
@@ -7225,6 +7745,362 @@ class KaipanlaCapturedClient:
             data['st'] = str(st)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(ZHISHURANKING_REALRANKINGINFO_HISTORY_18286, data=data)
+
+    def stockf10basic_getcompanyinfo_frida_18292(self, stockid=None, **overrides):
+        """Replay session 18292: StockF10Basic.GetCompanyInfo."""
+        data = dict(STOCKF10BASIC_GETCOMPANYINFO_FRIDA_18292['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKF10BASIC_GETCOMPANYINFO_FRIDA_18292, data=data)
+
+    def stockf10basic_getconceptjxbkw23_frida_18293(self, stockid=None, **overrides):
+        """Replay session 18293: StockF10Basic.GetConceptJXBKw23."""
+        data = dict(STOCKF10BASIC_GETCONCEPTJXBKW23_FRIDA_18293['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKF10BASIC_GETCONCEPTJXBKW23_FRIDA_18293, data=data)
+
+    def stockf10basic_getfinanceinfo_frida_18294(self, dl=None, type=None, stockid=None, state=None, **overrides):
+        """Replay session 18294: StockF10Basic.GetFinanceInfo."""
+        data = dict(STOCKF10BASIC_GETFINANCEINFO_FRIDA_18294['data'])
+        if dl is not None:
+            data['DL'] = str(dl)
+        if type is not None:
+            data['Type'] = str(type)
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if state is not None:
+            data['State'] = str(state)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKF10BASIC_GETFINANCEINFO_FRIDA_18294, data=data)
+
+    def hishomedingpan_getnum_frida_18295(self, is_st=None, filtermotherboard=None, filter=None, filtertib=None, day=None, filtergem=None, **overrides):
+        """Replay session 18295: HisHomeDingPan.GetNum."""
+        data = dict(HISHOMEDINGPAN_GETNUM_FRIDA_18295['data'])
+        if is_st is not None:
+            data['Is_st'] = str(is_st)
+        if filtermotherboard is not None:
+            data['FilterMotherboard'] = str(filtermotherboard)
+        if filter is not None:
+            data['Filter'] = str(filter)
+        if filtertib is not None:
+            data['FilterTIB'] = str(filtertib)
+        if day is not None:
+            data['Day'] = str(day)
+        if filtergem is not None:
+            data['FilterGem'] = str(filtergem)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(HISHOMEDINGPAN_GETNUM_FRIDA_18295, data=data)
+
+    def yidiancangwei_getgudong_frida_18296(self, type=None, stockid=None, **overrides):
+        """Replay session 18296: YiDianCangWei.GetGuDong."""
+        data = dict(YIDIANCANGWEI_GETGUDONG_FRIDA_18296['data'])
+        if type is not None:
+            data['Type'] = str(type)
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(YIDIANCANGWEI_GETGUDONG_FRIDA_18296, data=data)
+
+    def yidongkanpan_getholiday_frida_18297(self, **overrides):
+        """Replay session 18297: YiDongKanPan.GetHoliday."""
+        data = dict(YIDONGKANPAN_GETHOLIDAY_FRIDA_18297['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(YIDONGKANPAN_GETHOLIDAY_FRIDA_18297, data=data)
+
+    def conceptionpoint_getpoint_frida_18298(self, **overrides):
+        """Replay session 18298: ConceptionPoint.GetPoint."""
+        data = dict(CONCEPTIONPOINT_GETPOINT_FRIDA_18298['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(CONCEPTIONPOINT_GETPOINT_FRIDA_18298, data=data)
+
+    def conceptionpoint_zhibocontent_frida_18299(self, index=None, **overrides):
+        """Replay session 18299: ConceptionPoint.ZhiBoContent."""
+        data = dict(CONCEPTIONPOINT_ZHIBOCONTENT_FRIDA_18299['data'])
+        if index is not None:
+            data['index'] = str(index)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(CONCEPTIONPOINT_ZHIBOCONTENT_FRIDA_18299, data=data)
+
+    def globalindex_getsearchlist_frida_18300(self, indicesfuturestime=None, commoditiestime=None, currenciestime=None, ustime=None, indicestime=None, type=None, hktime=None, **overrides):
+        """Replay session 18300: GlobalIndex.GetSearchList."""
+        data = dict(GLOBALINDEX_GETSEARCHLIST_FRIDA_18300['data'])
+        if indicesfuturestime is not None:
+            data['IndicesFuturesTime'] = str(indicesfuturestime)
+        if commoditiestime is not None:
+            data['CommoditiesTime'] = str(commoditiestime)
+        if currenciestime is not None:
+            data['CurrenciesTime'] = str(currenciestime)
+        if ustime is not None:
+            data['USTime'] = str(ustime)
+        if indicestime is not None:
+            data['IndicesTime'] = str(indicestime)
+        if type is not None:
+            data['Type'] = str(type)
+        if hktime is not None:
+            data['HKTime'] = str(hktime)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(GLOBALINDEX_GETSEARCHLIST_FRIDA_18300, data=data)
+
+    def globalindex_globalcommon_frida_18301(self, view=None, **overrides):
+        """Replay session 18301: GlobalIndex.GlobalCommon."""
+        data = dict(GLOBALINDEX_GLOBALCOMMON_FRIDA_18301['data'])
+        if view is not None:
+            data['View'] = str(view)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(GLOBALINDEX_GLOBALCOMMON_FRIDA_18301, data=data)
+
+    def index_getrqz_data_frida_18302(self, **overrides):
+        """Replay session 18302: Index.GetRQZ_Data."""
+        data = dict(INDEX_GETRQZ_DATA_FRIDA_18302['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(INDEX_GETRQZ_DATA_FRIDA_18302, data=data)
+
+    def marketmood_moodnumcount_frida_18303(self, **overrides):
+        """Replay session 18303: MarketMood.MoodNumCount."""
+        data = dict(MARKETMOOD_MOODNUMCOUNT_FRIDA_18303['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(MARKETMOOD_MOODNUMCOUNT_FRIDA_18303, data=data)
+
+    def stockl2data_getstockduidaotrendincremental_frida_18304(self, stockid=None, **overrides):
+        """Replay session 18304: StockL2Data.GetStockDuiDaoTrendIncremental."""
+        data = dict(STOCKL2DATA_GETSTOCKDUIDAOTRENDINCREMENTAL_FRIDA_18304['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2DATA_GETSTOCKDUIDAOTRENDINCREMENTAL_FRIDA_18304, data=data)
+
+    def stockl2data_getzstrend_frida_18305(self, stockid=None, **overrides):
+        """Replay session 18305: StockL2Data.GetZsTrend."""
+        data = dict(STOCKL2DATA_GETZSTREND_FRIDA_18305['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2DATA_GETZSTREND_FRIDA_18305, data=data)
+
+    def stockyidongkanpan_stockmainmonitor_frida_18306(self, order=None, st=None, index=None, type=None, stockid=None, sort=None, **overrides):
+        """Replay session 18306: StockYiDongKanPan.StockMainMonitor."""
+        data = dict(STOCKYIDONGKANPAN_STOCKMAINMONITOR_FRIDA_18306['data'])
+        if order is not None:
+            data['Order'] = str(order)
+        if st is not None:
+            data['st'] = str(st)
+        if index is not None:
+            data['Index'] = str(index)
+        if type is not None:
+            data['Type'] = str(type)
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if sort is not None:
+            data['Sort'] = str(sort)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKYIDONGKANPAN_STOCKMAINMONITOR_FRIDA_18306, data=data)
+
+    def zhishuranking_platetcconfig_frida_18307(self, **overrides):
+        """Replay session 18307: ZhiShuRanking.PlateTCConfig."""
+        data = dict(ZHISHURANKING_PLATETCCONFIG_FRIDA_18307['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(ZHISHURANKING_PLATETCCONFIG_FRIDA_18307, data=data)
+
+    def leadingtimesoption_getfenshiklinecommonoption_frida_18308(self, **overrides):
+        """Replay session 18308: LeadingTimesOption.GetFenShiKLineCommonOption."""
+        data = dict(LEADINGTIMESOPTION_GETFENSHIKLINECOMMONOPTION_FRIDA_18308['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LEADINGTIMESOPTION_GETFENSHIKLINECOMMONOPTION_FRIDA_18308, data=data)
+
+    def leadingtimesoption_getuserleadingtimesoption_frida_18309(self, **overrides):
+        """Replay session 18309: LeadingTimesOption.GetUserLeadingTimesOption."""
+        data = dict(LEADINGTIMESOPTION_GETUSERLEADINGTIMESOPTION_FRIDA_18309['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LEADINGTIMESOPTION_GETUSERLEADINGTIMESOPTION_FRIDA_18309, data=data)
+
+    def log_logstate_frida_18310(self, **overrides):
+        """Replay session 18310: Log.LogState."""
+        data = dict(LOG_LOGSTATE_FRIDA_18310['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LOG_LOGSTATE_FRIDA_18310, data=data)
+
+    def longhubang_beijiaosuoget_frida_18311(self, bjmd5=None, **overrides):
+        """Replay session 18311: LongHuBang.BeiJiaoSuoGet."""
+        data = dict(LONGHUBANG_BEIJIAOSUOGET_FRIDA_18311['data'])
+        if bjmd5 is not None:
+            data['BJMD5'] = str(bjmd5)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(LONGHUBANG_BEIJIAOSUOGET_FRIDA_18311, data=data)
+
+    def paihangbangoption_getconvertiblebondsstockoption_frida_18312(self, type=None, **overrides):
+        """Replay session 18312: PaiHangBangOption.GetConvertibleBondsStockOption."""
+        data = dict(PAIHANGBANGOPTION_GETCONVERTIBLEBONDSSTOCKOPTION_FRIDA_18312['data'])
+        if type is not None:
+            data['Type'] = str(type)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAIHANGBANGOPTION_GETCONVERTIBLEBONDSSTOCKOPTION_FRIDA_18312, data=data)
+
+    def paihangbangoption_getuseroptionb_frida_18313(self, **overrides):
+        """Replay session 18313: PaiHangBangOption.GetUserOptionB."""
+        data = dict(PAIHANGBANGOPTION_GETUSEROPTIONB_FRIDA_18313['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAIHANGBANGOPTION_GETUSEROPTIONB_FRIDA_18313, data=data)
+
+    def paihangbangoption_getuseroptionc_frida_18314(self, **overrides):
+        """Replay session 18314: PaiHangBangOption.GetUserOptionC."""
+        data = dict(PAIHANGBANGOPTION_GETUSEROPTIONC_FRIDA_18314['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAIHANGBANGOPTION_GETUSEROPTIONC_FRIDA_18314, data=data)
+
+    def paihangbangoption_stockmarketvaluescreeningoption_frida_18315(self, **overrides):
+        """Replay session 18315: PaiHangBangOption.StocKMarketValueScreeningOption."""
+        data = dict(PAIHANGBANGOPTION_STOCKMARKETVALUESCREENINGOPTION_FRIDA_18315['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAIHANGBANGOPTION_STOCKMARKETVALUESCREENINGOPTION_FRIDA_18315, data=data)
+
+    def push_activepushmessageall_frida_18316(self, **overrides):
+        """Replay session 18316: Push.ActivePushMessageAll."""
+        data = dict(PUSH_ACTIVEPUSHMESSAGEALL_FRIDA_18316['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PUSH_ACTIVEPUSHMESSAGEALL_FRIDA_18316, data=data)
+
+    def push_devicetoken_frida_18317(self, tokentype=None, devicetoken=None, **overrides):
+        """Replay session 18317: Push.DeviceToken."""
+        data = dict(PUSH_DEVICETOKEN_FRIDA_18317['data'])
+        if tokentype is not None:
+            data['TokenType'] = str(tokentype)
+        if devicetoken is not None:
+            data['DeviceToken'] = str(devicetoken)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PUSH_DEVICETOKEN_FRIDA_18317, data=data)
+
+    def push_getnewpushmessageall_frida_18318(self, **overrides):
+        """Replay session 18318: Push.GetNewPushMessageAll."""
+        data = dict(PUSH_GETNEWPUSHMESSAGEALL_FRIDA_18318['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PUSH_GETNEWPUSHMESSAGEALL_FRIDA_18318, data=data)
+
+    def search_funclist_frida_18319(self, **overrides):
+        """Replay session 18319: Search.FuncList."""
+        data = dict(SEARCH_FUNCLIST_FRIDA_18319['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SEARCH_FUNCLIST_FRIDA_18319, data=data)
+
+    def singlestocknotify_getstocknotify_frida_18320(self, stockid=None, **overrides):
+        """Replay session 18320: SingleStockNotify.GetStockNotify."""
+        data = dict(SINGLESTOCKNOTIFY_GETSTOCKNOTIFY_FRIDA_18320['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SINGLESTOCKNOTIFY_GETSTOCKNOTIFY_FRIDA_18320, data=data)
+
+    def sysappversion_advguide_frida_18321(self, **overrides):
+        """Replay session 18321: SysAppVersion.AdvGuide."""
+        data = dict(SYSAPPVERSION_ADVGUIDE_FRIDA_18321['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSAPPVERSION_ADVGUIDE_FRIDA_18321, data=data)
+
+    def sysappversion_articleshareurl_frida_18322(self, **overrides):
+        """Replay session 18322: SysAppVersion.ArticleShareUrl."""
+        data = dict(SYSAPPVERSION_ARTICLESHAREURL_FRIDA_18322['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSAPPVERSION_ARTICLESHAREURL_FRIDA_18322, data=data)
+
+    def sysappversion_getsearchsort_frida_18323(self, **overrides):
+        """Replay session 18323: SysAppVersion.GetSearchSort."""
+        data = dict(SYSAPPVERSION_GETSEARCHSORT_FRIDA_18323['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSAPPVERSION_GETSEARCHSORT_FRIDA_18323, data=data)
+
+    def sysappversion_getserverinfo_frida_18324(self, **overrides):
+        """Replay session 18324: SysAppVersion.GetServerInfo."""
+        data = dict(SYSAPPVERSION_GETSERVERINFO_FRIDA_18324['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSAPPVERSION_GETSERVERINFO_FRIDA_18324, data=data)
+
+    def system_focusfunget_frida_18325(self, fwebid=None, **overrides):
+        """Replay session 18325: System.FocusFunGet."""
+        data = dict(SYSTEM_FOCUSFUNGET_FRIDA_18325['data'])
+        if fwebid is not None:
+            data['FWebID'] = str(fwebid)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSTEM_FOCUSFUNGET_FRIDA_18325, data=data)
+
+    def system_funlayoutget_frida_18326(self, **overrides):
+        """Replay session 18326: System.FunLayoutGet."""
+        data = dict(SYSTEM_FUNLAYOUTGET_FRIDA_18326['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSTEM_FUNLAYOUTGET_FRIDA_18326, data=data)
+
+    def system_oneswitch_frida_18327(self, key=None, **overrides):
+        """Replay session 18327: System.OneSwitch."""
+        data = dict(SYSTEM_ONESWITCH_FRIDA_18327['data'])
+        if key is not None:
+            data['Key'] = str(key)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(SYSTEM_ONESWITCH_FRIDA_18327, data=data)
+
+    def userinfo_getbrowsecounts_frida_18328(self, **overrides):
+        """Replay session 18328: UserInfo.GetBrowseCounts."""
+        data = dict(USERINFO_GETBROWSECOUNTS_FRIDA_18328['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(USERINFO_GETBROWSECOUNTS_FRIDA_18328, data=data)
+
+    def userinfo_getinfo_frida_18329(self, encrypttype=None, **overrides):
+        """Replay session 18329: UserInfo.GetInfo."""
+        data = dict(USERINFO_GETINFO_FRIDA_18329['data'])
+        if encrypttype is not None:
+            data['EncryptType'] = str(encrypttype)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(USERINFO_GETINFO_FRIDA_18329, data=data)
+
+    def userinfo_messageget_frida_18330(self, **overrides):
+        """Replay session 18330: UserInfo.MessageGet."""
+        data = dict(USERINFO_MESSAGEGET_FRIDA_18330['data'])
+        pass
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(USERINFO_MESSAGEGET_FRIDA_18330, data=data)
+
+    def datastatistics_caldeviceinfo_frida_18331(self, fingerprint=None, device=None, product=None, brand=None, manufacturer=None, sdk=None, gtresult=None, display=None, **overrides):
+        """Replay session 18331: DataStatistics.CalDeviceInfo."""
+        data = dict(DATASTATISTICS_CALDEVICEINFO_FRIDA_18331['data'])
+        if fingerprint is not None:
+            data['Fingerprint'] = str(fingerprint)
+        if device is not None:
+            data['Device'] = str(device)
+        if product is not None:
+            data['Product'] = str(product)
+        if brand is not None:
+            data['Brand'] = str(brand)
+        if manufacturer is not None:
+            data['Manufacturer'] = str(manufacturer)
+        if sdk is not None:
+            data['SDK'] = str(sdk)
+        if gtresult is not None:
+            data['GTResult'] = str(gtresult)
+        if display is not None:
+            data['Display'] = str(display)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(DATASTATISTICS_CALDEVICEINFO_FRIDA_18331, data=data)
+
 
 if __name__ == '__main__':
     client = KaipanlaCapturedClient()

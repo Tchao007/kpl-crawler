@@ -521,6 +521,7 @@
         levelLabel: item.level_label || item.levelLabel || "一般",
         params: item.params || {},
         data: item.data || {},
+        hideUrlFields: item.hide_url_fields || item.hideUrlFields || [],
         isCore: Boolean(item.is_core || item.isCore),
         host,
         group: inferGroup(item, host)
@@ -751,7 +752,7 @@
         ? '<span class="tag blue">GET</span>'
         : '<span class="tag green">POST</span>';
       const busy = state.busyId === item.sessionId ? "disabled" : "";
-      const canEditName = state.user && state.user.role === "admin" && !item.isCore;
+      const canEditName = state.user && state.user.role === "admin";
       const savingName = state.nameBusyId === item.sessionId;
       const requestUrl = buildRequestUrl(item);
       const levelOptions = (state.levelOptions.length ? state.levelOptions : [

@@ -42,7 +42,10 @@ CORE_API_KEYS = {
 }
 
 
-CORE_LOCAL_API_KEYS = {"five_level", "time_sales"}
+CORE_LOCAL_API_KEYS = {
+    "five_level",
+    "time_sales",
+}
 
 
 CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
