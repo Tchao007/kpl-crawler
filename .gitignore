@@ -1,6 +1,9 @@
 __pycache__/
 *.py[cod]
 .venv/
+frontend/node_modules/
+server.out.log
+server.err.log
 generated/users.json
 generated/users.tmp
 generated/scenario_levels.json

@@ -44,6 +44,8 @@ LOGIN_FILE = "login.html"
 REGISTER_FILE = "register.html"
 EXPIRED_FILE = "expired.html"
 ADMIN_FILE = "admin.html"
+STATIC_DIR = ROOT / "static"
+SPA_INDEX_FILE = STATIC_DIR / "index.html"
 AUTH_DB_FILE = ROOT / "users.json"
 SCENARIO_LEVEL_FILE = ROOT / "scenario_levels.json"
 SCENARIO_META_FILE = ROOT / "scenario_meta.json"
@@ -530,16 +532,154 @@ TITLE_CN_BY_SESSION = {
 }
 
 
+TITLE_CN_FIXES = {
+    "18001": "异动看盘 P19",
+    "18003": "市场风口数据",
+    "18012": "异动看盘列表",
+    "18013": "异动看盘详情",
+    "18019": "市场情绪指标",
+    "18021": "异动股票列表",
+    "18026": "市场主题机会",
+    "18054": "异动看盘 P41",
+    "18055": "上证指数数据",
+    "18059": "指数行情",
+    "18061": "涨停统计",
+    "18062": "跌停统计",
+    "18063": "市场概览",
+    "18065": "热点题材",
+    "18071": "个股异动",
+    "18080": "异动看盘 P85",
+    "18083": "主题机会数据",
+    "18090": "异动看盘 P140",
+    "18091": "异动看盘 P176",
+    "18092": "市场强度指标",
+    "18124": "异动看盘 P301",
+    "18125": "异动看盘 P143",
+    "18126": "市场情绪明细",
+    "18127": "异动看盘 P177",
+    "18128": "市场机会明细",
+    "18139": "异动看盘 P40",
+    "18157": "严重异动列表",
+    "18162": "市场提醒列表",
+    "18181": "严重异动提醒数据",
+    "18182": "异动提醒",
+    "18190": "异动看盘 P174",
+    "18191": "异动数据",
+    "18207": "异动看盘 P507",
+    "18208": "情绪-变化统计",
+    "18209": "情绪-市场连板K线",
+    "18210": "情绪-市场量能基准线",
+    "18211": "情绪-市场容量K线",
+    "18212": "情绪-涨停表现说明",
+    "18213": "情绪-涨停指数",
+    "18214": "情绪-涨跌家数",
+    "18215": "情绪-现货列表",
+    "18216": "情绪-急跌列表",
+    "18217": "情绪-权重表现列表",
+    "18218": "大幅回撤-查询历史",
+    "18219": "涨停表现-历史指数",
+    "18220": "涨停表现-历史列表",
+    "18221": "涨停表现-历史连板列表",
+    "18222": "涨停表现-历史打板列表",
+    "18223": "涨停表现-历史走势增量",
+    "18224": "涨停表现-历史量额增量",
+    "18225": "市场量能-大单历史K线",
+    "18226": "市场量能-指数历史K线",
+    "18227": "市场量能-大单当日K线",
+    "18228": "市场量能-指数当日K线",
+    "18229": "市场量能-个股区间访问历史",
+    "18230": "市场量能-个股区间访问实时",
+    "18231": "市场量能-指数区间访问历史",
+    "18232": "市场量能-历史量能",
+    "18233": "市场情绪-最新主题提醒",
+    "18234": "市场情绪-最新主题阅读计数",
+    "18235": "风向标-父级板块代码",
+    "18236": "风向标-实时量额增量",
+    "18237": "风向标-实时走势增量",
+    "18238": "风向标-文章标题",
+    "18239": "风向标-历史走势增量",
+    "18240": "风向标-历史板块行情",
+    "18241": "风向标-历史量额增量",
+    "18242": "风向标-历史子板块",
+    "18243": "风向标-历史题材标签",
+    "18244": "风向标-历史分时直播",
+    "18245": "风向标-历史股票列表",
+    "18246": "风向标-强势题材股票列表",
+    "18247": "风向标-高强题材股票列表",
+    "18248": "风向标-活跃题材股票列表",
+    "18249": "龙虎榜-今日上榜股票列表",
+    "18250": "龙虎榜-今日上榜营业部列表",
+    "18251": "龙虎榜-营业部K线",
+    "18252": "龙虎榜-营业部买卖列表",
+    "18253": "龙虎榜-营业部区间统计",
+    "18254": "龙虎榜-游资组合信息",
+    "18255": "龙虎榜-游资组合流水",
+    "18256": "龙虎榜-营业部基础列表",
+    "18257": "龙虎榜-游资组合股票图表",
+    "18258": "龙虎榜-游资日期列表",
+    "18259": "龙虎榜-游资组合信息-成都系",
+    "18260": "龙虎榜-游资组合信息-佛山系",
+    "18261": "龙虎榜-游资组合信息-炒股养家",
+    "18262": "龙虎榜-游资组合信息-赵老哥",
+    "18263": "龙虎榜-游资组合信息-小鳄鱼",
+    "18264": "龙虎榜-游资组合信息-作手新一",
+    "18265": "龙虎榜-游资组合信息-章盟主",
+    "18266": "龙虎榜-游资组合信息-量化基金",
+    "18267": "龙虎榜-游资组合信息-上塘路",
+    "18268": "龙虎榜-游资组合信息-北京光华路",
+    "18269": "龙虎榜-游资组合信息-思明南路",
+    "18270": "龙虎榜-游资组合信息-南京帮",
+    "18271": "龙虎榜-游资组合信息-机构",
+    "18272": "龙虎榜-游资组合流水-成都系",
+    "18273": "龙虎榜-游资组合流水-佛山系",
+    "18274": "龙虎榜-游资组合流水-炒股养家",
+    "18275": "龙虎榜-游资组合流水-赵老哥",
+    "18276": "龙虎榜-游资组合流水-小鳄鱼",
+    "18277": "龙虎榜-游资组合流水-作手新一",
+    "18278": "龙虎榜-游资组合流水-章盟主",
+    "18279": "龙虎榜-游资组合流水-量化基金",
+    "18280": "龙虎榜-游资组合流水-上塘路",
+    "18281": "龙虎榜-游资组合流水-北京光华路",
+    "18282": "龙虎榜-游资组合流水-思明南路",
+    "18283": "龙虎榜-游资组合流水-南京帮",
+    "18284": "龙虎榜-游资组合流水-机构",
+    "18285": "行情-历史指数窄幅走势",
+    "18286": "行情-历史排名信息",
+    "18287": "行情-历史题材指数排名",
+    "18288": "行情-历史行业指数排名",
+    "18289": "行情-历史地域指数排名",
+    "18290": "行情-历史行业指数时间段排名",
+    "18291": "行情-历史地域指数时间段排名",
+}
+
+
+def _looks_garbled_title(value: str) -> bool:
+    if not value:
+        return False
+    if "?" in value or "\ufffd" in value:
+        return True
+    mojibake_markers = ("鐢", "鎯", "甯", "榫", "琛", "棰", "涓", "鍘", "娑", "椋")
+    return any(marker in value for marker in mojibake_markers)
+
+
+def _fixed_title_cn(session_id: str, value: str) -> str:
+    fixed = TITLE_CN_FIXES.get(session_id)
+    if fixed and _looks_garbled_title(value):
+        return fixed
+    return value
+
+
 def _title_cn_for(spec: dict[str, object], controller: object, action: object) -> str:
     session_id = str(spec.get("session_id") or "")
     meta_title = _scenario_meta_for(session_id).get("title_cn", "")
-    if meta_title:
+    if meta_title and not _looks_garbled_title(meta_title):
         return meta_title
     spec_title = str(spec.get("title_cn", "")).strip()
-    if spec_title:
-        return spec_title
+    fixed = _fixed_title_cn(session_id, spec_title)
+    if fixed:
+        return fixed
     if session_id in TITLE_CN_BY_SESSION:
-        return TITLE_CN_BY_SESSION[session_id]
+        return _fixed_title_cn(session_id, TITLE_CN_BY_SESSION[session_id])
     return f"{controller}.{action}"
 
 
@@ -705,6 +845,11 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             self._handle_admin_api(path)
             return
 
+        if path.startswith("/assets/") or path.startswith("/static/"):
+            static_path = path[len("/static") :] if path.startswith("/static/") else path
+            self._serve_static_file(STATIC_DIR / static_path.lstrip("/"))
+            return
+
         if path in {"/", "/index.html", f"/{PAGE_FILE}", f"/{ADMIN_FILE}", "/admin"}:
             user, error = self._require_user()
             if error:
@@ -713,8 +858,11 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if path in {f"/{ADMIN_FILE}", "/admin"} and user.get("role") != "admin":
                 self._send_json({"error": "forbidden", "message": "Admin role required"}, status=403)
                 return
-            page = ADMIN_FILE if path in {f"/{ADMIN_FILE}", "/admin"} else PAGE_FILE
-            self._serve_file(ROOT / page, "text/html; charset=utf-8")
+            if path in {f"/{ADMIN_FILE}", "/admin"}:
+                self._serve_file(ROOT / ADMIN_FILE, "text/html; charset=utf-8")
+                return
+            page_path = SPA_INDEX_FILE if SPA_INDEX_FILE.exists() else ROOT / PAGE_FILE
+            self._serve_file(page_path, "text/html; charset=utf-8")
             return
 
         if path == f"/{CLIENT_FILE}":
@@ -1597,6 +1745,18 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         self.send_header("Expires", "0")
         self.end_headers()
         self.wfile.write(body)
+
+    def _serve_static_file(self, path: Path) -> None:
+        try:
+            resolved = path.resolve()
+            static_root = STATIC_DIR.resolve()
+        except OSError:
+            self._send_json({"error": "file_not_found", "path": path.name}, status=404)
+            return
+        if static_root not in resolved.parents and resolved != static_root:
+            self._send_json({"error": "forbidden"}, status=403)
+            return
+        self._serve_file(resolved, "application/octet-stream")
 
     def _send_json(
         self,

@@ -1,160 +1,238 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>用户管理</title>
+  <title>管理控制台</title>
   <style>
-    :root { --bg:#f4f6f8; --panel:#fff; --ink:#17202a; --muted:#667380; --line:#d8dee6; --accent:#136f63; --blue:#205b9f; --danger:#b0302a; --radius:8px; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI","Microsoft YaHei",Arial,sans-serif; }
-    .wrap { width:min(1280px, calc(100% - 32px)); margin:0 auto; }
-    header { background:#fff; border-bottom:1px solid var(--line); box-shadow:0 10px 24px rgba(25,34,45,.08); }
-    header .wrap { padding:18px 0; display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
-    h1 { margin:0; font-size:22px; }
-    .sub { margin-top:4px; color:var(--muted); }
-    .panel { margin:16px 0; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:0 10px 24px rgba(25,34,45,.08); }
-    .panel h2 { margin:0; padding:14px 16px; border-bottom:1px solid var(--line); font-size:16px; }
-    form { padding:16px; display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; align-items:end; }
-    label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
-    input, select { width:100%; height:38px; border:1px solid var(--line); border-radius:var(--radius); padding:0 10px; font:inherit; background:#fff; }
-    button, a.btn { height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); text-decoration:none; cursor:pointer; font:inherit; font-weight:600; }
-    button.primary { height:38px; background:var(--accent); border-color:var(--accent); color:#fff; }
-    button.danger { color:var(--danger); }
-    button.blue { color:var(--blue); }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px 12px; border-top:1px solid var(--line); text-align:left; vertical-align:middle; }
-    th { color:var(--muted); font-size:12px; background:#fafbfc; }
-    .actions { display:flex; gap:6px; flex-wrap:wrap; }
-    .badge { display:inline-flex; height:24px; align-items:center; padding:0 8px; border-radius:999px; background:#f2f4f7; color:#51606f; font-size:12px; }
-    .badge.admin { background:#eaf1fb; color:var(--blue); }
-    .badge.bad { background:#fff0df; color:#9f5b13; }
-    .badge.level-normal { background:#f2f4f7; color:#51606f; }
-    .badge.level-important { background:#fff0df; color:#9f5b13; }
-    .badge.level-rare { background:#fdecec; color:#b0302a; }
-    .badge.level-pending_delete { background:#f4e8ff; color:#7c3aad; }
-    .scenario-tools { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
-    .scenario-tools input { max-width:360px; }
-    .level-select { min-width:96px; }
-    .scenario-name-input { min-width:220px; height:34px; }
-    .scenario-cn-input { min-width:180px; height:34px; }
-    .scenario-maintenance-input { min-width:150px; height:34px; }
-    .endpoint { font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); word-break:break-all; }
-    .log-tools { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
-    .log-tools input { max-width:220px; }
-    .log-detail { max-width:260px; word-break:break-all; font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); }
-    .msg { min-height:22px; margin:10px 0 0; color:var(--danger); }
-    .created-codes { padding:0 16px 16px; display:grid; gap:8px; }
-    .code-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; background:#f7f9fb; border:1px solid var(--line); border-radius:6px; }
-    code { font-family:Consolas,"Cascadia Mono",monospace; }
-    @media (max-width:980px) { form { grid-template-columns:1fr 1fr; } table { min-width:900px; } .table-wrap { overflow:auto; } }
-  </style>
+  :root { --bg:#f5f7fb; --panel:#fff; --ink:#17202a; --muted:#667380; --line:#d8dee6; --soft:#edf1f6; --accent:#136f63; --accent-soft:#e6f4f1; --blue:#205b9f; --danger:#b0302a; --radius:8px; --shadow:0 10px 24px rgba(25,34,45,.08); }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI","Microsoft YaHei",Arial,sans-serif; }
+  .wrap { width:min(1480px, calc(100% - 32px)); margin:0 auto; }
+  header { position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line); }
+  header .wrap { min-height:62px; display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
+  h1 { margin:0; font-size:22px; line-height:1.2; }
+  .sub { margin-top:4px; color:var(--muted); font-size:13px; }
+  .admin-shell { width:min(1480px, calc(100% - 32px)); margin:0 auto; display:grid; grid-template-columns:260px minmax(0, 1fr); gap:20px; padding:18px 0 32px; }
+  .admin-nav { position:sticky; top:80px; align-self:start; display:grid; gap:8px; padding:14px; background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+  .admin-nav-title { margin:0 0 4px; color:var(--muted); font-size:12px; font-weight:800; text-transform:uppercase; }
+  .admin-nav a { min-height:36px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:6px; color:var(--ink); text-decoration:none; font-weight:700; }
+  .admin-nav a:hover { background:var(--accent-soft); color:var(--accent); }
+  .admin-content { min-width:0; }
+  .module-band { margin-bottom:18px; }
+  .module-title { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 0 10px; }
+  .module-title h2 { margin:0; font-size:18px; }
+  .module-title p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  .quick-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+  .panel h2 { margin:0; padding:14px 16px; border-bottom:1px solid var(--line); background:#fbfcfe; font-size:15px; }
+  form { padding:16px; display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; align-items:end; }
+  label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; font-weight:700; }
+  input, select { width:100%; height:38px; border:1px solid var(--line); border-radius:6px; padding:0 10px; font:inherit; background:#fff; color:var(--ink); }
+  button, a.btn { min-height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); text-decoration:none; cursor:pointer; font:inherit; font-weight:700; }
+  button.primary { height:38px; background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { color:var(--danger); }
+  button.blue { color:var(--blue); }
+  button:disabled { opacity:.55; cursor:not-allowed; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:10px 12px; border-top:1px solid var(--line); text-align:left; vertical-align:middle; }
+  th { color:var(--muted); font-size:12px; background:#fafbfc; white-space:nowrap; }
+  .actions { display:flex; gap:6px; flex-wrap:wrap; }
+  .badge { display:inline-flex; min-height:24px; align-items:center; padding:2px 8px; border-radius:999px; background:#f2f4f7; color:#51606f; font-size:12px; }
+  .badge.admin { background:#eaf1fb; color:var(--blue); }
+  .badge.bad { background:#fff0df; color:#9f5b13; }
+  .badge.level-normal { background:#f2f4f7; color:#51606f; }
+  .badge.level-important { background:#fff0df; color:#9f5b13; }
+  .badge.level-rare { background:#fdecec; color:#b0302a; }
+  .badge.level-pending_delete { background:#f4e8ff; color:#7c3aad; }
+  .scenario-tools, .log-tools { padding:12px 16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); background:#fbfcfe; }
+  .scenario-tools input { max-width:420px; }
+  .scenario-tools select { max-width:180px; }
+  .log-tools input { max-width:220px; }
+  .table-wrap { overflow:auto; }
+  .scenario-groups { display:grid; gap:12px; padding:12px; }
+  .scenario-group { border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#fff; }
+  .scenario-group-head { width:100%; min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:0; border-bottom:1px solid var(--line); border-radius:0; background:#f8fafc; color:var(--ink); text-align:left; cursor:pointer; }
+  .scenario-group-head strong { font-size:14px; }
+  .scenario-group-head span { color:var(--muted); font-size:12px; font-weight:600; }
+  .scenario-group.collapsed .table-wrap { display:none; }
+  .scenario-group-toggle { color:var(--accent); font-weight:800; }
+  .level-select { min-width:96px; }
+  .scenario-name-input { min-width:220px; height:34px; }
+  .scenario-cn-input { min-width:180px; height:34px; }
+  .scenario-maintenance-input { min-width:150px; height:34px; }
+  .endpoint { font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); word-break:break-all; }
+  .log-detail { max-width:260px; word-break:break-all; font-family:Consolas,"Cascadia Mono",monospace; font-size:12px; color:var(--muted); }
+  .msg { position:sticky; bottom:12px; min-height:22px; margin:10px 0 0; color:var(--danger); background:#fff; border:1px solid var(--line); border-radius:6px; padding:8px 10px; box-shadow:var(--shadow); }
+  .created-codes { padding:0 16px 16px; display:grid; gap:8px; }
+  .code-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; background:#f7f9fb; border:1px solid var(--line); border-radius:6px; }
+  code { font-family:Consolas,"Cascadia Mono",monospace; }
+  @media (max-width:1180px) { .admin-shell { grid-template-columns:1fr; } .admin-nav { position:static; grid-template-columns:repeat(2, minmax(0,1fr)); } .admin-nav-title { grid-column:1/-1; } .quick-grid { grid-template-columns:1fr; } }
+  @media (max-width:980px) { header .wrap { grid-template-columns:1fr; padding:12px 0; } form { grid-template-columns:1fr 1fr; } table { min-width:900px; } }
+  @media (max-width:640px) { .admin-shell, .wrap { width:min(100% - 20px, 1480px); } form, .admin-nav { grid-template-columns:1fr; } }
+</style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <div>
-        <h1>用户与激活码管理</h1>
-        <div class="sub">管理员创建用户、生成激活码，用户通过激活码开通或续期。</div>
+        <h1>管理控制台</h1>
+        <div class="sub">分区管理用户、激活码、接口元数据和调用日志。</div>
       </div>
       <div class="actions">
-        <a class="btn" href="/">返回场景</a>
+        <a class="btn" href="/">返回接口文档</a>
         <button id="logout" type="button">退出</button>
       </div>
     </div>
   </header>
-  <main class="wrap">
-    <section class="panel">
-      <h2>创建用户</h2>
-      <form id="createUserForm">
-        <div><label>用户名</label><input name="username" required></div>
-        <div><label>密码</label><input name="password" type="password" required></div>
-        <div><label>角色</label><select name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
-        <div><label>初始有效期</label><input name="expires_at" type="date"></div>
-        <div><label>状态</label><select name="disabled"><option value="false">启用</option><option value="true">禁用</option></select></div>
-        <button class="primary" type="submit">创建</button>
-      </form>
-    </section>
 
-    <section class="panel">
-      <h2>生成激活码</h2>
-      <form id="createCodeForm">
-        <div><label>有效天数</label><input name="days" type="number" min="1" max="3650" value="30" required></div>
-        <div><label>生成数量</label><input name="count" type="number" min="1" max="100" value="1" required></div>
-        <div style="grid-column:span 3;"><label>备注</label><input name="note" placeholder="例如：月卡、季度卡、指定客户"></div>
-        <button class="primary" type="submit">生成</button>
-      </form>
-      <div id="createdCodes" class="created-codes"></div>
-    </section>
+  <main class="admin-shell">
+    <nav class="admin-nav" aria-label="管理模块">
+      <div class="admin-nav-title">Admin Modules</div>
+      <a href="#account-ops"><span>账户开通</span><small>创建 / 激活</small></a>
+      <a href="#user-list"><span>用户列表</span><small>权限 / 有效期</small></a>
+      <a href="#code-list"><span>激活码列表</span><small>状态 / 删除</small></a>
+      <a href="#scenario-admin"><span>接口管理</span><small>名称 / 分级</small></a>
+      <a href="#call-logs"><span>调用日志</span><small>审计 / 排查</small></a>
+    </nav>
 
-    <section class="panel">
-      <h2>接口分级管理</h2>
-      <div class="scenario-tools">
-        <input id="scenarioSearch" type="search" placeholder="搜索接口、中文名、session、URL">
-        <button id="reloadScenarioLevels" type="button">刷新接口</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Session</th><th>英文名</th><th>中文名</th><th>维护时间</th><th>等级</th><th>调用 URL</th><th>操作</th></tr></thead>
-          <tbody id="scenarioLevels"></tbody>
-        </table>
-      </div>
-    </section>
+    <div class="admin-content">
+      <section id="account-ops" class="module-band">
+        <div class="module-title">
+          <div>
+            <h2>账户开通</h2>
+            <p>面向新用户的账号创建、有效期设置和激活码生成。</p>
+          </div>
+        </div>
+        <div class="quick-grid">
+          <section class="panel">
+            <h2>创建用户</h2>
+            <form id="createUserForm">
+              <div><label>用户名</label><input name="username" required></div>
+              <div><label>密码</label><input name="password" type="password" required></div>
+              <div><label>角色</label><select name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
+              <div><label>初始有效期</label><input name="expires_at" type="date"></div>
+              <div><label>状态</label><select name="disabled"><option value="false">启用</option><option value="true">禁用</option></select></div>
+              <button class="primary" type="submit">创建</button>
+            </form>
+          </section>
 
-    <section class="panel">
-      <h2>现有用户</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>有效期</th><th>创建时间</th><th>操作</th></tr></thead>
-          <tbody id="users"></tbody>
-        </table>
-      </div>
-    </section>
+          <section class="panel">
+            <h2>生成激活码</h2>
+            <form id="createCodeForm">
+              <div><label>有效天数</label><input name="days" type="number" min="1" max="3650" value="30" required></div>
+              <div><label>生成数量</label><input name="count" type="number" min="1" max="100" value="1" required></div>
+              <div style="grid-column:span 3;"><label>备注</label><input name="note" placeholder="例如：月卡、季度卡、指定客户"></div>
+              <button class="primary" type="submit">生成</button>
+            </form>
+            <div id="createdCodes" class="created-codes"></div>
+          </section>
+        </div>
+      </section>
 
-    <section class="panel">
-      <h2>激活码列表</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>天数</th><th>状态</th><th>使用用户</th><th>使用时间</th><th>创建时间</th><th>备注</th><th>操作</th></tr></thead>
-          <tbody id="codes"></tbody>
-        </table>
-      </div>
-    </section>
+      <section id="user-list" class="module-band">
+        <div class="module-title">
+          <div>
+            <h2>用户列表</h2>
+            <p>查看用户角色、状态和有效期，支持禁用、续期和删除。</p>
+          </div>
+        </div>
+        <section class="panel">
+          <h2>现有用户</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>有效期</th><th>创建时间</th><th>操作</th></tr></thead>
+              <tbody id="users"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
 
-        <section id="call-logs" class="panel">
-      <h2>&#25509;&#21475;&#35843;&#29992;&#35760;&#24405;</h2>
-      <div class="log-tools">
-        <input id="callLogSearch" type="search" placeholder="&#25628;&#32034;&#29992;&#25143;&#12289;&#25509;&#21475;&#12289;session">
-        <input id="callLogUser" type="search" placeholder="&#29992;&#25143;">
-        <input id="callLogSession" type="search" placeholder="Session">
-        <button id="reloadCallLogs" type="button">&#21047;&#26032;&#35760;&#24405;</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>&#26102;&#38388;</th><th>&#29992;&#25143;</th><th>Session</th><th>&#25509;&#21475;</th><th>&#29366;&#24577;</th><th>&#32791;&#26102;</th><th>&#35843;&#29992; URL</th><th>&#21442;&#25968;</th></tr></thead>
-          <tbody id="callLogs"></tbody>
-        </table>
-      </div>
-    </section>
-    <div id="msg" class="msg"></div>
-  </main>
-  <script>
+      <section id="code-list" class="module-band">
+        <div class="module-title">
+          <div>
+            <h2>激活码列表</h2>
+            <p>管理已生成激活码的使用状态、备注和可用性。</p>
+          </div>
+        </div>
+        <section class="panel">
+          <h2>激活码列表</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>天数</th><th>状态</th><th>使用用户</th><th>使用时间</th><th>创建时间</th><th>备注</th><th>操作</th></tr></thead>
+              <tbody id="codes"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="scenario-admin" class="module-band">
+        <div class="module-title">
+          <div>
+            <h2>接口管理</h2>
+            <p>维护接口中英文名称、维护时间和重要等级，用于前台文档展示。</p>
+          </div>
+        </div>
+        <section class="panel">
+          <h2>接口分级管理</h2>
+          <div class="scenario-tools">
+            <input id="scenarioSearch" type="search" placeholder="搜索接口、中文名、session、URL">
+            <select id="scenarioSort"><option value="name_asc">名称 A-Z</option><option value="name_desc">名称 Z-A</option><option value="maintenance_desc">维护时间 新-旧</option><option value="maintenance_asc">维护时间 旧-新</option></select>
+            <button id="expandScenarioGroups" type="button">全部展开</button>
+            <button id="collapseScenarioGroups" type="button">全部收起</button>
+            <button id="reloadScenarioLevels" type="button">刷新接口</button>
+          </div>
+          <div id="scenarioLevels" class="scenario-groups"></div>
+        </section>
+      </section>
+
+      <section id="call-logs" class="module-band">
+        <div class="module-title">
+          <div>
+            <h2>调用日志</h2>
+            <p>按用户、接口和 session 查询最近调用记录。</p>
+          </div>
+        </div>
+        <section class="panel">
+          <h2>接口调用记录</h2>
+          <div class="log-tools">
+            <input id="callLogSearch" type="search" placeholder="搜索用户、接口、session">
+            <input id="callLogUser" type="search" placeholder="用户">
+            <input id="callLogSession" type="search" placeholder="Session">
+            <button id="reloadCallLogs" type="button">刷新记录</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>时间</th><th>用户</th><th>Session</th><th>接口</th><th>状态</th><th>耗时</th><th>调用 URL</th><th>参数</th></tr></thead>
+              <tbody id="callLogs"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <div id="msg" class="msg"></div>
+    </div>
+  </main>  <script>
     const usersEl = document.getElementById("users");
     const codesEl = document.getElementById("codes");
     const scenarioLevelsEl = document.getElementById("scenarioLevels");
     const scenarioSearchEl = document.getElementById("scenarioSearch");
+    const scenarioSortEl = document.getElementById("scenarioSort");
+    const expandScenarioGroupsEl = document.getElementById("expandScenarioGroups");
+    const collapseScenarioGroupsEl = document.getElementById("collapseScenarioGroups");
     const callLogsEl = document.getElementById("callLogs");
     const callLogSearchEl = document.getElementById("callLogSearch");
     const callLogUserEl = document.getElementById("callLogUser");
     const callLogSessionEl = document.getElementById("callLogSession");
-    let scenarioLevelOptions = [];
-    let scenarioLevelRows = [];
     const createdCodesEl = document.getElementById("createdCodes");
     const msg = document.getElementById("msg");
+    let scenarioLevelOptions = [];
+    let scenarioLevelRows = [];
+    const collapsedScenarioGroups = new Set();
+
     function showMsg(text) { msg.textContent = text || ""; }
     function html(value) {
-      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
     }
     async function request(url, options = {}) {
       const response = await fetch(url, options);
@@ -165,30 +243,89 @@
       return data;
     }
 
-    function levelBadgeClass(level) {
-      return `level-${level || "normal"}`;
+    function levelBadgeClass(level) { return `level-${level || "normal"}`; }
+    function inferScenarioGroup(item) {
+      const sessionId = String(item.session_id || "");
+      const text = [item.title, item.title_cn, item.endpoint, item.target_url].join(" ").toLowerCase();
+      if (text.includes("local_hqstock") || text.includes("hqstock") || text.includes("apphwhq")) return "\u884c\u60c5\u6838\u5fc3";
+      if (text.includes("\u5e02\u573a\u91cf\u80fd") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "\u5e02\u573a\u91cf\u80fd";
+      if (text.includes("\u60c5\u7eea") || text.includes("\u5927\u5e45\u56de\u64a4") || text.includes("\u6da8\u505c\u8868\u73b0") || text.includes("\u98ce\u5411\u6807") || /^1820[8-9]$|^1821[0-9]$|^1822[0-4]$|^1823[3-9]$|^1824[0-8]$/.test(sessionId)) return "\u60c5\u7eea\u6a21\u5757";
+      if (text.includes("apphis")) return "\u5386\u53f2\u6570\u636e";
+      if (text.includes("apparticle")) return "\u8d44\u8baf\u5185\u5bb9";
+      if (text.includes("appuser") || text.includes("applog")) return "\u7528\u6237\u4e0e\u57cb\u70b9";
+      if (text.includes("getsockip")) return "\u7f51\u7edc\u914d\u7f6e";
+      if (text.includes("applhb")) {
+        if (text.includes("stock") || text.includes("\u4e2a\u80a1") || text.includes("\u76d8\u53e3")) return "\u4e2a\u80a1\u8be6\u60c5";
+        return "\u9f99\u864e\u699c";
+      }
+      if (text.includes("\u9898\u6750")) return "\u9898\u6750\u6570\u636e";
+      return "\u5176\u4ed6";
+    }
+    function scenarioNameForSort(item) {
+      return String(item.title_cn || item.title || item.session_id || "");
+    }
+    function scenarioMaintenanceForSort(item) {
+      return String(item.maintenance_time || item.added_time || "");
+    }
+    function sortScenarioRows(rows) {
+      const mode = scenarioSortEl?.value || "name_asc";
+      return [...rows].sort((a, b) => {
+        if (mode.startsWith("maintenance")) {
+          const result = scenarioMaintenanceForSort(a).localeCompare(scenarioMaintenanceForSort(b), "zh-Hans-CN", { numeric: true });
+          return mode.endsWith("desc") ? -result : result;
+        }
+        const result = scenarioNameForSort(a).localeCompare(scenarioNameForSort(b), "zh-Hans-CN", { numeric: true });
+        return mode.endsWith("desc") ? -result : result;
+      });
     }
     function renderScenarioLevels() {
       const query = (scenarioSearchEl?.value || "").trim().toLowerCase();
-      const rows = scenarioLevelRows.filter((item) => {
-        const haystack = [item.session_id, item.title, item.title_cn, item.maintenance_time, item.level_label, item.endpoint, item.target_url].join(" ").toLowerCase();
+      const rows = sortScenarioRows(scenarioLevelRows.filter((item) => {
+        const group = inferScenarioGroup(item);
+        const haystack = [group, item.session_id, item.title, item.title_cn, item.maintenance_time, item.level_label, item.endpoint, item.target_url].join(" ").toLowerCase();
         return !query || haystack.includes(query);
+      }));
+      const groups = new Map();
+      rows.forEach((item) => {
+        const group = inferScenarioGroup(item);
+        if (!groups.has(group)) groups.set(group, []);
+        groups.get(group).push(item);
       });
-      scenarioLevelsEl.innerHTML = rows.map((item) => {
-        const options = scenarioLevelOptions.map((option) => `<option value="${html(option.value)}" ${option.value === item.level ? "selected" : ""}>${html(option.label)}</option>`).join("");
+      if (!groups.size) {
+        scenarioLevelsEl.innerHTML = `<div class="empty">\u6ca1\u6709\u627e\u5230\u5339\u914d\u7684\u63a5\u53e3\u3002</div>`;
+        return;
+      }
+      scenarioLevelsEl.innerHTML = Array.from(groups.entries()).map(([groupName, groupRows]) => {
+        const collapsed = collapsedScenarioGroups.has(groupName);
+        const body = groupRows.map((item) => {
+          const options = scenarioLevelOptions.map((option) => `<option value="${html(option.value)}" ${option.value === item.level ? "selected" : ""}>${html(option.label)}</option>`).join("");
+          return `
+            <tr>
+              <td>${html(item.session_id)}</td>
+              <td><input class="scenario-name-input" data-field="scenario-title" data-session="${html(item.session_id)}" value="${html(item.title)}"></td>
+              <td><input class="scenario-cn-input" data-field="scenario-title-cn" data-session="${html(item.session_id)}" value="${html(item.title_cn || "")}"></td>
+              <td><input class="scenario-maintenance-input" data-field="scenario-maintenance-time" data-session="${html(item.session_id)}" value="${html(item.maintenance_time || "")}"></td>
+              <td>
+                <select class="level-select" data-action="save-scenario-level" data-session="${html(item.session_id)}">${options}</select>
+                <span class="badge ${levelBadgeClass(item.level)}">${html(item.level_label)}</span>
+              </td>
+              <td class="endpoint">${html(item.endpoint)}</td>
+              <td class="actions"><button class="blue" data-action="save-scenario-name" data-session="${html(item.session_id)}">\u4fdd\u5b58\u540d\u79f0</button></td>
+            </tr>`;
+        }).join("");
         return `
-          <tr>
-            <td>${html(item.session_id)}</td>
-            <td><input class="scenario-name-input" data-field="scenario-title" data-session="${html(item.session_id)}" value="${html(item.title)}"></td>
-            <td><input class="scenario-cn-input" data-field="scenario-title-cn" data-session="${html(item.session_id)}" value="${html(item.title_cn || "")}"></td>
-            <td><input class="scenario-maintenance-input" data-field="scenario-maintenance-time" data-session="${html(item.session_id)}" value="${html(item.maintenance_time || "")}"></td>
-            <td>
-              <select class="level-select" data-action="save-scenario-level" data-session="${html(item.session_id)}">${options}</select>
-              <span class="badge ${levelBadgeClass(item.level)}">${html(item.level_label)}</span>
-            </td>
-            <td class="endpoint">${html(item.endpoint)}</td>
-            <td class="actions"><button class="blue" data-action="save-scenario-name" data-session="${html(item.session_id)}">保存名称</button></td>
-          </tr>`;
+          <section class="scenario-group ${collapsed ? "collapsed" : ""}" data-scenario-group="${html(groupName)}">
+            <button class="scenario-group-head" type="button" data-action="toggle-scenario-group" data-group="${html(groupName)}">
+              <strong>${html(groupName)}</strong>
+              <span>${groupRows.length} 个接口 <b class="scenario-group-toggle">${collapsed ? "展开" : "收起"}</b></span>
+            </button>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Session</th><th>\u82f1\u6587\u540d</th><th>\u4e2d\u6587\u540d</th><th>\u7ef4\u62a4\u65f6\u95f4</th><th>\u7b49\u7ea7</th><th>\u8c03\u7528 URL</th><th>\u64cd\u4f5c</th></tr></thead>
+                <tbody>${body}</tbody>
+              </table>
+            </div>
+          </section>`;
       }).join("");
     }
     async function loadScenarioLevels() {
@@ -256,6 +393,7 @@
           </tr>`;
       }).join("");
     }
+
     document.getElementById("createUserForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const payload = Object.fromEntries(new FormData(event.target).entries());
@@ -268,6 +406,7 @@
         await loadUsers();
       } catch (error) { showMsg(error.message); }
     });
+
     document.getElementById("createCodeForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const payload = Object.fromEntries(new FormData(event.target).entries());
@@ -283,11 +422,20 @@
         await loadCodes();
       } catch (error) { showMsg(error.message); }
     });
+
     document.addEventListener("click", async (event) => {
       const copy = event.target.closest("[data-copy]");
       if (copy) {
         await navigator.clipboard.writeText(copy.dataset.copy);
         copy.textContent = "已复制";
+        return;
+      }
+      const groupToggle = event.target.closest('[data-action="toggle-scenario-group"]');
+      if (groupToggle) {
+        const groupName = groupToggle.dataset.group;
+        if (collapsedScenarioGroups.has(groupName)) collapsedScenarioGroups.delete(groupName);
+        else collapsedScenarioGroups.add(groupName);
+        renderScenarioLevels();
         return;
       }
       const levelSelect = event.target.closest('select[data-action="save-scenario-level"]');
@@ -342,20 +490,31 @@
         showMsg("");
       } catch (error) { showMsg(error.message); }
     });
+
     document.getElementById("reloadScenarioLevels").addEventListener("click", () => loadScenarioLevels().catch((error) => showMsg(error.message)));
     scenarioSearchEl.addEventListener("input", renderScenarioLevels);
+    scenarioSortEl?.addEventListener("change", renderScenarioLevels);
+    expandScenarioGroupsEl?.addEventListener("click", () => {
+      collapsedScenarioGroups.clear();
+      renderScenarioLevels();
+    });
+    collapseScenarioGroupsEl?.addEventListener("click", () => {
+      scenarioLevelRows.forEach((item) => collapsedScenarioGroups.add(inferScenarioGroup(item)));
+      renderScenarioLevels();
+    });
     document.getElementById("reloadCallLogs")?.addEventListener("click", async () => {
-      try { await loadCallLogs(); showMsg("???????"); } catch (error) { showMsg(error.message); }
+      try { await loadCallLogs(); showMsg("记录已刷新"); } catch (error) { showMsg(error.message); }
     });
     callLogSearchEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
     callLogUserEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
     callLogSessionEl?.addEventListener("input", () => loadCallLogs().catch((error) => showMsg(error.message)));
+
     function scrollToHashPanel() {
       if (!location.hash) return;
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
       if (!target) return;
       requestAnimationFrame(() => {
-        window.scrollTo({ top: Math.max(0, target.offsetTop - 12), behavior: "auto" });
+        window.scrollTo({ top: Math.max(0, target.offsetTop - 72), behavior: "auto" });
       });
     }
     window.addEventListener("hashchange", scrollToHashPanel);
@@ -369,3 +528,7 @@
   </script>
 </body>
 </html>
+
+
+
+
