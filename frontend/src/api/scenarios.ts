@@ -71,20 +71,6 @@ export interface ScenariosPayload {
   user: User;
 }
 
-export interface TopicPayload {
-  requested_at?: string;
-  output?: string;
-  result?: {
-    requested_at?: string;
-    func_name?: string;
-    topic_library?: {
-      status_code?: string | number;
-      upstream_url?: string;
-      body?: unknown;
-    };
-  };
-}
-
 export function hostFromUrl(url: string): string {
   try {
     return new URL(url).host || "";
@@ -167,7 +153,6 @@ export function buildRequestUrl(item: Scenario): string {
     Object.entries(item.params || {}).forEach(([key, value]) => params.set(key, value));
     getUrlManagedFields(item).forEach((key) => params.set(key, item.data[key]));
   }
-
   const query = params.toString();
   if (query) url.search = query;
   return url.toString();
@@ -175,18 +160,6 @@ export function buildRequestUrl(item: Scenario): string {
 
 export async function loadScenarios(): Promise<ScenariosPayload> {
   return apiJson<ScenariosPayload>("/api/scenarios");
-}
-
-export async function loadTopicLatest(): Promise<TopicPayload> {
-  return apiJson<TopicPayload>("/api/topic-library/latest");
-}
-
-export async function crawlTopicLibrary(): Promise<TopicPayload> {
-  return apiJson<TopicPayload>("/api/topic-library/crawl", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ func_name: "题材库" })
-  });
 }
 
 export async function saveScenarioMeta(
@@ -204,11 +177,14 @@ export async function saveScenarioMeta(
   return response.scenario;
 }
 
-export async function callScenario(item: Scenario): Promise<{ status: number; text: string }> {
+export async function callScenario(item: Scenario, apiKey = ""): Promise<{ status: number; text: string }> {
   const requestUrl = buildRequestUrl(item);
   const init: RequestInit = {
     method: item.httpMethod || "POST",
-    headers: { Accept: "application/json" }
+    headers: {
+      Accept: "application/json",
+      "x-api-key": apiKey.trim()
+    }
   };
 
   if ((item.httpMethod || "POST").toUpperCase() === "POST") {

@@ -159,7 +159,7 @@
           <h2>激活码列表</h2>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>天数</th><th>状态</th><th>使用用户</th><th>使用时间</th><th>创建时间</th><th>备注</th><th>操作</th></tr></thead>
+              <thead><tr><th>天数</th><th>状态</th><th>使用用户</th><th>用户有效期</th><th>剩余有效时间</th><th>使用时间</th><th>激活码密文</th><th>备注</th><th>操作</th></tr></thead>
               <tbody id="codes"></tbody>
             </table>
           </div>
@@ -378,13 +378,21 @@
       const data = await request("/api/admin/activation-codes");
       codesEl.innerHTML = data.codes.map((code) => {
         const status = code.used ? "已使用" : (code.disabled ? "已禁用" : "未使用");
+        const remainingDays = Number.isFinite(Number(code.remaining_days)) ? Number(code.remaining_days) : -1;
+        const codeHash = String(code.code_hash || "");
+        const hashPreview = codeHash ? `${codeHash.slice(0, 12)}...${codeHash.slice(-8)}` : "-";
         return `
           <tr>
             <td>${html(code.days)} 天</td>
             <td><span class="badge ${code.used || code.disabled ? "bad" : ""}">${status}</span></td>
             <td>${html(code.used_by || "-")}</td>
+            <td>${html(code.user_expires_at || "-")}</td>
+            <td>${remainingDays >= 0 ? `${html(remainingDays)} 天` : "-1"}</td>
             <td>${html(code.used_at || "-")}</td>
-            <td>${html(code.created_at || "-")}</td>
+            <td class="log-detail">
+              <code title="${html(codeHash)}">${html(hashPreview)}</code>
+              ${codeHash ? `<button data-copy="${html(codeHash)}">复制</button>` : ""}
+            </td>
             <td>${html(code.note || "")}</td>
             <td class="actions">
               <button data-action="toggle-code" data-id="${html(code.id)}" data-disabled="${code.disabled ? "false" : "true"}" ${code.used ? "disabled" : ""}>${code.disabled ? "启用" : "禁用"}</button>

@@ -7,6 +7,7 @@ const props = defineProps<{
   item: Scenario;
   user: User | null;
   levelOptions: LevelOption[];
+  apiKey: string;
   busy: boolean;
   nameBusy: boolean;
 }>();

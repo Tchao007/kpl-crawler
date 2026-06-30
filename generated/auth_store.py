@@ -350,15 +350,29 @@ class AuthStore:
             self._write(data)
 
     def public_activation_code(self, code: dict[str, Any]) -> dict[str, Any]:
+        user_expires_at = None
+        remaining_days = -1
+        used_by = code.get("used_by")
+        if used_by and not code.get("disabled"):
+            data = self._read()
+            user = data.get("users", {}).get(used_by)
+            if user and not user.get("disabled"):
+                user_expires_at = user.get("expires_at")
+                expires = parse_expiration(user_expires_at)
+                if expires and expires >= today_utc():
+                    remaining_days = (expires - today_utc()).days
         return {
             "id": code.get("id"),
+            "code_hash": code.get("code_hash", ""),
             "days": int(code.get("days", 0)),
             "disabled": bool(code.get("disabled")),
-            "used": bool(code.get("used_by")),
-            "used_by": code.get("used_by"),
+            "used": bool(used_by),
+            "used_by": used_by,
             "used_at": code.get("used_at"),
             "created_at": code.get("created_at"),
             "note": code.get("note", ""),
+            "user_expires_at": user_expires_at,
+            "remaining_days": remaining_days,
         }
 
     def list_activation_codes(self) -> list[dict[str, Any]]:
@@ -458,3 +472,34 @@ class AuthStore:
                 "days": int(record["days"]),
                 "expires_at": user["expires_at"],
             }
+
+    def validate_interface_activation_code(
+        self,
+        username: str,
+        role: str,
+        code_text: str,
+    ) -> tuple[bool, str | None]:
+        code_hash = activation_code_hash(code_text)
+        if not code_hash:
+            return False, "missing_activation_code"
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                return False, "invalid_session"
+            if user.get("disabled"):
+                return False, "disabled"
+            if user.get("role") != "admin" and self.is_expired(user):
+                return False, "expired"
+
+            record = data["activation_codes"].get(code_hash)
+            if not record:
+                return False, "invalid_activation_code"
+            if record.get("disabled"):
+                return False, "activation_code_disabled"
+
+            if role == "admin":
+                return True, None
+            if record.get("used_by") != username:
+                return False, "activation_code_not_bound_to_user"
+            return True, None

@@ -54,9 +54,11 @@ FRIDA_CAPTURE_LOG = ROOT.parent / "outputs" / "frida" / "kpl_capture.ndjson"
 DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
 SESSION_COOKIE = "kpl_session"
 AUTH = AuthStore(AUTH_DB_FILE)
-SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist"}
+SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist", "x-api-key"}
 MAX_CALL_LOGS = 1000
 UPSTREAM_IDENTITY_CACHE: dict[str, object] = {"mtime": 0.0, "identity": {}}
+INTERFACE_API_KEY_HEADER = "x-api-key"
+LEGACY_INTERFACE_API_KEY_FIELDS = {"activation_code", "ActivationCode", "api_activation_code", "code"}
 CORE_LOCAL_ADDED_TIME = "2026-06-28"
 CORE_LOCAL_TITLES = {
     "five_level": {
@@ -931,6 +933,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             body_values = self._read_body_values()
             overrides = {**query_values, **body_values}
             overrides.pop("_ts", None)
+            if not self._validate_interface_api_key(user):
+                return
+            for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+                overrides.pop(key, None)
             if route.get("core_name"):
                 self._call_core_scene(user, route["scenario"], str(route["core_name"]), overrides)
                 return
@@ -1397,6 +1403,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
         body_values = self._read_body_values()
         values = {**query_values, **body_values}
+        if not self._validate_interface_api_key(user):
+            return
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+            values.pop(key, None)
         default_code = "2015" if name == "five_level" else "2006"
         stock_id = normalize_stock_id(
             str(
@@ -1572,6 +1582,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         body_values = self._read_body_values()
         overrides = {**query_values, **body_values}
         overrides.pop("_ts", None)
+        if not self._validate_interface_api_key(user):
+            return
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+            overrides.pop(key, None)
 
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
@@ -1668,6 +1682,28 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 
     def _require_user(self) -> tuple[dict[str, object] | None, str | None]:
         return AUTH.session_user(self._session_token())
+
+    def _interface_api_key(self) -> str:
+        return str(self.headers.get(INTERFACE_API_KEY_HEADER) or "").strip()
+
+    def _validate_interface_api_key(self, user: dict[str, object]) -> bool:
+        code = self._interface_api_key()
+        ok, error = AUTH.validate_interface_activation_code(
+            str(user.get("username", "")),
+            str(user.get("role", "")),
+            code,
+        )
+        if ok:
+            return True
+        status = 403 if error in {"disabled", "expired"} else 401
+        self._send_json(
+            {
+                "error": error or "invalid_activation_code",
+                "message": f"接口调用需要在 Header 中携带有效激活码：{INTERFACE_API_KEY_HEADER}",
+            },
+            status=status,
+        )
+        return False
 
     def _send_auth_failure(self, error: str, json_response: bool) -> None:
         if json_response:

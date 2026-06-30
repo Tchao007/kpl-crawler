@@ -341,37 +341,6 @@
       color: var(--muted);
       border-bottom: 1px solid var(--line);
     }
-    .topic-panel {
-      margin: 16px 0 10px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .topic-body {
-      padding: 14px 16px;
-      display: grid;
-      gap: 12px;
-    }
-    .topic-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .topic-result {
-      min-height: 40px;
-      padding: 10px;
-      background: #f7f9fb;
-      border: 1px solid #e4e9ef;
-      border-radius: 6px;
-      color: var(--muted);
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: Consolas, "Cascadia Mono", monospace;
-      font-size: 12px;
-    }
     .toast {
       position: fixed;
       right: 20px;
@@ -425,20 +394,6 @@
       <div class="stats" id="stats"></div>
       <div class="filters" id="groupFilters"></div>
 
-      <section class="topic-panel">
-        <div class="panel-head">
-          <strong>题材库数据爬取</strong>
-          <div class="hint" id="topicHint">读取最近结果</div>
-        </div>
-        <div class="topic-body">
-          <div class="topic-actions">
-            <button id="crawlTopicBtn" class="btn primary">爬取题材库</button>
-            <button id="loadTopicBtn" class="btn ghost">查看最近结果</button>
-          </div>
-          <div id="topicResult" class="topic-result">暂无结果</div>
-        </div>
-      </section>
-
       <div class="panel">
         <div class="panel-head">
           <strong id="panelTitle">场景列表</strong>
@@ -480,10 +435,6 @@
       reloadBtn: document.getElementById("reloadBtn"),
       copyAllBtn: document.getElementById("copyAllBtn"),
       logoutBtn: document.getElementById("logoutBtn"),
-      crawlTopicBtn: document.getElementById("crawlTopicBtn"),
-      loadTopicBtn: document.getElementById("loadTopicBtn"),
-      topicHint: document.getElementById("topicHint"),
-      topicResult: document.getElementById("topicResult"),
       toast: document.getElementById("toast")
     };
 
@@ -597,64 +548,6 @@
       el.currentUser.textContent = `${state.user.username} · ${state.user.role}${expires}`;
       el.adminLink.style.display = state.user.role === "admin" ? "inline-flex" : "none";
       el.callLogsLink.style.display = state.user.role === "admin" ? "inline-flex" : "none";
-    }
-
-    function summarizeTopicResult(payload) {
-      const result = payload.result || payload;
-      const topic = result.topic_library || {};
-      const body = topic.body;
-      const bodySummary = typeof body === "string" ? body : JSON.stringify(body, null, 2);
-      return [
-        `请求时间: ${result.requested_at || "-"}`,
-        `功能: ${result.func_name || "题材库"}`,
-        `状态码: ${topic.status_code || "-"}`,
-        `上游 URL: ${topic.upstream_url || "-"}`,
-        `保存文件: ${payload.output || "-"}`,
-        "",
-        bodySummary ? bodySummary.slice(0, 1800) : "无返回体"
-      ].join("\n");
-    }
-
-    async function loadTopicLatest() {
-      el.topicHint.textContent = "读取中";
-      try {
-        const response = await fetch(new URL("/api/topic-library/latest", API_BASE), { cache: "no-store" });
-        if (handleAuthFailure(response)) return;
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          el.topicResult.textContent = payload.message || "暂无最近结果";
-          el.topicHint.textContent = "暂无结果";
-          return;
-        }
-        el.topicResult.textContent = summarizeTopicResult(payload);
-        el.topicHint.textContent = "最近结果已加载";
-      } catch (error) {
-        el.topicResult.textContent = error.message;
-        el.topicHint.textContent = "读取失败";
-      }
-    }
-
-    async function crawlTopicLibrary() {
-      el.crawlTopicBtn.disabled = true;
-      el.topicHint.textContent = "爬取中";
-      el.topicResult.textContent = "正在请求开盘啦题材库...";
-      try {
-        const response = await fetch(new URL("/api/topic-library/crawl", API_BASE), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ func_name: "题材库" })
-        });
-        if (handleAuthFailure(response)) return;
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.message || payload.error || `HTTP ${response.status}`);
-        el.topicResult.textContent = summarizeTopicResult(payload);
-        el.topicHint.textContent = "爬取完成";
-      } catch (error) {
-        el.topicResult.textContent = error.message;
-        el.topicHint.textContent = "爬取失败";
-      } finally {
-        el.crawlTopicBtn.disabled = false;
-      }
     }
 
     function groupList(items, key) {
@@ -995,8 +888,6 @@
     });
 
     el.reloadBtn.addEventListener("click", loadScenarios);
-    el.loadTopicBtn.addEventListener("click", loadTopicLatest);
-    el.crawlTopicBtn.addEventListener("click", crawlTopicLibrary);
     el.logoutBtn.addEventListener("click", async () => {
       await fetch("/api/auth/logout", { method: "POST" });
       location.href = "/login.html";
@@ -1009,7 +900,6 @@
     });
 
     loadScenarios();
-    loadTopicLatest();
   </script>
 </body>
 </html>

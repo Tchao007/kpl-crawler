@@ -3,21 +3,17 @@ import { computed, onMounted, ref } from "vue";
 import { logout } from "./api/auth";
 import {
   callScenario,
-  crawlTopicLibrary,
   loadScenarios,
-  loadTopicLatest,
   normalizeScenario,
   saveScenarioMeta,
   type LevelOption,
   type Scenario,
-  type TopicPayload,
   type User
 } from "./api/scenarios";
 import FiltersBar from "./components/FiltersBar.vue";
 import ScenarioCard from "./components/ScenarioCard.vue";
 import StatsBar from "./components/StatsBar.vue";
 import Topbar from "./components/Topbar.vue";
-import TopicPanel from "./components/TopicPanel.vue";
 
 const scenarios = ref<Scenario[]>([]);
 const levelOptions = ref<LevelOption[]>([]);
@@ -31,9 +27,7 @@ const busyId = ref<string | null>(null);
 const nameBusyId = ref<string | null>(null);
 const toast = ref("");
 const toastType = ref<"success" | "error">("success");
-const topicHint = ref("读取最近结果");
-const topicResult = ref("暂无结果");
-const topicBusy = ref(false);
+const apiKey = ref(localStorage.getItem("kpl_interface_api_key") || "");
 
 let toastTimer = 0;
 
@@ -90,23 +84,6 @@ function showToast(message: string, type: "success" | "error" = "success") {
   }, 1800);
 }
 
-function summarizeTopicResult(payload: TopicPayload) {
-  const result = payload.result || payload;
-  const topic = "topic_library" in result ? result.topic_library || {} : {};
-  const body = topic.body;
-  const bodySummary = typeof body === "string" ? body : JSON.stringify(body, null, 2);
-
-  return [
-    `请求时间: ${result.requested_at || "-"}`,
-    `功能: ${"func_name" in result ? result.func_name || "题材库" : "题材库"}`,
-    `状态码: ${topic.status_code || "-"}`,
-    `上游 URL: ${topic.upstream_url || "-"}`,
-    `保存文件: ${payload.output || "-"}`,
-    "",
-    bodySummary ? bodySummary.slice(0, 1800) : "无返回体"
-  ].join("\n");
-}
-
 async function refreshScenarios() {
   loading.value = true;
   loadingText.value = "正在从 /api/scenarios 拉取接口清单...";
@@ -125,39 +102,16 @@ async function refreshScenarios() {
   }
 }
 
-async function refreshTopicLatest() {
-  topicHint.value = "读取中";
-  try {
-    const payload = await loadTopicLatest();
-    topicResult.value = summarizeTopicResult(payload);
-    topicHint.value = "最近结果已加载";
-  } catch (error) {
-    topicResult.value = error instanceof Error ? error.message : String(error);
-    topicHint.value = "读取失败";
-  }
-}
-
-async function runTopicCrawl() {
-  topicBusy.value = true;
-  topicHint.value = "爬取中";
-  topicResult.value = "正在请求开盘啦题材库...";
-  try {
-    const payload = await crawlTopicLibrary();
-    topicResult.value = summarizeTopicResult(payload);
-    topicHint.value = "爬取完成";
-  } catch (error) {
-    topicResult.value = error instanceof Error ? error.message : String(error);
-    topicHint.value = "爬取失败";
-  } finally {
-    topicBusy.value = false;
-  }
-}
-
 async function runScenarioCall(item: Scenario) {
   if (busyId.value) return;
+  if (!apiKey.value.trim()) {
+    showToast("请先填写接口 API Key", "error");
+    return;
+  }
+  localStorage.setItem("kpl_interface_api_key", apiKey.value.trim());
   busyId.value = item.sessionId;
   try {
-    const result = await callScenario(item);
+    const result = await callScenario(item, apiKey.value);
     window.alert(`调用完成: ${result.status}\n\n${result.text.slice(0, 900)}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -207,7 +161,6 @@ async function copyCurrentList() {
 
 onMounted(() => {
   refreshScenarios();
-  refreshTopicLatest();
 });
 </script>
 
@@ -239,13 +192,20 @@ onMounted(() => {
           <StatsBar :items="scenarios" :current-group="group" />
         </div>
 
-        <TopicPanel
-          :hint="topicHint"
-          :result="topicResult"
-          :busy="topicBusy"
-          @load-latest="refreshTopicLatest"
-          @crawl="runTopicCrawl"
-        />
+        <section class="panel api-key-panel">
+          <div class="api-key-copy">
+            <strong>接口 API Key</strong>
+            <span>所有接口调用都会通过 Header: x-api-key 进行验证。</span>
+          </div>
+          <input
+            v-model.trim="apiKey"
+            class="api-key-input"
+            type="text"
+            placeholder="输入 x-api-key"
+            autocomplete="off"
+            @change="localStorage.setItem('kpl_interface_api_key', apiKey.trim())"
+          />
+        </section>
 
         <section class="panel doc-panel">
           <div class="panel-head">
@@ -269,6 +229,7 @@ onMounted(() => {
                 :item="item"
                 :user="user"
                 :level-options="levelOptions"
+                :api-key="apiKey"
                 :busy="busyId === item.sessionId"
                 :name-busy="nameBusyId === item.sessionId"
                 @call="runScenarioCall"
