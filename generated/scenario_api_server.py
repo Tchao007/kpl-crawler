@@ -9,7 +9,7 @@ import mimetypes
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
@@ -57,8 +57,75 @@ AUTH = AuthStore(AUTH_DB_FILE)
 SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist", "x-api-key"}
 MAX_CALL_LOGS = 1000
 UPSTREAM_IDENTITY_CACHE: dict[str, object] = {"mtime": 0.0, "identity": {}}
+LATEST_MARKET_DAY_CACHE: dict[str, object] = {"expires_at": 0.0, "day": ""}
 INTERFACE_API_KEY_HEADER = "x-api-key"
 LEGACY_INTERFACE_API_KEY_FIELDS = {"activation_code", "ActivationCode", "api_activation_code", "code"}
+CHINA_TZ = timezone(timedelta(hours=8))
+STOCK_GETNEWESTDAY_SESSION_ID = "213"
+DYNAMIC_LATEST_DATE_FIELDS = {
+    "1880": {"Time": "date"},
+    "18019": {"Day": "compact"},
+    "18021": {"Day": "compact"},
+    "18249": {"Time": "date"},
+    "18250": {"Time": "date"},
+    "18252": {"Time": "date"},
+}
+SENTIMENT_TEMPLATE_PATHS = {
+    "/api/sentiment": "sentiment",
+    "/api/emotion/mood": "mood",
+    "/api/emotion/distribution": "distribution",
+}
+SENTIMENT_TEMPLATE_SOURCES = {
+    "change": ("HisHomeDingPan", "ChangeStatistics"),
+    "daily_limit": ("HomeDingPan", "DailyLimitIndex"),
+    "distribution": ("HomeDingPan", "MarketStockZDNum"),
+    "mood": ("MarketMood", "MoodNumCount"),
+    "volume": ("HisHomeDingPan", "MarketVolumeBenchmarkLine"),
+    "capacity": ("HomeDingPan", "MarketCapacityKLine"),
+}
+SENTIMENT_TEMPLATE_SCENARIO_IDS = {
+    "sentiment": "template:sentiment",
+    "mood": "template:emotion_mood",
+    "distribution": "template:emotion_distribution",
+}
+EMOTION_BODY_ONLY_SESSION_IDS = {
+    "18019",
+    "18126",
+    "18208",
+    "18209",
+    "18210",
+    "18211",
+    "18212",
+    "18213",
+    "18214",
+    "18215",
+    "18216",
+    "18217",
+    "18218",
+    "18219",
+    "18220",
+    "18221",
+    "18222",
+    "18223",
+    "18224",
+    "18233",
+    "18234",
+    "18235",
+    "18236",
+    "18237",
+    "18238",
+    "18239",
+    "18240",
+    "18241",
+    "18242",
+    "18243",
+    "18244",
+    "18245",
+    "18246",
+    "18247",
+    "18248",
+    "18303",
+}
 CORE_LOCAL_ADDED_TIME = "2026-06-28"
 CORE_LOCAL_TITLES = {
     "five_level": {
@@ -76,6 +143,242 @@ CORE_LOCAL_TITLES = {
 
 def _safe_route_part(value: str) -> str:
     return "".join(ch.lower() if ch.isalnum() else "_" for ch in value).strip("_")
+
+
+def _find_request_spec(controller: str, action: str) -> dict[str, object] | None:
+    for spec in REQUESTS:
+        data = spec.get("data") or {}
+        if str(data.get("c", "")).lower() == controller.lower() and str(data.get("a", "")).lower() == action.lower():
+            return spec
+    return None
+
+
+def _latest_day_from_update_payload(payload: object) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    raw_time = payload.get("Time") or payload.get("time")
+    if raw_time in {None, ""}:
+        return ""
+    try:
+        timestamp = int(float(str(raw_time)))
+    except ValueError:
+        return ""
+    return datetime.fromtimestamp(timestamp, CHINA_TZ).date().isoformat()
+
+
+def _format_latest_day(day: str, kind: str) -> str:
+    if kind == "compact":
+        return day.replace("-", "")
+    return day
+
+
+def _latest_market_day_cached() -> str:
+    now = time.time()
+    cached_day = str(LATEST_MARKET_DAY_CACHE.get("day") or "")
+    if cached_day and float(LATEST_MARKET_DAY_CACHE.get("expires_at") or 0) > now:
+        return cached_day
+
+    update_spec = _find_request_spec("LongHuBang", "UpdateList")
+    if not update_spec:
+        return cached_day
+    client = KaipanlaCapturedClient()
+    client.session.trust_env = False
+    captured_identity = _latest_upstream_identity()
+    data = dict(update_spec.get("data") or {})
+    params = dict(update_spec.get("params") or {})
+    upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
+    upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
+    upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
+    if upstream_user_id and _is_placeholder_value(data.get("UserID")):
+        data["UserID"] = upstream_user_id
+    if upstream_token and _is_placeholder_value(data.get("Token")):
+        data["Token"] = upstream_token
+    if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
+        data["DeviceID"] = upstream_device_id
+    params["_ts"] = str(int(now * 1000))
+    try:
+        response = client.request(update_spec, data=data, params=params)
+        latest_day = _latest_day_from_update_payload(response.json())
+    except Exception:
+        latest_day = ""
+    if latest_day:
+        LATEST_MARKET_DAY_CACHE["day"] = latest_day
+        LATEST_MARKET_DAY_CACHE["expires_at"] = now + 60
+        return latest_day
+    return cached_day
+
+
+def _scenarios_with_latest_date_defaults(scenarios: list[dict[str, object]]) -> list[dict[str, object]]:
+    latest_day = _latest_market_day_cached()
+    if not latest_day:
+        return scenarios
+    result: list[dict[str, object]] = []
+    for scenario in scenarios:
+        fields = DYNAMIC_LATEST_DATE_FIELDS.get(str(scenario.get("session_id", "")))
+        if not fields:
+            result.append(scenario)
+            continue
+        item = dict(scenario)
+        data = dict(item.get("data") or {})
+        for field, kind in fields.items():
+            if field in data:
+                data[field] = _format_latest_day(latest_day, kind)
+        item["data"] = data
+        result.append(item)
+    return result
+
+
+def _compact_date(value: object) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    digits = "".join(ch for ch in text if ch.isdigit())
+    if len(digits) >= 8:
+        return digits[:8]
+    return ""
+
+
+def _display_date(compact_date: str) -> str:
+    if len(compact_date) == 8:
+        return f"{compact_date[:4]}-{compact_date[4:6]}-{compact_date[6:8]}"
+    return compact_date
+
+
+def _clean_none_values(payload: dict[str, object]) -> dict[str, object]:
+    return {key: value for key, value in payload.items() if value is not None}
+
+
+def _iter_payload_items(payload: object):
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            yield str(key), value
+            yield from _iter_payload_items(value)
+    elif isinstance(payload, list):
+        for item in payload:
+            yield from _iter_payload_items(item)
+
+
+def _normalized_field_name(name: object) -> str:
+    return "".join(ch.lower() for ch in str(name) if ch.isalnum())
+
+
+def _coerce_number(value: object) -> int | float | None:
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return int(value) if float(value).is_integer() else float(value)
+    text = str(value).strip().replace(",", "").replace("%", "")
+    if not text:
+        return None
+    try:
+        number = float(text)
+    except ValueError:
+        return None
+    return int(number) if number.is_integer() else number
+
+
+def _first_number(payload: object, *field_names: str) -> int | float | None:
+    wanted = {_normalized_field_name(name) for name in field_names}
+    for key, value in _iter_payload_items(payload):
+        if _normalized_field_name(key) in wanted:
+            number = _coerce_number(value)
+            if number is not None:
+                return number
+    return None
+
+
+def _extract_first_list(payload: object, *field_names: str) -> list[object]:
+    wanted = {_normalized_field_name(name) for name in field_names}
+    for key, value in _iter_payload_items(payload):
+        if _normalized_field_name(key) in wanted and isinstance(value, list):
+            return value
+    return []
+
+
+def _build_sentiment_board(raw_sources: dict[str, object]) -> dict[str, object]:
+    all_sources = list(raw_sources.values())
+    distribution_source = raw_sources.get("distribution")
+    daily_limit_source = raw_sources.get("daily_limit")
+    mood_source = raw_sources.get("mood")
+    change_source = raw_sources.get("change")
+    return _clean_none_values(
+        {
+            "todayZhangTing": _first_number(
+                daily_limit_source,
+                "todayZhangTing",
+                "ZhangTing",
+                "ZTNum",
+                "ZT",
+                "ztNum",
+                "LimitUp",
+            ),
+            "lastZhangTing": _first_number(daily_limit_source, "lastZhangTing", "YesterdayZT", "YZTNum"),
+            "todayDieTing": _first_number(daily_limit_source, "todayDieTing", "DTNum", "DT", "LimitDown"),
+            "lastDieTing": _first_number(daily_limit_source, "lastDieTing", "YesterdayDT", "YDTNum"),
+            "upCount": _first_number(
+                distribution_source,
+                "upCount",
+                "UpCount",
+                "ZhangNum",
+                "SZJS",
+                "SZZS",
+                "RedNum",
+                "riseCount",
+            ),
+            "downCount": _first_number(
+                distribution_source,
+                "downCount",
+                "DownCount",
+                "DieNum",
+                "XDJS",
+                "XDZS",
+                "GreenNum",
+                "fallCount",
+            ),
+            "flatCount": _first_number(distribution_source, "flatCount", "FlatCount", "PingNum", "PJS", "equalCount"),
+            "intensity": _first_number(
+                mood_source,
+                "intensity",
+                "Mood",
+                "MoodNum",
+                "MoodValue",
+                "Strength",
+                "Score",
+                "ZHQD",
+                "QDD",
+            )
+            or _first_number(change_source, "intensity", "Strength", "Score", "ZHQD", "QDD"),
+            "lastZTMoney": _first_number(all_sources, "lastZTMoney", "LastZTMoney", "ZTMoney", "YZZJXY"),
+            "lastLBMoney": _first_number(all_sources, "lastLBMoney", "LastLBMoney", "LBMoney", "YZLBZJXY"),
+        }
+    )
+
+
+def _build_sentiment_distribution(raw_sources: dict[str, object], board: dict[str, object]) -> dict[str, object]:
+    volume_source = raw_sources.get("volume")
+    capacity_source = raw_sources.get("capacity")
+    distribution_source = raw_sources.get("distribution")
+    return _clean_none_values(
+        {
+            "upCount": board.get("upCount"),
+            "downCount": board.get("downCount"),
+            "flatCount": board.get("flatCount"),
+            "volume": _first_number(volume_source, "volume", "Vol", "MarketVolume", "CJL", "CJE"),
+            "amount": _first_number(volume_source, "amount", "Money", "MarketAmount", "CJE", "Turnover"),
+            "capacity": _first_number(capacity_source, "capacity", "MarketCapacity", "Capacity", "RongLiang"),
+            "rawDistribution": distribution_source,
+            "rawVolume": volume_source,
+            "rawCapacity": capacity_source,
+        }
+    )
+
+
+def _is_emotion_body_only_scenario(scenario: dict[str, object]) -> bool:
+    session_id = str(scenario.get("session_id") or "")
+    if session_id in EMOTION_BODY_ONLY_SESSION_IDS:
+        return True
+    text = f"{scenario.get('title', '')} {scenario.get('title_cn', '')} {scenario.get('method_name', '')}".lower()
+    return any(keyword in text for keyword in ("情绪", "大幅回撤", "涨停表现", "风向标", "emotion", "mood"))
 
 
 SCENARIO_LEVELS = {
@@ -769,6 +1072,40 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "hide_url_fields": [],
             }
         )
+    for template_name, endpoint in {
+        "sentiment": "/api/sentiment",
+        "mood": "/api/emotion/mood",
+        "distribution": "/api/emotion/distribution",
+    }.items():
+        session_id = SENTIMENT_TEMPLATE_SCENARIO_IDS[template_name]
+        core_meta = _scenario_meta_for(session_id)
+        default_titles = {
+            "sentiment": ("Sentiment.Template", "情绪模板-情绪总览"),
+            "mood": ("Sentiment.MoodTemplate", "情绪模板-综合强度"),
+            "distribution": ("Sentiment.DistributionTemplate", "情绪模板-涨跌分布与量能"),
+        }
+        title, title_cn = default_titles[template_name]
+        level = _scenario_level_for(session_id)
+        scenarios.append(
+            {
+                "session_id": session_id,
+                "title": core_meta.get("title", title),
+                "title_cn": core_meta.get("title_cn", title_cn),
+                "added_time": core_meta.get("maintenance_time", "2026-07-01"),
+                "maintenance_time": core_meta.get("maintenance_time", "2026-07-01"),
+                "level": level,
+                "level_label": SCENARIO_LEVELS[level],
+                "method_name": endpoint.rsplit("/", 1)[-1].replace("-", "_"),
+                "http_method": "GET",
+                "target_url": "sentiment-template",
+                "endpoint": endpoint,
+                "alias_endpoint": endpoint,
+                "params": {"date": ""},
+                "data": {},
+                "is_template": True,
+                "hide_url_fields": [],
+            }
+        )
     return scenarios
 
 
@@ -886,7 +1223,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             self._send_json(
                 {
                     "count": len(SCENARIOS),
-                    "scenarios": SCENARIOS,
+                    "scenarios": _scenarios_with_latest_date_defaults(SCENARIOS),
                     "level_options": [
                         {"value": value, "label": label}
                         for value, label in SCENARIO_LEVELS.items()
@@ -920,6 +1257,19 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             self._handle_hq_api(user, path)
             return
 
+        if path in SENTIMENT_TEMPLATE_PATHS:
+            user, error = self._require_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            if self.command not in {"GET", "POST"}:
+                self._send_json({"error": "method_not_allowed"}, status=405)
+                return
+            if not self._validate_interface_api_key(user):
+                return
+            self._handle_sentiment_template_api(user, path, parsed)
+            return
+
         if path in ROUTES:
             user, error = self._require_user()
             if error:
@@ -945,6 +1295,198 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 
         self._send_json({"error": "not_found", "path": path}, status=404)
 
+    def _handle_sentiment_template_api(self, user: dict[str, object], path: str, parsed) -> None:
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        mode = SENTIMENT_TEMPLATE_PATHS[path]
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values() if self.command == "POST" else {}
+        overrides = {**query_values, **body_values}
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS | {"_ts"}:
+            overrides.pop(key, None)
+
+        latest_day = _latest_market_day_cached()
+        latest_compact = _format_latest_day(latest_day, "compact") if latest_day else ""
+        today_compact = datetime.now(CHINA_TZ).strftime("%Y%m%d")
+        requested_date = _compact_date(overrides.get("date") or overrides.get("Day")) or latest_compact or today_compact
+        data_date = latest_compact or requested_date
+        source_names = {
+            "sentiment": ["daily_limit", "distribution", "mood", "change", "volume", "capacity"],
+            "mood": ["mood", "change", "daily_limit"],
+            "distribution": ["distribution", "volume", "capacity"],
+        }[mode]
+
+        client = KaipanlaCapturedClient()
+        client.session.trust_env = False
+        captured_identity = _latest_upstream_identity()
+        source_results: dict[str, dict[str, object]] = {}
+        for source_name in source_names:
+            controller, action = SENTIMENT_TEMPLATE_SOURCES[source_name]
+            source_results[source_name] = self._call_sentiment_template_source(
+                client,
+                captured_identity,
+                source_name,
+                controller,
+                action,
+                data_date,
+                requested_at,
+            )
+
+        raw_sources = {name: result.get("body") for name, result in source_results.items()}
+        board = _build_sentiment_board(raw_sources)
+        distribution = _build_sentiment_distribution(raw_sources, board)
+        source_meta = {
+            name: {
+                key: value
+                for key, value in result.items()
+                if key not in {"body"} and value not in {None, ""}
+            }
+            for name, result in source_results.items()
+        }
+        errors = {
+            name: result.get("error")
+            for name, result in source_results.items()
+            if result.get("error") or result.get("ok") is False
+        }
+        base_payload: dict[str, object] = {
+            "requestedDate": requested_date,
+            "dataDate": data_date,
+            "isFallback": requested_date != data_date,
+            "date": _display_date(data_date),
+            "source": "kaipanla-captured-template",
+            "basis": "Aggregated from captured Kaipanla sentiment endpoints.",
+            "sources": source_meta,
+        }
+        if mode == "mood":
+            payload = {
+                **base_payload,
+                "intensity": board.get("intensity"),
+                "board": board,
+                "raw": {
+                    "mood": raw_sources.get("mood"),
+                    "change": raw_sources.get("change"),
+                    "daily_limit": raw_sources.get("daily_limit"),
+                },
+            }
+        elif mode == "distribution":
+            payload = {
+                **base_payload,
+                "distribution": distribution,
+                "board": {
+                    key: board[key]
+                    for key in ("upCount", "downCount", "flatCount")
+                    if key in board
+                },
+                "raw": {
+                    "distribution": raw_sources.get("distribution"),
+                    "volume": raw_sources.get("volume"),
+                    "capacity": raw_sources.get("capacity"),
+                },
+            }
+        else:
+            payload = {
+                **base_payload,
+                "board": board,
+                "weatherVane": {
+                    "topUp": _extract_first_list(raw_sources, "topUp", "TopUp", "top_up"),
+                    "topDown": _extract_first_list(raw_sources, "topDown", "TopDown", "top_down"),
+                },
+                "distribution": distribution,
+                "raw": raw_sources,
+            }
+        if errors:
+            payload["sourceErrors"] = errors
+
+        status_code = 200 if any(result.get("ok") for result in source_results.values()) else 502
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": SENTIMENT_TEMPLATE_SCENARIO_IDS[mode],
+                "title": f"Sentiment.{mode}",
+                "title_cn": {
+                    "sentiment": "情绪模板-情绪总览",
+                    "mood": "情绪模板-综合强度",
+                    "distribution": "情绪模板-涨跌分布与量能",
+                }[mode],
+                "endpoint": path,
+                "target_url": "sentiment-template",
+                "http_method": self.command,
+                "status": "ok" if status_code == 200 else "upstream_error",
+                "status_code": status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(overrides),
+            }
+        )
+        self._send_json(payload, status=status_code)
+
+    def _call_sentiment_template_source(
+        self,
+        client: KaipanlaCapturedClient,
+        captured_identity: dict[str, str],
+        source_name: str,
+        controller: str,
+        action: str,
+        data_date: str,
+        requested_at: float,
+    ) -> dict[str, object]:
+        spec = _find_request_spec(controller, action)
+        if not spec:
+            return {
+                "ok": False,
+                "source": source_name,
+                "controller": controller,
+                "action": action,
+                "error": "source_not_found",
+            }
+        data = dict(spec.get("data") or {})
+        params = dict(spec.get("params") or {})
+        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
+        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
+        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
+        if upstream_user_id and _is_placeholder_value(data.get("UserID")):
+            data["UserID"] = upstream_user_id
+        if upstream_token and _is_placeholder_value(data.get("Token")):
+            data["Token"] = upstream_token
+        if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
+            data["DeviceID"] = upstream_device_id
+        if "Day" in data:
+            data["Day"] = data_date
+        if "day" in data:
+            data["day"] = data_date
+        if "Date" in data:
+            data["Date"] = data_date
+        params["_ts"] = str(int(requested_at * 1000))
+        try:
+            response = client.request(spec, data=data, params=params)
+            content_type = response.headers.get("Content-Type", "")
+            try:
+                payload: object = response.json()
+            except ValueError:
+                payload = response.text
+            return {
+                "ok": response.ok,
+                "source": source_name,
+                "session_id": spec.get("session_id", ""),
+                "controller": controller,
+                "action": action,
+                "status_code": response.status_code,
+                "content_type": content_type,
+                "upstream_url": response.url,
+                "body": payload,
+            }
+        except Exception as exc:
+            return {
+                "ok": False,
+                "source": source_name,
+                "session_id": spec.get("session_id", ""),
+                "controller": controller,
+                "action": action,
+                "error": str(exc),
+            }
+
     def _call_scene(self, user: dict[str, object], scenario: dict[str, object], spec: dict[str, object], overrides: dict[str, str]) -> None:
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
@@ -968,6 +1510,12 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             data["Token"] = upstream_token
         if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
             data["DeviceID"] = upstream_device_id
+
+        self._apply_dynamic_latest_date_defaults(data, scenario, client, captured_identity, overrides, requested_at)
+
+        if str(scenario.get("session_id", "")) == STOCK_GETNEWESTDAY_SESSION_ID and not str(overrides.get("StockID", "")).strip():
+            if self._call_stock_getnewestday_latest(user, scenario, client, captured_identity, overrides, requested_at, started_iso):
+                return
         params["_ts"] = str(int(requested_at * 1000))
 
         try:
@@ -1030,6 +1578,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             }
         )
 
+        if _is_emotion_body_only_scenario(scenario):
+            self._send_json(payload)
+            return
+
         self._send_json(
             {
                 "requested_at": requested_at,
@@ -1039,6 +1591,133 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "body": payload,
             }
         )
+
+    def _call_stock_getnewestday_latest(
+        self,
+        user: dict[str, object],
+        scenario: dict[str, object],
+        client: KaipanlaCapturedClient,
+        captured_identity: dict[str, str],
+        overrides: dict[str, str],
+        requested_at: float,
+        started_iso: str,
+    ) -> bool:
+        update_spec = _find_request_spec("LongHuBang", "UpdateList")
+        if not update_spec:
+            return False
+
+        data = dict(update_spec.get("data") or {})
+        params = dict(update_spec.get("params") or {})
+        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
+        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
+        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
+        if upstream_user_id and _is_placeholder_value(data.get("UserID")):
+            data["UserID"] = upstream_user_id
+        if upstream_token and _is_placeholder_value(data.get("Token")):
+            data["Token"] = upstream_token
+        if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
+            data["DeviceID"] = upstream_device_id
+        params["_ts"] = str(int(requested_at * 1000))
+
+        try:
+            response = client.request(update_spec, data=data, params=params)
+        except Exception:
+            return False
+
+        content_type = response.headers.get("Content-Type", "")
+        try:
+            upstream_payload: object = response.json()
+        except ValueError:
+            upstream_payload = response.text
+
+        latest_day = _latest_day_from_update_payload(upstream_payload)
+        if not latest_day:
+            return False
+
+        payload = {
+            "Day": _format_latest_day(latest_day, "compact"),
+            "errcode": str(upstream_payload.get("errcode", "0")) if isinstance(upstream_payload, dict) else "0",
+        }
+        if isinstance(upstream_payload, dict) and "t" in upstream_payload:
+            payload["t"] = upstream_payload["t"]
+
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": scenario.get("session_id", ""),
+                "title": scenario.get("title", ""),
+                "title_cn": scenario.get("title_cn", ""),
+                "endpoint": scenario.get("endpoint", ""),
+                "target_url": update_spec.get("url", ""),
+                "http_method": scenario.get("http_method", update_spec.get("method", "")),
+                "status": "ok" if response.ok else "upstream_error",
+                "status_code": response.status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "content_type": content_type,
+                "overrides": _safe_log_values(overrides),
+            }
+        )
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "status_code": response.status_code,
+                "content_type": content_type,
+                "upstream_url": response.url,
+                "body": payload,
+            }
+        )
+        return True
+
+    def _apply_dynamic_latest_date_defaults(
+        self,
+        data: dict[str, object],
+        scenario: dict[str, object],
+        client: KaipanlaCapturedClient,
+        captured_identity: dict[str, str],
+        overrides: dict[str, str],
+        requested_at: float,
+    ) -> None:
+        fields = DYNAMIC_LATEST_DATE_FIELDS.get(str(scenario.get("session_id", "")))
+        if not fields:
+            return
+        pending = {field: kind for field, kind in fields.items() if field not in overrides}
+        if not pending:
+            return
+        latest_day = self._resolve_latest_market_day(client, captured_identity, requested_at)
+        if not latest_day:
+            return
+        for field, kind in pending.items():
+            data[field] = _format_latest_day(latest_day, kind)
+
+    def _resolve_latest_market_day(
+        self,
+        client: KaipanlaCapturedClient,
+        captured_identity: dict[str, str],
+        requested_at: float,
+    ) -> str:
+        update_spec = _find_request_spec("LongHuBang", "UpdateList")
+        if not update_spec:
+            return ""
+        data = dict(update_spec.get("data") or {})
+        params = dict(update_spec.get("params") or {})
+        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
+        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
+        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
+        if upstream_user_id and _is_placeholder_value(data.get("UserID")):
+            data["UserID"] = upstream_user_id
+        if upstream_token and _is_placeholder_value(data.get("Token")):
+            data["Token"] = upstream_token
+        if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
+            data["DeviceID"] = upstream_device_id
+        params["_ts"] = str(int(requested_at * 1000))
+        try:
+            response = client.request(update_spec, data=data, params=params)
+            return _latest_day_from_update_payload(response.json())
+        except Exception:
+            return ""
 
     def _handle_auth_api(self, path: str) -> None:
         if path == "/api/auth/login" and self.command == "POST":
@@ -1695,11 +2374,11 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         )
         if ok:
             return True
-        status = 403 if error in {"disabled", "expired"} else 401
+        status = 403 if error in {"disabled", "expired"} else 400
         self._send_json(
             {
                 "error": error or "invalid_activation_code",
-                "message": f"接口调用需要在 Header 中携带有效激活码：{INTERFACE_API_KEY_HEADER}",
+                "message": f"Interface calls require a valid {INTERFACE_API_KEY_HEADER} header",
             },
             status=status,
         )

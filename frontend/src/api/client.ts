@@ -29,11 +29,10 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
     ...init
   });
 
-  if (handleAuthFailure(response)) {
+  const payload = await readJson<Record<string, unknown>>(response);
+  if (isAuthFailure(response, payload) && handleAuthFailure(response)) {
     throw new ApiError("auth redirect", response.status, {});
   }
-
-  const payload = await readJson<Record<string, unknown>>(response);
   if (!response.ok) {
     const message =
       typeof payload.message === "string"
@@ -67,4 +66,17 @@ export function handleAuthFailure(response: Response): boolean {
   }
 
   return false;
+}
+
+export function isAuthFailure(response: Response, payload: { error?: unknown } = {}): boolean {
+  const error = typeof payload.error === "string" ? payload.error : "";
+  if (
+    error === "missing_activation_code" ||
+    error === "invalid_activation_code" ||
+    error === "activation_code_disabled" ||
+    error === "activation_code_not_bound_to_user"
+  ) {
+    return false;
+  }
+  return response.status === 401 || response.status === 403;
 }

@@ -128,7 +128,7 @@ class AuthStore:
     def _read(self) -> dict[str, Any]:
         if not self.path.exists():
             return {"users": {}, "sessions": {}}
-        with self.path.open("r", encoding="utf-8") as handle:
+        with self.path.open("r", encoding="utf-8-sig") as handle:
             data = json.load(handle)
         data.setdefault("users", {})
         data.setdefault("sessions", {})
@@ -479,9 +479,6 @@ class AuthStore:
         role: str,
         code_text: str,
     ) -> tuple[bool, str | None]:
-        code_hash = activation_code_hash(code_text)
-        if not code_hash:
-            return False, "missing_activation_code"
         with self.lock:
             data = self._read()
             user = data["users"].get(username)
@@ -489,17 +486,20 @@ class AuthStore:
                 return False, "invalid_session"
             if user.get("disabled"):
                 return False, "disabled"
+            if user.get("role") == "admin":
+                return True, None
             if user.get("role") != "admin" and self.is_expired(user):
                 return False, "expired"
 
+            code_hash = activation_code_hash(code_text)
+            if not code_hash:
+                return False, "missing_activation_code"
             record = data["activation_codes"].get(code_hash)
             if not record:
                 return False, "invalid_activation_code"
             if record.get("disabled"):
                 return False, "activation_code_disabled"
 
-            if role == "admin":
-                return True, None
             if record.get("used_by") != username:
                 return False, "activation_code_not_bound_to_user"
             return True, None

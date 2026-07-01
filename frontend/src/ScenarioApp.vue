@@ -74,6 +74,11 @@ const groupedScenarios = computed(() => {
   });
   return [...map.entries()];
 });
+const requiresApiKey = computed(() => user.value?.role !== "admin");
+
+function persistApiKey() {
+  localStorage.setItem("kpl_interface_api_key", apiKey.value.trim());
+}
 
 function showToast(message: string, type: "success" | "error" = "success") {
   toast.value = message;
@@ -104,14 +109,15 @@ async function refreshScenarios() {
 
 async function runScenarioCall(item: Scenario) {
   if (busyId.value) return;
-  if (!apiKey.value.trim()) {
+  if (requiresApiKey.value && !apiKey.value.trim()) {
     showToast("请先填写接口 API Key", "error");
     return;
   }
-  localStorage.setItem("kpl_interface_api_key", apiKey.value.trim());
+  const interfaceApiKey = requiresApiKey.value ? apiKey.value.trim() : "";
+  if (requiresApiKey.value) localStorage.setItem("kpl_interface_api_key", interfaceApiKey);
   busyId.value = item.sessionId;
   try {
-    const result = await callScenario(item, apiKey.value);
+    const result = await callScenario(item, interfaceApiKey);
     window.alert(`调用完成: ${result.status}\n\n${result.text.slice(0, 900)}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -192,10 +198,10 @@ onMounted(() => {
           <StatsBar :items="scenarios" :current-group="group" />
         </div>
 
-        <section class="panel api-key-panel">
+        <section v-if="requiresApiKey" class="panel api-key-panel">
           <div class="api-key-copy">
             <strong>接口 API Key</strong>
-            <span>所有接口调用都会通过 Header: x-api-key 进行验证。</span>
+            <span>普通用户调用接口需通过 Header: x-api-key 进行验证。</span>
           </div>
           <input
             v-model.trim="apiKey"
@@ -203,7 +209,7 @@ onMounted(() => {
             type="text"
             placeholder="输入 x-api-key"
             autocomplete="off"
-            @change="localStorage.setItem('kpl_interface_api_key', apiKey.trim())"
+            @change="persistApiKey"
           />
         </section>
 
@@ -229,7 +235,6 @@ onMounted(() => {
                 :item="item"
                 :user="user"
                 :level-options="levelOptions"
-                :api-key="apiKey"
                 :busy="busyId === item.sessionId"
                 :name-busy="nameBusyId === item.sessionId"
                 @call="runScenarioCall"

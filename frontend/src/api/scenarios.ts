@@ -1,4 +1,4 @@
-﻿import { apiJson, apiUrl, handleAuthFailure } from "./client";
+import { apiJson, apiUrl, handleAuthFailure, isAuthFailure } from "./client";
 
 export interface User {
   username: string;
@@ -83,7 +83,13 @@ export function inferGroup(item: RawScenario, host: string): string {
   const title = String(item.title || "");
   const titleCn = String(item.title_cn || item.titleCn || "");
   const sessionId = String(item.session_id || item.sessionId || "");
-  const text = `${host} ${title} ${titleCn}`.toLowerCase();
+  const endpoint = String(item.endpoint || item.alias_endpoint || item.aliasEndpoint || "");
+  const targetUrl = String(item.target_url || item.url || "");
+  const text = `${host} ${targetUrl} ${endpoint} ${title} ${titleCn} ${sessionId}`.toLowerCase();
+
+  if (sessionId.startsWith("template:") || text.includes("sentiment-template") || text.includes("情绪")) {
+    return "情绪模块";
+  }
 
   if (text.includes("local_hqstock") || text.includes("hqstock")) return "行情核心";
   if (text.includes("市场量能") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "市场量能";
@@ -179,12 +185,15 @@ export async function saveScenarioMeta(
 
 export async function callScenario(item: Scenario, apiKey = ""): Promise<{ status: number; text: string }> {
   const requestUrl = buildRequestUrl(item);
+  const headers: Record<string, string> = {
+    Accept: "application/json"
+  };
+  const trimmedApiKey = apiKey.trim();
+  if (trimmedApiKey) headers["x-api-key"] = trimmedApiKey;
+
   const init: RequestInit = {
     method: item.httpMethod || "POST",
-    headers: {
-      Accept: "application/json",
-      "x-api-key": apiKey.trim()
-    }
+    headers
   };
 
   if ((item.httpMethod || "POST").toUpperCase() === "POST") {
@@ -201,7 +210,13 @@ export async function callScenario(item: Scenario, apiKey = ""): Promise<{ statu
   }
 
   const response = await fetch(requestUrl, init);
-  if (handleAuthFailure(response)) return { status: response.status, text: "" };
-  return { status: response.status, text: await response.text() };
+  const text = await response.text();
+  let payload: { error?: unknown } = {};
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    payload = {};
+  }
+  if (isAuthFailure(response, payload) && handleAuthFailure(response)) return { status: response.status, text: "" };
+  return { status: response.status, text };
 }
-

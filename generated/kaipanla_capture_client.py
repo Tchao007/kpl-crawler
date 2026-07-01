@@ -932,7 +932,7 @@ STOCK_GETNEWESTDAY = {
     'data': {
         "c": "Stock",
         "a": "GetNewestDay",
-        "StockID": "603335",
+        "StockID": "",
         "UserID": "0",
         "Token": "0",
         "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2"

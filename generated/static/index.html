@@ -3,97 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>.topic-panel{display:none!important}</style>
     <title>开盘啦抓包场景调用清单</title>
-    <script type="module" crossorigin src="/assets/main-D4q7BUxP.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/main-Cf0t49XR.css">
+    <script type="module" crossorigin src="/assets/main-Dp4H7kY-.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-CYCrOVg6.css">
   </head>
   <body>
-    <div id="app"></div>
-    <script>
-      (() => {
-        const STORAGE_KEY = "kpl_interface_api_key";
-        const EXEMPT_PREFIXES = [
-          "/api/auth",
-          "/api/admin",
-          "/api/scenarios",
-          "/api/topic-library"
-        ];
-
-        function currentKey() {
-          return (localStorage.getItem(STORAGE_KEY) || "").trim();
-        }
-
-        function shouldAttach(url) {
-          return url.origin === location.origin
-            && url.pathname.startsWith("/api/")
-            && !EXEMPT_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
-        }
-
-        const originalFetch = window.fetch.bind(window);
-        window.fetch = (input, init) => {
-          const apiKey = currentKey();
-          if (!apiKey) return originalFetch(input, init);
-          if (typeof input === "string" || input instanceof URL) {
-            const url = new URL(String(input), location.origin);
-            if (!shouldAttach(url)) return originalFetch(input, init);
-            const nextInit = { ...(init || {}) };
-            const headers = new Headers(nextInit.headers || {});
-            headers.set("x-api-key", apiKey);
-            nextInit.headers = headers;
-            return originalFetch(url.toString(), nextInit);
-          }
-          if (input instanceof Request) {
-            const url = new URL(input.url);
-            if (!shouldAttach(url)) return originalFetch(input, init);
-            const request = new Request(input, init);
-            const headers = new Headers(request.headers);
-            headers.set("x-api-key", apiKey);
-            return originalFetch(new Request(request, { headers }));
-          }
-          return originalFetch(input, init);
-        };
-
-        function renderPanel() {
-          const docMain = document.querySelector(".doc-main");
-          if (!docMain || document.querySelector(".activation-panel")) return;
-          const panel = document.createElement("section");
-          panel.className = "panel activation-panel";
-          panel.innerHTML = [
-            '<div class="activation-copy">',
-            "<strong>接口 API Key</strong>",
-            "<span>所有接口调用都会通过 Header: x-api-key 进行验证。</span>",
-            "</div>",
-            '<input class="activation-input" type="text" placeholder="输入 x-api-key" autocomplete="off">'
-          ].join("");
-          const input = panel.querySelector("input");
-          input.value = currentKey();
-          input.addEventListener("input", () => {
-            localStorage.setItem(STORAGE_KEY, input.value.trim());
-          });
-          const target = document.querySelector(".doc-panel");
-          docMain.insertBefore(panel, target || docMain.firstChild);
-        }
-
-        function tick() {
-          renderPanel();
-        }
-
-        const style = document.createElement("style");
-        style.textContent = [
-          ".activation-panel{margin-top:14px;padding:12px 14px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,420px);gap:12px;align-items:center}",
-          ".activation-copy{display:grid;gap:2px}",
-          ".activation-copy strong{font-size:15px}",
-          ".activation-copy span{color:var(--muted);font-size:12px}",
-          ".activation-input{width:100%;height:36px;border:1px solid var(--line);border-radius:6px;padding:0 10px;background:#fff;color:var(--ink)}",
-          "@media(max-width:720px){.activation-panel{grid-template-columns:1fr}}"
-        ].join("");
-        document.head.appendChild(style);
-
-        new MutationObserver(tick).observe(document.documentElement, { childList: true, subtree: true });
-        document.addEventListener("DOMContentLoaded", tick);
-        setInterval(tick, 1200);
-      })();
-    </script>
+    <div id="app"></div>
   </body>
 </html>
