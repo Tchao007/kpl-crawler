@@ -7,7 +7,6 @@ const props = defineProps<{
   item: Scenario;
   user: User | null;
   levelOptions: LevelOption[];
-  apiKey: string;
   busy: boolean;
   nameBusy: boolean;
 }>();
@@ -45,7 +44,6 @@ const fallbackLevels: LevelOption[] = [
   { value: "pending_delete", label: "待删除" }
 ];
 
-const paramEntries = computed(() => Object.entries(props.item.params || {}).slice(0, 6));
 const dataEntries = computed(() => Object.entries(props.item.data || {}).slice(0, 6));
 </script>
 
@@ -75,17 +73,7 @@ const dataEntries = computed(() => Object.entries(props.item.data || {}).slice(0
       <code>{{ buildRequestUrl(item) }}</code>
     </div>
 
-    <div class="api-grid">
-      <div>
-        <div class="mini-title">Query 参数</div>
-        <dl v-if="paramEntries.length" class="param-list">
-          <template v-for="[key, value] in paramEntries" :key="key">
-            <dt>{{ key }}</dt>
-            <dd>{{ value }}</dd>
-          </template>
-        </dl>
-        <div v-else class="empty-mini">无</div>
-      </div>
+    <div v-if="user?.role === 'admin'" class="api-grid">
       <div>
         <div class="mini-title">Body 参数</div>
         <dl v-if="dataEntries.length" class="param-list">

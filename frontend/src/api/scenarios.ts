@@ -34,6 +34,7 @@ export interface RawScenario {
   level?: string;
   level_label?: string;
   levelLabel?: string;
+  group?: string;
   params?: Record<string, string>;
   data?: Record<string, string>;
   hide_url_fields?: string[];
@@ -80,6 +81,9 @@ export function hostFromUrl(url: string): string {
 }
 
 export function inferGroup(item: RawScenario, host: string): string {
+  if (item.group) return String(item.group);
+  if (item.level === "pending_delete") return "待删除模块";
+
   const title = String(item.title || "");
   const titleCn = String(item.title_cn || item.titleCn || "");
   const sessionId = String(item.session_id || item.sessionId || "");
@@ -99,8 +103,24 @@ export function inferGroup(item: RawScenario, host: string): string {
   if (text.includes("apphwhq")) return "行情核心";
   if (text.includes("apphis")) return "历史数据";
   if (text.includes("apparticle")) return "资讯内容";
-  if (text.includes("appuser") || text.includes("applog")) return "用户与埋点";
-  if (text.includes("getsockip")) return "网络配置";
+  if (
+    text.includes("appuser") ||
+    text.includes("applog") ||
+    text.includes("getsockip") ||
+    text.includes("userinfo") ||
+    text.includes("userselectstock") ||
+    text.includes("datastatistics") ||
+    text.includes("databatchstatistics") ||
+    text.includes("sysappversion") ||
+    text.includes("system") ||
+    text.includes("log_") ||
+    text.includes("用户") ||
+    text.includes("系统") ||
+    text.includes("网络") ||
+    text.includes("埋点")
+  ) {
+    return "系统配置接口";
+  }
   if (text.includes("applhb")) {
     if (text.includes("longhubang") || text.includes("龙虎榜")) return "龙虎榜";
     if (text.includes("stock") || text.includes("个股") || text.includes("盘口")) return "个股详情";
@@ -177,13 +197,12 @@ export async function saveScenarioMeta(
   return response.scenario;
 }
 
-export async function callScenario(item: Scenario, apiKey = ""): Promise<{ status: number; text: string }> {
+export async function callScenario(item: Scenario): Promise<{ status: number; text: string }> {
   const requestUrl = buildRequestUrl(item);
   const init: RequestInit = {
     method: item.httpMethod || "POST",
     headers: {
-      Accept: "application/json",
-      "x-api-key": apiKey.trim()
+      Accept: "application/json"
     }
   };
 
@@ -201,7 +220,17 @@ export async function callScenario(item: Scenario, apiKey = ""): Promise<{ statu
   }
 
   const response = await fetch(requestUrl, init);
-  if (handleAuthFailure(response)) return { status: response.status, text: "" };
-  return { status: response.status, text: await response.text() };
+  const text = await response.text();
+  if (!response.ok) {
+    let message = text || `HTTP ${response.status}`;
+    try {
+      const payload = JSON.parse(text) as { message?: string; error?: string };
+      message = payload.message || payload.error || message;
+    } catch {
+      // Keep the raw response text.
+    }
+    throw new Error(message);
+  }
+  return { status: response.status, text };
 }
 

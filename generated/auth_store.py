@@ -170,6 +170,15 @@ class AuthStore:
             "updated_at": user.get("updated_at"),
         }
 
+    def _user_activation_summary(self, data: dict[str, Any], username: str) -> dict[str, Any] | None:
+        for record in data.get("activation_codes", {}).values():
+            if record.get("used_by") == username and not record.get("disabled"):
+                public_record = self.public_activation_code(record)
+                public_record["code"] = record.get("code") or ""
+                public_record["has_plain_code"] = bool(record.get("code"))
+                return public_record
+        return None
+
     def is_expired(self, user: dict[str, Any]) -> bool:
         if user.get("role") == "admin":
             return False
@@ -247,7 +256,12 @@ class AuthStore:
     def list_users(self) -> list[dict[str, Any]]:
         with self.lock:
             data = self._read()
-            return [self.public_user(user) for user in data["users"].values()]
+            users = []
+            for user in data["users"].values():
+                public_user = self.public_user(user)
+                public_user["activation_code"] = self._user_activation_summary(data, str(user.get("username", "")))
+                users.append(public_user)
+            return users
 
     def create_user(self, payload: dict[str, Any]) -> dict[str, Any]:
         username = str(payload.get("username", "")).strip()
@@ -364,6 +378,8 @@ class AuthStore:
         return {
             "id": code.get("id"),
             "code_hash": code.get("code_hash", ""),
+            "code": code.get("code", ""),
+            "has_plain_code": bool(code.get("code")),
             "days": int(code.get("days", 0)),
             "disabled": bool(code.get("disabled")),
             "used": bool(used_by),
@@ -401,6 +417,7 @@ class AuthStore:
                 record = {
                     "id": str(uuid.uuid4()),
                     "code_hash": code_hash,
+                    "code": code_text,
                     "days": days,
                     "disabled": False,
                     "used_by": None,
@@ -473,6 +490,59 @@ class AuthStore:
                 "expires_at": user["expires_at"],
             }
 
+    def assign_activation_code_to_user(self, username: str, code_text: str) -> dict[str, Any]:
+        code_hash = activation_code_hash(code_text)
+        if not code_hash:
+            raise ValueError("activation code is required")
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                raise KeyError("user not found")
+            if user.get("role") != "user":
+                raise ValueError("admin accounts do not need activation codes")
+            if user.get("disabled"):
+                raise ValueError("account disabled")
+            record = data["activation_codes"].get(code_hash)
+            if not record:
+                raise ValueError("invalid activation code")
+            if record.get("disabled"):
+                raise ValueError("activation code disabled")
+            if record.get("used_by") and record.get("used_by") != username:
+                raise ValueError("activation code already used")
+            for existing in data["activation_codes"].values():
+                if existing is not record and existing.get("used_by") == username:
+                    existing["used_by"] = None
+                    existing["used_at"] = None
+            user["expires_at"] = (today_utc() + timedelta(days=int(record["days"]))).isoformat()
+            user["updated_at"] = now_iso()
+            record["used_by"] = username
+            record["used_at"] = now_iso()
+            record["code"] = normalize_code(code_text)
+            self._write(data)
+            public_user = self.public_user(user)
+            public_user["activation_code"] = self._user_activation_summary(data, username)
+            return public_user
+
+    def remove_user_activation_code(self, username: str) -> dict[str, Any]:
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                raise KeyError("user not found")
+            if user.get("role") != "user":
+                raise ValueError("admin accounts do not need activation codes")
+            for record in data["activation_codes"].values():
+                if record.get("used_by") == username:
+                    record["used_by"] = None
+                    record["used_at"] = None
+            user["expires_at"] = None
+            user["updated_at"] = now_iso()
+            self._write(data)
+            public_user = self.public_user(user)
+            public_user["activation_code"] = None
+            return public_user
+
     def validate_interface_activation_code(
         self,
         username: str,
@@ -503,3 +573,73 @@ class AuthStore:
             if record.get("used_by") != username:
                 return False, "activation_code_not_bound_to_user"
             return True, None
+
+    def validate_interface_user_activation(self, username: str, role: str) -> tuple[bool, str | None]:
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                return False, "invalid_session"
+            if user.get("disabled"):
+                return False, "disabled"
+            if user.get("role") == "admin" or role == "admin":
+                return True, None
+            if self.is_expired(user):
+                return False, "expired"
+            for record in data["activation_codes"].values():
+                if record.get("used_by") == username and not record.get("disabled"):
+                    return True, None
+            return False, "missing_bound_activation_code"
+
+    def user_for_interface_activation_code(self, code_text: str) -> tuple[dict[str, Any] | None, str | None]:
+        code_hash = activation_code_hash(code_text)
+        if not code_hash:
+            return None, "missing_activation_code"
+        with self.lock:
+            data = self._read()
+            record = data["activation_codes"].get(code_hash)
+            if not record:
+                return None, "invalid_activation_code"
+            if record.get("disabled"):
+                return None, "activation_code_disabled"
+            username = record.get("used_by")
+            if not username:
+                return None, "activation_code_not_bound_to_user"
+            user = data["users"].get(username)
+            if not user:
+                return None, "invalid_session"
+            if user.get("disabled"):
+                return None, "disabled"
+            if user.get("role") != "admin" and self.is_expired(user):
+                return None, "expired"
+            return self.public_user(user), None
+
+    def user_for_interface_credentials(
+        self,
+        username: str,
+        password: str,
+        code_text: str,
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        username = str(username or "").strip()
+        if not username or not password:
+            return None, "missing_credentials"
+        code_hash = activation_code_hash(code_text)
+        if not code_hash:
+            return None, "missing_activation_code"
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user or not verify_password(password, user.get("password_hash", "")):
+                return None, "invalid_credentials"
+            if user.get("disabled"):
+                return None, "disabled"
+            if user.get("role") != "admin" and self.is_expired(user):
+                return None, "expired"
+            record = data["activation_codes"].get(code_hash)
+            if not record:
+                return None, "invalid_activation_code"
+            if record.get("disabled"):
+                return None, "activation_code_disabled"
+            if user.get("role") != "admin" and record.get("used_by") != username:
+                return None, "activation_code_not_bound_to_user"
+            return self.public_user(user), None

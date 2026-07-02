@@ -28,12 +28,12 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
     ...init
   });
+  const payload = await readJson<Record<string, unknown>>(response);
 
-  if (handleAuthFailure(response)) {
+  if (handleAuthFailure(response, payload)) {
     throw new ApiError("auth redirect", response.status, {});
   }
 
-  const payload = await readJson<Record<string, unknown>>(response);
   if (!response.ok) {
     const message =
       typeof payload.message === "string"
@@ -47,22 +47,18 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
-export function handleAuthFailure(response: Response): boolean {
+export function handleAuthFailure(response: Response, payload: Record<string, unknown> = {}): boolean {
+  if (payload.auth_error !== true) {
+    return false;
+  }
+
   if (response.status === 401) {
     window.location.href = `/login.html?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     return true;
   }
 
   if (response.status === 403) {
-    response
-      .clone()
-      .json()
-      .then((data: { error?: string }) => {
-        window.location.href = data.error === "expired" ? "/expired.html" : "/login.html";
-      })
-      .catch(() => {
-        window.location.href = "/login.html";
-      });
+    window.location.href = payload.error === "expired" ? "/expired.html" : "/login.html";
     return true;
   }
 

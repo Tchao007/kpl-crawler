@@ -9,7 +9,7 @@ import mimetypes
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
@@ -60,6 +60,20 @@ UPSTREAM_IDENTITY_CACHE: dict[str, object] = {"mtime": 0.0, "identity": {}}
 INTERFACE_API_KEY_HEADER = "x-api-key"
 LEGACY_INTERFACE_API_KEY_FIELDS = {"activation_code", "ActivationCode", "api_activation_code", "code"}
 CORE_LOCAL_ADDED_TIME = "2026-06-28"
+PENDING_DELETE_GROUP = "待删除模块"
+STATUS_ONLY_RESPONSE_KEYS = {
+    "code",
+    "errcode",
+    "info",
+    "message",
+    "msg",
+    "serverts",
+    "status",
+    "success",
+    "t",
+    "time",
+    "ttag",
+}
 CORE_LOCAL_TITLES = {
     "five_level": {
         "method_name": "hqstock_five_level",
@@ -206,6 +220,37 @@ def _scenario_level_for(session_id: object) -> str:
     return level if level in SCENARIO_LEVELS else "normal"
 
 
+def _effective_scenario_level_for(session_id: object) -> str:
+    session_key = str(session_id)
+    if session_key in RUNTIME_PENDING_DELETE_SESSION_IDS:
+        return "pending_delete"
+    return _scenario_level_for(session_key)
+
+
+def _is_pending_delete_scenario(scenario: dict[str, object]) -> bool:
+    return (
+        str(scenario.get("level") or "") == "pending_delete"
+        or str(scenario.get("session_id") or "") in RUNTIME_PENDING_DELETE_SESSION_IDS
+    )
+
+
+def _scenario_group_for(level: str) -> str:
+    return PENDING_DELETE_GROUP if level == "pending_delete" else ""
+
+
+def _mark_scenario_pending_delete(session_id: object) -> None:
+    session_key = str(session_id or "").strip()
+    if not session_key:
+        return
+    RUNTIME_PENDING_DELETE_SESSION_IDS.add(session_key)
+    for scenario in SCENARIOS:
+        if str(scenario.get("session_id") or "") != session_key:
+            continue
+        scenario["level"] = "pending_delete"
+        scenario["level_label"] = SCENARIO_LEVELS["pending_delete"]
+        scenario["group"] = PENDING_DELETE_GROUP
+
+
 def _safe_log_values(values: dict[str, object]) -> dict[str, str]:
     clean: dict[str, str] = {}
     for key, value in values.items():
@@ -214,6 +259,380 @@ def _safe_log_values(values: dict[str, object]) -> dict[str, str]:
         else:
             clean[key] = str(value)
     return clean
+
+
+def _log_headers(headers: object) -> dict[str, str]:
+    if not isinstance(headers, dict):
+        try:
+            return {str(key): str(value) for key, value in dict(headers).items()}
+        except (TypeError, ValueError):
+            return {}
+    return {str(key): str(value) for key, value in headers.items()}
+
+
+def _log_payload(payload: object) -> object:
+    if isinstance(payload, dict):
+        return {str(key): _log_payload(value) for key, value in payload.items()}
+    if isinstance(payload, list):
+        return [_log_payload(item) for item in payload]
+    return payload
+
+
+def _request_log_payload(
+    method: object,
+    url: object,
+    headers: object,
+    params: dict[str, object],
+    data: dict[str, object],
+    overrides: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "method": str(method or ""),
+        "url": str(url or ""),
+        "headers": _log_headers(headers),
+        "query": _log_payload(dict(params or {})),
+        "body": _log_payload(dict(data or {})),
+        "overrides": _log_payload(dict(overrides or {})),
+    }
+
+
+def _response_log_payload(response: object, body: object) -> dict[str, object]:
+    return {
+        "url": str(getattr(response, "url", "") or ""),
+        "status_code": int(getattr(response, "status_code", 0) or 0),
+        "headers": _log_headers(getattr(response, "headers", {})),
+        "body": _log_payload(body),
+    }
+
+
+def _is_upstream_auth_error(body: object) -> bool:
+    if not isinstance(body, dict):
+        text = str(body or "").lower()
+        return any(marker in text for marker in ("login", "token", "auth", "登录", "登陆", "失效", "过期", "未授权"))
+    errcode = str(body.get("errcode", "")).strip()
+    message = str(body.get("message") or body.get("msg") or body.get("errmsg") or body.get("error") or "").strip()
+    lowered = message.lower()
+    if errcode in {"1001", "1002", "401", "403"}:
+        return True
+    return any(marker in lowered for marker in ("login", "token", "auth", "登录", "登陆", "失效", "过期", "未授权"))
+
+
+def _upstream_error_message(body: object) -> str:
+    if not isinstance(body, dict):
+        text = str(body or "")
+        return text[:300] if text else ""
+    errcode = str(body.get("errcode", "")).strip()
+    message = str(body.get("message") or body.get("msg") or body.get("errmsg") or body.get("error") or "").strip()
+    if errcode and errcode not in {"0", "200", "success"}:
+        return message or f"upstream errcode: {errcode}"
+    lowered = message.lower()
+    if any(marker in lowered for marker in ("login", "token", "auth", "登录", "登陆", "失效", "过期", "未授权")):
+        return message
+    return ""
+
+
+def _is_body_only_market_scenario(scenario: dict[str, object]) -> bool:
+    if scenario.get("body_only_disabled"):
+        return False
+    endpoint = str(scenario.get("endpoint") or "").lower()
+    alias_endpoint = str(scenario.get("alias_endpoint") or "").lower()
+    title = str(scenario.get("title") or "").lower()
+    return any(
+        marker in value
+        for value in (endpoint, alias_endpoint, title)
+        for marker in ("xianhuodata_getxianhuolist", "xianhuodata/getxianhuolist")
+    )
+
+
+def _is_theme_infogr_scenario(scenario: dict[str, object]) -> bool:
+    endpoint = str(scenario.get("endpoint") or "").lower()
+    alias_endpoint = str(scenario.get("alias_endpoint") or "").lower()
+    title = str(scenario.get("title") or "").lower()
+    return any(
+        marker in value
+        for value in (endpoint, alias_endpoint, title)
+        for marker in ("theme_infogr", "theme/infogr")
+    )
+
+
+def _is_stock_getnewestday_scenario(scenario: dict[str, object]) -> bool:
+    endpoint = str(scenario.get("endpoint") or "").lower()
+    alias_endpoint = str(scenario.get("alias_endpoint") or "").lower()
+    title = str(scenario.get("title") or "").lower()
+    return any(
+        marker in value
+        for value in (endpoint, alias_endpoint, title)
+        for marker in ("stock_getnewestday", "stock/getnewestday")
+    )
+
+
+def _latest_weekday_trading_day(now: datetime | None = None) -> str:
+    day = (now or datetime.now()).date()
+    while day.weekday() >= 5:
+        day -= timedelta(days=1)
+    return day.isoformat()
+
+
+def _parse_day_text(value: object) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    digits = "".join(ch for ch in text if ch.isdigit())
+    if len(digits) >= 8:
+        return f"{digits[:4]}-{digits[4:6]}-{digits[6:8]}"
+    return text
+
+
+def _stock_newestday_payload(payload: object) -> object:
+    if not isinstance(payload, dict):
+        return payload
+    fixed = dict(payload)
+    latest_day = _latest_weekday_trading_day()
+    date_keys = ("Day", "Date", "NewestDay", "NewDay", "TradeDate", "TradingDay", "latest_trading_day")
+    matched_key = next((key for key in date_keys if key in fixed), "")
+    raw_day = _parse_day_text(fixed.get(matched_key)) if matched_key else ""
+    target_key = matched_key or "Day"
+    fixed[target_key] = latest_day
+    fixed["latest_trading_day"] = latest_day
+    fixed["raw_latest_trading_day"] = raw_day
+    fixed["latest_trading_day_fixed"] = raw_day != latest_day
+    fixed["latest_trading_day_source"] = "local_weekday_calendar"
+    return fixed
+
+
+def _flatten_for_dataframe(value: object, prefix: str = "") -> dict[str, object]:
+    if isinstance(value, dict):
+        flattened: dict[str, object] = {}
+        for key, item in value.items():
+            name = f"{prefix}.{key}" if prefix else str(key)
+            if isinstance(item, dict):
+                flattened.update(_flatten_for_dataframe(item, name))
+            elif isinstance(item, list):
+                flattened[name] = json.dumps(item, ensure_ascii=False)
+            else:
+                flattened[name] = item
+        return flattened
+    return {prefix or "value": value}
+
+
+def _find_dataframe_rows(payload: object) -> tuple[list[dict[str, object]], str]:
+    if isinstance(payload, list):
+        if all(isinstance(item, dict) for item in payload):
+            return [_flatten_for_dataframe(item) for item in payload], "root"
+        return [{"value": item} for item in payload], "root"
+    if not isinstance(payload, dict):
+        return [{"value": payload}], "root"
+    candidates = ("List", "list", "Data", "data", "Rows", "rows", "Result", "result")
+    for key in candidates:
+        value = payload.get(key)
+        if isinstance(value, list):
+            if all(isinstance(item, dict) for item in value):
+                return [_flatten_for_dataframe(item) for item in value], key
+            return [{"value": item} for item in value], key
+    for key, value in payload.items():
+        if isinstance(value, list):
+            if all(isinstance(item, dict) for item in value):
+                return [_flatten_for_dataframe(item) for item in value], str(key)
+            return [{"value": item} for item in value], str(key)
+    return [_flatten_for_dataframe(payload)], "root"
+
+
+def _dataframe_payload(payload: object) -> dict[str, object]:
+    rows, source = _find_dataframe_rows(payload)
+    columns: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        for key in row:
+            if key not in seen:
+                seen.add(key)
+                columns.append(key)
+    data = [[row.get(column) for column in columns] for row in rows]
+    return {
+        "format": "dataframe",
+        "source": source,
+        "columns": columns,
+        "data": data,
+        "records": rows,
+        "shape": [len(rows), len(columns)],
+    }
+
+
+def _hq_not_found_payload(packet_code: str, label: str, stock_id: str) -> dict[str, object]:
+    if not HQSTOCK_LOG.exists():
+        message = f"hqStock capture log not found: {HQSTOCK_LOG}"
+        hint = "Start Frida capture first, then open the stock quote page in the app before calling this API."
+    else:
+        message = f"no hqStock {packet_code} {label} packet found for {stock_id}"
+        hint = "Open or refresh the target stock quote page while Frida capture is running, then call this API again."
+    return {
+        "error": "not_found",
+        "message": message,
+        "stock": stock_id,
+        "log": str(HQSTOCK_LOG),
+        "hint": hint,
+    }
+
+
+def _as_float(value: object, default: float = 0.0) -> float:
+    try:
+        return float(str(value).replace(",", "").strip())
+    except (TypeError, ValueError):
+        return default
+
+
+def _as_int(value: object, default: int = 0) -> int:
+    try:
+        return int(float(str(value).replace(",", "").strip()))
+    except (TypeError, ValueError):
+        return default
+
+
+def _weituo_level(price: float, volume: int, amount: float) -> dict[str, object]:
+    return {
+        "price": price,
+        "price_raw": int(round(price * 10000)),
+        "volume": volume,
+        "volume_unit": "lot",
+        "amount": round(amount, 2),
+        "amount_raw": int(round(amount * 100)),
+        "amount_unit": "CNY",
+    }
+
+
+def _decode_weituo_five_level(stock_id: str, payload: object) -> dict[str, object] | None:
+    if not isinstance(payload, dict):
+        return None
+    rows = payload.get("List")
+    if not isinstance(rows, list):
+        return None
+    books: dict[str, dict[float, dict[str, float]]] = {"buy": {}, "sell": {}}
+    latest_time = ""
+    for row in rows:
+        if not isinstance(row, list) or len(row) < 9:
+            continue
+        if str(row[8]) == "1":
+            continue
+        price = _as_float(row[2])
+        volume = _as_int(row[3])
+        amount = _as_float(row[4])
+        if price <= 0 or volume <= 0:
+            continue
+        side = "buy" if str(row[6]) == "1" else "sell" if str(row[6]) == "2" else ""
+        if not side:
+            continue
+        bucket = books[side].setdefault(price, {"volume": 0.0, "amount": 0.0})
+        bucket["volume"] += volume
+        bucket["amount"] += amount
+        latest_time = str(row[0] or latest_time)
+
+    buy = [
+        _weituo_level(price, int(values["volume"]), float(values["amount"]))
+        for price, values in sorted(books["buy"].items(), key=lambda item: item[0], reverse=True)[:5]
+    ]
+    sell = [
+        _weituo_level(price, int(values["volume"]), float(values["amount"]))
+        for price, values in sorted(books["sell"].items(), key=lambda item: item[0])[:5]
+    ]
+    if not buy and not sell:
+        return None
+    return {
+        "stock": stock_id,
+        "source": "online_stockl2data_getweituo",
+        "packet_code": "2015",
+        "packet_note": "Online parsed from StockL2Data.GetWeiTuo order data; local Frida hqStock 2015 remains fallback.",
+        "time": latest_time,
+        "base_price": None,
+        "sell": sell,
+        "buy": buy,
+        "raw_fields": {
+            "count": payload.get("Count"),
+            "total": payload.get("total"),
+            "title": payload.get("Title", ""),
+            "errcode": payload.get("errcode"),
+        },
+    }
+
+
+def _decode_weituo_time_sales(stock_id: str, payload: object, limit: int = 100) -> dict[str, object] | None:
+    if not isinstance(payload, dict):
+        return None
+    rows = payload.get("List")
+    if not isinstance(rows, list):
+        return None
+    trades: list[dict[str, object]] = []
+    for row in rows:
+        if not isinstance(row, list) or len(row) < 9:
+            continue
+        price = _as_float(row[2])
+        volume = _as_int(row[3])
+        amount = _as_float(row[4])
+        if price <= 0 or volume <= 0:
+            continue
+        side_flag = _as_int(row[6])
+        trades.append(
+            {
+                "time": str(row[0] or ""),
+                "order_id": str(row[1] or ""),
+                "price": price,
+                "price_raw": int(round(price * 10000)),
+                "side": "buy" if side_flag == 1 else "sell" if side_flag == 2 else "neutral",
+                "side_flag": side_flag,
+                "volume": volume,
+                "volume_unit": "lot",
+                "amount": round(amount, 2),
+                "amount_raw": int(round(amount * 100)),
+                "amount_unit": "CNY",
+                "cancelled": str(row[8]) == "1",
+                "timestamp": str(row[9] if len(row) > 9 else ""),
+            }
+        )
+    if not trades:
+        return None
+    selected = trades[-limit:] if limit > 0 else trades
+    return {
+        "stock": stock_id,
+        "source": "online_stockl2data_getweituo",
+        "packet_code": "2006",
+        "packet_note": "Online parsed from StockL2Data.GetWeiTuo order data; local Frida hqStock 2006 remains fallback.",
+        "day": payload.get("day") or "",
+        "count": len(trades),
+        "trades": selected,
+        "raw_fields": {
+            "count": payload.get("Count"),
+            "total": payload.get("total"),
+            "title": payload.get("Title", ""),
+            "errcode": payload.get("errcode"),
+        },
+    }
+
+
+def _fetch_online_weituo(stock_id: str, overrides: dict[str, str]) -> tuple[object, object]:
+    client = KaipanlaCapturedClient(timeout=15, min_interval=0, jitter=0)
+    client.session.trust_env = False
+    request_overrides = {
+        "StockID": stock_id,
+        "st": str(overrides.get("st") or overrides.get("St") or "25"),
+        "Type": str(overrides.get("Type") or "0"),
+        "Vol": str(overrides.get("Vol") or "500"),
+    }
+    response = client.stockl2data_getweituo(**request_overrides)
+    try:
+        body: object = response.json()
+    except ValueError:
+        body = response.text
+    return response, body
+
+
+def _fetch_online_five_level(stock_id: str, overrides: dict[str, str]) -> tuple[dict[str, object] | None, object, object]:
+    response, body = _fetch_online_weituo(stock_id, overrides)
+    return _decode_weituo_five_level(stock_id, body), response, body
+
+
+def _fetch_online_time_sales(
+    stock_id: str, overrides: dict[str, str], limit: int = 100
+) -> tuple[dict[str, object] | None, object, object]:
+    response, body = _fetch_online_weituo(stock_id, overrides)
+    return _decode_weituo_time_sales(stock_id, body, limit=limit), response, body
 
 
 def _is_placeholder_value(value: object) -> bool:
@@ -235,13 +654,13 @@ def _form_values_from_hex(hex_text: str) -> dict[str, str]:
     return {key: values[-1] if values else "" for key, values in parse_qs(query, keep_blank_values=True).items()}
 
 
-def _latest_upstream_identity() -> dict[str, str]:
+def _latest_upstream_identity(force: bool = False) -> dict[str, str]:
     try:
         stat = FRIDA_CAPTURE_LOG.stat()
     except OSError:
         return {}
     cached_mtime = float(UPSTREAM_IDENTITY_CACHE.get("mtime") or 0)
-    if stat.st_mtime == cached_mtime:
+    if not force and stat.st_mtime == cached_mtime:
         cached = UPSTREAM_IDENTITY_CACHE.get("identity")
         return dict(cached) if isinstance(cached, dict) else {}
     identity: dict[str, str] = {}
@@ -271,6 +690,23 @@ def _latest_upstream_identity() -> dict[str, str]:
     return dict(identity)
 
 
+def _current_upstream_identity(force: bool = False) -> dict[str, str]:
+    captured_identity = _latest_upstream_identity(force=force)
+    identity = {
+        "UserID": os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID", ""),
+        "Token": os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token", ""),
+        "DeviceID": os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID", ""),
+    }
+    return {key: value for key, value in identity.items() if value and not _is_placeholder_value(value)}
+
+
+def _apply_upstream_identity(data: dict[str, object], identity: dict[str, str]) -> None:
+    for key in ("UserID", "Token", "DeviceID"):
+        value = identity.get(key)
+        if value and _is_placeholder_value(data.get(key)):
+            data[key] = value
+
+
 def _append_call_log(record: dict[str, object]) -> None:
     try:
         with CALL_LOG_FILE.open("a", encoding="utf-8") as handle:
@@ -297,6 +733,51 @@ def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
         if len(records) >= limit:
             break
     return records
+
+
+def _is_scalar_status_value(value: object) -> bool:
+    return value is None or isinstance(value, (str, int, float, bool))
+
+
+def _unwrap_response_body(payload: object) -> object:
+    if isinstance(payload, dict):
+        response = payload.get("response")
+        if isinstance(response, dict) and "body" in response:
+            return response.get("body")
+        if "body" in payload and {
+            "requested_at",
+            "status_code",
+            "content_type",
+            "upstream_url",
+        }.intersection(payload):
+            return payload.get("body")
+    return payload
+
+
+def _is_status_only_response_body(payload: object) -> bool:
+    body = _unwrap_response_body(payload)
+    if not isinstance(body, dict) or not body:
+        return False
+    keys = {str(key).lower() for key in body}
+    if not keys <= STATUS_ONLY_RESPONSE_KEYS:
+        return False
+    if not {"errcode", "code", "status", "success"}.intersection(keys):
+        return False
+    return all(_is_scalar_status_value(value) for value in body.values())
+
+
+def _load_pending_delete_session_ids_from_logs() -> set[str]:
+    session_ids: set[str] = set()
+    for record in _load_call_logs(limit=MAX_CALL_LOGS):
+        if not _is_status_only_response_body(record):
+            continue
+        session_id = str(record.get("session_id") or "").strip()
+        if session_id:
+            session_ids.add(session_id)
+    return session_ids
+
+
+RUNTIME_PENDING_DELETE_SESSION_IDS = _load_pending_delete_session_ids_from_logs()
 
 
 def _interface_added_time_for(spec: dict[str, object]) -> str:
@@ -693,6 +1174,32 @@ def _title_for(spec: dict[str, object], controller: object, action: object) -> s
     return f"{controller}.{action}"
 
 
+def _is_system_config_scenario(scenario: dict[str, object]) -> bool:
+    text = " ".join(
+        str(scenario.get(key, ""))
+        for key in ("title", "title_cn", "method_name", "endpoint", "alias_endpoint", "target_url", "host")
+    ).lower()
+    system_markers = (
+        "appuser",
+        "applog",
+        "getsockip",
+        "userinfo",
+        "userselectstock",
+        "datastatistics",
+        "databatchstatistics",
+        "log.",
+        "log_",
+        "system",
+        "sysappversion",
+        "getiplist",
+        "用户",
+        "系统",
+        "网络",
+        "埋点",
+    )
+    return any(marker in text for marker in system_markers)
+
+
 def _build_scenarios() -> list[dict[str, object]]:
     scenarios: list[dict[str, object]] = []
     used_method_names: dict[str, int] = {}
@@ -716,6 +1223,7 @@ def _build_scenarios() -> list[dict[str, object]]:
             if duplicate_index == 0
             else f"{base_alias_endpoint}/{_safe_route_part(str(spec['session_id']))}"
         )
+        level = _effective_scenario_level_for(spec["session_id"])
         scenarios.append(
             {
                 "session_id": spec["session_id"],
@@ -723,8 +1231,9 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "title_cn": _title_cn_for(spec, controller, action),
                 "added_time": _interface_added_time_for(spec),
                 "maintenance_time": _maintenance_time_for(spec),
-                "level": _scenario_level_for(spec["session_id"]),
-                "level_label": SCENARIO_LEVELS[_scenario_level_for(spec["session_id"])],
+                "level": level,
+                "level_label": SCENARIO_LEVELS[level],
+                "group": _scenario_group_for(level),
                 "method_name": method_name,
                 "http_method": spec["method"],
                 "target_url": spec["url"],
@@ -735,6 +1244,34 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "hide_url_fields": spec.get("hide_url_fields", []),
             }
         )
+    for scenario in list(scenarios):
+        if scenario.get("endpoint") != "/api/xianhuodata_getxianhuolist":
+            continue
+        copy_scenario = dict(scenario)
+        copy_scenario["session_id"] = f"{scenario.get('session_id')}:copy"
+        copy_scenario["title"] = f"{scenario.get('title')} Copy"
+        copy_scenario["title_cn"] = f"{scenario.get('title_cn') or scenario.get('title')}（原始包装返回）"
+        copy_scenario["method_name"] = "xianhuodata_getxianhuolist_copy"
+        copy_scenario["endpoint"] = "/api/xianhuodata_getxianhuolist_copy"
+        copy_scenario["alias_endpoint"] = "/api/xianhuodata/getxianhuolist/copy"
+        copy_scenario["body_only_disabled"] = True
+        copy_scenario["copy_of_endpoint"] = scenario.get("endpoint")
+        scenarios.append(copy_scenario)
+        break
+    for scenario in list(scenarios):
+        if scenario.get("endpoint") != "/api/stock_getnewestday":
+            continue
+        copy_scenario = dict(scenario)
+        copy_scenario["session_id"] = f"{scenario.get('session_id')}:copy"
+        copy_scenario["title"] = f"{scenario.get('title')} Copy"
+        copy_scenario["title_cn"] = f"{scenario.get('title_cn') or scenario.get('title')} DataFrame"
+        copy_scenario["method_name"] = "stock_getnewestday_copy"
+        copy_scenario["endpoint"] = "/api/stock_getnewestday_copy"
+        copy_scenario["alias_endpoint"] = "/api/stock/getnewestday/copy"
+        copy_scenario["stock_newestday_body_only"] = True
+        copy_scenario["copy_of_endpoint"] = scenario.get("endpoint")
+        scenarios.append(copy_scenario)
+        break
     for name, (host, controller, action) in CORE_API_KEYS.items():
         if name not in CORE_LOCAL_API_KEYS:
             continue
@@ -746,7 +1283,7 @@ def _build_scenarios() -> list[dict[str, object]]:
         title_cn = core_meta.get("title_cn", str(defaults.get("title_cn") or f"{controller}.{action}"))
         maintenance_time = core_meta.get("maintenance_time", CORE_LOCAL_ADDED_TIME)
         added_time = CORE_LOCAL_ADDED_TIME
-        level = _scenario_level_for(session_id)
+        level = _effective_scenario_level_for(session_id)
         scenarios.append(
             {
                 "session_id": session_id,
@@ -756,6 +1293,7 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "maintenance_time": maintenance_time,
                 "level": level,
                 "level_label": SCENARIO_LEVELS[level],
+                "group": _scenario_group_for(level),
                 "method_name": method_name,
                 "http_method": "GET",
                 "target_url": str(HQSTOCK_LOG),
@@ -784,6 +1322,13 @@ def _refresh_routes() -> None:
         ROUTES[scenario["endpoint"]] = {"scenario": scenario, "spec": spec}
         ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "spec": spec}
     for scenario in SCENARIOS[len(REQUESTS) :]:
+        copy_of_endpoint = scenario.get("copy_of_endpoint")
+        if copy_of_endpoint:
+            source_route = ROUTES.get(str(copy_of_endpoint))
+            if source_route and source_route.get("spec"):
+                ROUTES[scenario["endpoint"]] = {"scenario": scenario, "spec": source_route["spec"]}
+                ROUTES[scenario["alias_endpoint"]] = {"scenario": scenario, "spec": source_route["spec"]}
+            continue
         if not scenario.get("is_core"):
             continue
         ROUTES[scenario["endpoint"]] = {"scenario": scenario, "core_name": scenario.get("core_name")}
@@ -883,10 +1428,19 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if error:
                 self._send_auth_failure(error, json_response=True)
                 return
+            visible_scenarios = (
+                SCENARIOS
+                if user.get("role") == "admin"
+                else [
+                    item
+                    for item in SCENARIOS
+                    if not _is_system_config_scenario(item) and not _is_pending_delete_scenario(item)
+                ]
+            )
             self._send_json(
                 {
-                    "count": len(SCENARIOS),
-                    "scenarios": SCENARIOS,
+                    "count": len(visible_scenarios),
+                    "scenarios": visible_scenarios,
                     "level_options": [
                         {"value": value, "label": label}
                         for value, label in SCENARIO_LEVELS.items()
@@ -905,7 +1459,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/core" or path.startswith("/api/core/"):
-            user, error = self._require_user()
+            user, error = self._require_interface_or_session_user()
             if error:
                 self._send_auth_failure(error, json_response=True)
                 return
@@ -913,7 +1467,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/hq" or path.startswith("/api/hq/"):
-            user, error = self._require_user()
+            user, error = self._require_interface_or_session_user()
             if error:
                 self._send_auth_failure(error, json_response=True)
                 return
@@ -921,7 +1475,24 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         if path in ROUTES:
-            user, error = self._require_user()
+            if path == "/api/stock_getnewestday" and self._interface_api_key():
+                user, error = self._require_api_key_user()
+                if error:
+                    self._send_json(
+                        {"error": error, "message": error, "auth_error": True},
+                        status=self._auth_failure_status(error),
+                    )
+                    return
+                route = ROUTES[path]
+                query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+                body_values = self._read_body_values()
+                overrides = {**query_values, **body_values}
+                overrides.pop("_ts", None)
+                for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+                    overrides.pop(key, None)
+                self._call_stock_getnewestday_api_key(user, route["scenario"], route["spec"], overrides)
+                return
+            user, error = self._require_interface_or_session_user()
             if error:
                 self._send_auth_failure(error, json_response=True)
                 return
@@ -929,6 +1500,9 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": "method_not_allowed"}, status=405)
                 return
             route = ROUTES[path]
+            if user.get("role") != "admin" and _is_pending_delete_scenario(route["scenario"]):
+                self._send_json({"error": "forbidden", "message": "Admin role required"}, status=403)
+                return
             query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
             body_values = self._read_body_values()
             overrides = {**query_values, **body_values}
@@ -952,23 +1526,23 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         client.session.trust_env = False
         data = dict(spec.get("data") or {})
         params = dict(spec.get("params") or {})
-        captured_identity = _latest_upstream_identity()
-        upstream_user_id = os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID")
-        upstream_token = os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token")
-        upstream_device_id = os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID")
 
         for key, value in overrides.items():
             if key in params and key not in data:
                 params[key] = value
             else:
                 data[key] = value
-        if upstream_user_id and _is_placeholder_value(data.get("UserID")):
-            data["UserID"] = upstream_user_id
-        if upstream_token and _is_placeholder_value(data.get("Token")):
-            data["Token"] = upstream_token
-        if upstream_device_id and _is_placeholder_value(data.get("DeviceID")):
-            data["DeviceID"] = upstream_device_id
+        identity = _current_upstream_identity()
+        _apply_upstream_identity(data, identity)
         params["_ts"] = str(int(requested_at * 1000))
+        request_log = _request_log_payload(
+            spec.get("method", ""),
+            spec.get("url", ""),
+            spec.get("headers", {}),
+            params,
+            data,
+            overrides,
+        )
 
         try:
             response = client.request(spec, data=data, params=params)
@@ -989,6 +1563,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     "status_code": 502,
                     "duration_ms": int((time.time() - requested_at) * 1000),
                     "overrides": _safe_log_values(overrides),
+                    "request": request_log,
+                    "response": None,
                     "error": str(exc),
                 }
             )
@@ -1009,6 +1585,44 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             payload = response.json()
         except ValueError:
             payload = response.text
+        relogin_attempted = False
+        relogin_succeeded = False
+        if _is_upstream_auth_error(payload):
+            refreshed_identity = _current_upstream_identity(force=True)
+            if refreshed_identity and refreshed_identity != identity:
+                identity = refreshed_identity
+                retry_data = dict(data)
+                for key, value in identity.items():
+                    retry_data[key] = value
+                retry_params = dict(params)
+                retry_params["_ts"] = str(int(time.time() * 1000))
+                relogin_attempted = True
+                try:
+                    response = client.request(spec, data=retry_data, params=retry_params)
+                    data = retry_data
+                    params = retry_params
+                    request_log = _request_log_payload(
+                        spec.get("method", ""),
+                        spec.get("url", ""),
+                        spec.get("headers", {}),
+                        params,
+                        data,
+                        overrides,
+                    )
+                    content_type = response.headers.get("Content-Type", "")
+                    try:
+                        payload = response.json()
+                    except ValueError:
+                        payload = response.text
+                    relogin_succeeded = not _is_upstream_auth_error(payload)
+                except Exception:
+                    pass
+        upstream_error = "" if response.ok else f"upstream HTTP {response.status_code}"
+        upstream_body_error = _upstream_error_message(payload)
+        if upstream_body_error:
+            upstream_error = upstream_body_error
+        if not upstream_error and _is_status_only_response_body(payload):
+            _mark_scenario_pending_delete(scenario.get("session_id", ""))
 
         _append_call_log(
             {
@@ -1022,23 +1636,136 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "endpoint": scenario.get("endpoint", ""),
                 "target_url": scenario.get("target_url", spec.get("url", "")),
                 "http_method": scenario.get("http_method", spec.get("method", "")),
-                "status": "ok" if response.ok else "upstream_error",
+                "status": "ok" if not upstream_error else "upstream_error",
                 "status_code": response.status_code,
                 "duration_ms": int((time.time() - requested_at) * 1000),
                 "content_type": content_type,
                 "overrides": _safe_log_values(overrides),
+                "request": request_log,
+                "response": _response_log_payload(response, payload),
+                "upstream_relogin_attempted": relogin_attempted,
+                "upstream_relogin_succeeded": relogin_succeeded,
             }
         )
 
+        if not upstream_error and _is_body_only_market_scenario(scenario):
+            self._send_json(payload)
+            return
+
+        if not upstream_error and _is_theme_infogr_scenario(scenario):
+            self._send_json(_dataframe_payload(payload))
+            return
+
+        if not upstream_error and scenario.get("stock_newestday_body_only"):
+            self._send_json(_dataframe_payload(_stock_newestday_payload(payload)))
+            return
+
+        response_body = _stock_newestday_payload(payload) if not upstream_error and _is_stock_getnewestday_scenario(scenario) else payload
         self._send_json(
             {
                 "requested_at": requested_at,
                 "status_code": response.status_code,
                 "content_type": content_type,
-                "upstream_url": response.url,
+                "body": response_body,
+                "upstream_error": upstream_error,
+                "upstream_relogin_attempted": relogin_attempted,
+                "upstream_relogin_succeeded": relogin_succeeded,
+            }
+            if not upstream_error
+            else {
+                "error": "upstream_error",
+                "message": upstream_error,
+                "requested_at": requested_at,
+                "status_code": response.status_code,
+                "content_type": content_type,
                 "body": payload,
+                "upstream_relogin_attempted": relogin_attempted,
+                "upstream_relogin_succeeded": relogin_succeeded,
+            },
+            status=200 if not upstream_error else 502,
+        )
+
+    def _call_stock_getnewestday_api_key(
+        self,
+        user: dict[str, object],
+        scenario: dict[str, object],
+        spec: dict[str, object],
+        overrides: dict[str, str],
+    ) -> None:
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        client = KaipanlaCapturedClient()
+        client.session.trust_env = False
+        data = dict(spec.get("data") or {})
+        params = dict(spec.get("params") or {})
+        for key, value in overrides.items():
+            if key in params and key not in data:
+                params[key] = value
+            else:
+                data[key] = value
+        identity = _current_upstream_identity()
+        _apply_upstream_identity(data, identity)
+        params["_ts"] = str(int(requested_at * 1000))
+        request_log = _request_log_payload(spec.get("method", ""), spec.get("url", ""), spec.get("headers", {}), params, data, overrides)
+        try:
+            response = client.request(spec, data=data, params=params)
+            content_type = response.headers.get("Content-Type", "")
+            try:
+                payload: object = response.json()
+            except ValueError:
+                payload = response.text
+        except Exception as exc:
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": scenario.get("session_id", ""),
+                    "title": scenario.get("title", ""),
+                    "title_cn": scenario.get("title_cn", ""),
+                    "endpoint": scenario.get("endpoint", ""),
+                    "target_url": scenario.get("target_url", spec.get("url", "")),
+                    "http_method": self.command,
+                    "status": "failed",
+                    "status_code": 502,
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "overrides": _safe_log_values(overrides),
+                    "request": request_log,
+                    "response": None,
+                    "error": str(exc),
+                }
+            )
+            self._send_json({"error": "upstream_request_failed", "message": str(exc)}, status=502)
+            return
+
+        upstream_error = "" if response.ok else f"upstream HTTP {response.status_code}"
+        upstream_body_error = _upstream_error_message(payload)
+        if upstream_body_error:
+            upstream_error = upstream_body_error
+        body = _stock_newestday_payload(payload)
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": scenario.get("session_id", ""),
+                "title": scenario.get("title", ""),
+                "title_cn": scenario.get("title_cn", ""),
+                "endpoint": scenario.get("endpoint", ""),
+                "target_url": scenario.get("target_url", spec.get("url", "")),
+                "http_method": self.command,
+                "status": "ok" if not upstream_error else "upstream_error",
+                "status_code": response.status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "content_type": content_type,
+                "overrides": _safe_log_values(overrides),
+                "request": request_log,
+                "response": _response_log_payload(response, payload),
             }
         )
+        self._send_json(body if not upstream_error else {"error": "upstream_error", "message": upstream_error, "body": body}, status=200 if not upstream_error else 502)
 
     def _handle_auth_api(self, path: str) -> None:
         if path == "/api/auth/login" and self.command == "POST":
@@ -1050,7 +1777,11 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if error:
                 status = 403 if error in {"disabled", "expired"} else 401
                 headers = [self._make_session_cookie(token)] if token else None
-                self._send_json({"error": error, "message": error, "user": user}, status=status, extra_headers=headers)
+                self._send_json(
+                    {"error": error, "message": error, "user": user, "auth_error": True},
+                    status=status,
+                    extra_headers=headers,
+                )
                 return
             self._send_json({"user": user}, extra_headers=[self._make_session_cookie(token)])
             return
@@ -1071,7 +1802,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if error:
                 status = 201 if error == "expired" else 403
                 self._send_json(
-                    {"error": error, "message": error, "user": user},
+                    {"error": error, "message": error, "user": user, "auth_error": True},
                     status=status,
                     extra_headers=[self._make_session_cookie(token)] if token else None,
                 )
@@ -1155,6 +1886,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                             "maintenance_time": scenario.get("maintenance_time", ""),
                             "level": scenario.get("level", "normal"),
                             "level_label": scenario.get("level_label", SCENARIO_LEVELS["normal"]),
+                            "group": scenario.get("group", ""),
                             "endpoint": scenario["endpoint"],
                             "target_url": scenario["target_url"],
                         }
@@ -1260,7 +1992,32 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 
         prefix = "/api/admin/users/"
         if path.startswith(prefix):
-            username = unquote(path[len(prefix) :])
+            user_path = path[len(prefix) :]
+            if user_path.endswith("/activation-code"):
+                username = unquote(user_path[: -len("/activation-code")])
+                if self.command in {"PUT", "PATCH", "POST"}:
+                    try:
+                        user = AUTH.assign_activation_code_to_user(username, str(self._read_json_body().get("code", "")))
+                    except KeyError as exc:
+                        self._send_json({"error": "not_found", "message": str(exc)}, status=404)
+                        return
+                    except ValueError as exc:
+                        self._send_json({"error": "invalid_request", "message": str(exc)}, status=400)
+                        return
+                    self._send_json({"user": user})
+                    return
+                if self.command == "DELETE":
+                    try:
+                        user = AUTH.remove_user_activation_code(username)
+                    except KeyError as exc:
+                        self._send_json({"error": "not_found", "message": str(exc)}, status=404)
+                        return
+                    except ValueError as exc:
+                        self._send_json({"error": "invalid_request", "message": str(exc)}, status=400)
+                        return
+                    self._send_json({"user": user})
+                    return
+            username = unquote(user_path)
             if self.command == "PATCH":
                 try:
                     user = AUTH.update_user(username, self._read_json_body())
@@ -1422,18 +2179,51 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        request_log: dict[str, object] | None = None
+        response_log: dict[str, object] | None = None
+        error_message = ""
         if name == "five_level":
-            result = latest_five_level(stock_id)
             packet_code = "2015"
-            not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
+            try:
+                result, upstream_response, upstream_body = _fetch_online_five_level(stock_id, values)
+                request_log = _request_log_payload(
+                    "POST",
+                    "https://apphwhq.longhuvip.com/w1/api/index.php",
+                    {},
+                    {},
+                    {"c": "StockL2Data", "a": "GetWeiTuo", "StockID": stock_id},
+                    values,
+                )
+                response_log = _response_log_payload(upstream_response, upstream_body)
+            except Exception as exc:
+                error_message = str(exc)
+                result = latest_five_level(stock_id)
+            not_found_payload = _hq_not_found_payload(packet_code, "five-level", stock_id)
+            if error_message:
+                not_found_payload["online_error"] = error_message
         else:
             try:
                 limit = max(1, min(1000, int(values.get("limit", "100"))))
             except ValueError:
                 limit = 100
-            result = latest_time_sales(stock_id, limit=limit)
             packet_code = "2006"
-            not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
+            try:
+                result, upstream_response, upstream_body = _fetch_online_time_sales(stock_id, values, limit=limit)
+                request_log = _request_log_payload(
+                    "POST",
+                    "https://apphwhq.longhuvip.com/w1/api/index.php",
+                    {},
+                    {},
+                    {"c": "StockL2Data", "a": "GetWeiTuo", "StockID": stock_id},
+                    values,
+                )
+                response_log = _response_log_payload(upstream_response, upstream_body)
+            except Exception as exc:
+                error_message = str(exc)
+                result = latest_time_sales(stock_id, limit=limit)
+            not_found_payload = _hq_not_found_payload(packet_code, "time-sales", stock_id)
+            if error_message:
+                not_found_payload["online_error"] = error_message
         _append_call_log(
             {
                 "requested_at": requested_at,
@@ -1442,27 +2232,21 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "role": user.get("role", ""),
                 "session_id": f"hq:{name}",
                 "title": f"hqStock.{packet_code}",
-                "title_cn": "五档行情",
+                "title_cn": "五档行情" if name == "five_level" else "分时成交",
                 "endpoint": f"/api/hq/{name}",
-                "target_url": str(HQSTOCK_LOG),
+                "target_url": response_log["url"] if response_log else str(HQSTOCK_LOG),
                 "http_method": self.command,
                 "status": "ok" if result else "not_found",
                 "status_code": 200 if result else 404,
                 "duration_ms": int((time.time() - requested_at) * 1000),
                 "overrides": _safe_log_values(values),
+                "request": request_log,
+                "response": response_log,
+                "error": error_message,
             }
         )
         if not result:
-            self._send_json(
-                {
-                    "error": "not_found",
-                    "message": not_found_message,
-                    "stock": stock_id,
-                    "log": str(HQSTOCK_LOG),
-                    "hint": "Start Frida capture and open the stock quote page before calling this API.",
-                },
-                status=404,
-            )
+            self._send_json(not_found_payload, status=404)
             return
         self._send_json({"requested_at": requested_at, "body": result})
 
@@ -1488,18 +2272,51 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         if not stock_id:
             self._send_json({"error": "missing_stock_id", "message": "Pass StockID=688008"}, status=400)
             return
+        request_log: dict[str, object] | None = None
+        response_log: dict[str, object] | None = None
+        error_message = ""
         if name == "five_level":
-            result = latest_five_level(stock_id)
             packet_code = "2015"
-            not_found_message = f"no hqStock 2015 five-level packet found for {stock_id}"
+            try:
+                result, upstream_response, upstream_body = _fetch_online_five_level(stock_id, overrides)
+                request_log = _request_log_payload(
+                    "POST",
+                    "https://apphwhq.longhuvip.com/w1/api/index.php",
+                    {},
+                    {},
+                    {"c": "StockL2Data", "a": "GetWeiTuo", "StockID": stock_id},
+                    overrides,
+                )
+                response_log = _response_log_payload(upstream_response, upstream_body)
+            except Exception as exc:
+                error_message = str(exc)
+                result = latest_five_level(stock_id)
+            not_found_payload = _hq_not_found_payload(packet_code, "five-level", stock_id)
+            if error_message:
+                not_found_payload["online_error"] = error_message
         elif name == "time_sales":
             try:
                 limit = max(1, min(1000, int(overrides.get("limit", "100"))))
             except ValueError:
                 limit = 100
-            result = latest_time_sales(stock_id, limit=limit)
             packet_code = "2006"
-            not_found_message = f"no hqStock 2006 time-sales packet found for {stock_id}"
+            try:
+                result, upstream_response, upstream_body = _fetch_online_time_sales(stock_id, overrides, limit=limit)
+                request_log = _request_log_payload(
+                    "POST",
+                    "https://apphwhq.longhuvip.com/w1/api/index.php",
+                    {},
+                    {},
+                    {"c": "StockL2Data", "a": "GetWeiTuo", "StockID": stock_id},
+                    overrides,
+                )
+                response_log = _response_log_payload(upstream_response, upstream_body)
+            except Exception as exc:
+                error_message = str(exc)
+                result = latest_time_sales(stock_id, limit=limit)
+            not_found_payload = _hq_not_found_payload(packet_code, "time-sales", stock_id)
+            if error_message:
+                not_found_payload["online_error"] = error_message
         else:
             self._send_json({"error": "not_found", "message": f"unknown local core api: {name}"}, status=404)
             return
@@ -1519,26 +2336,19 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "status_code": 200 if result else 404,
                 "duration_ms": int((time.time() - requested_at) * 1000),
                 "overrides": _safe_log_values(overrides),
+                "request": request_log,
+                "response": response_log,
+                "error": error_message,
             }
         )
         if not result:
-            self._send_json(
-                {
-                    "error": "not_found",
-                    "message": not_found_message,
-                    "stock": stock_id,
-                    "log": str(HQSTOCK_LOG),
-                    "hint": "Start Frida capture and open the stock quote page before calling this API.",
-                },
-                status=404,
-            )
+            self._send_json(not_found_payload, status=404)
             return
         self._send_json(
             {
                 "requested_at": requested_at,
                 "status_code": 200,
                 "content_type": "application/json",
-                "upstream_url": str(HQSTOCK_LOG),
                 "core_api": {
                     "name": name,
                     "host": host,
@@ -1605,8 +2415,18 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         client = KaipanlaCoreClient()
+        request_log = _request_log_payload(
+            "POST",
+            f"https://{host}/w1/api/index.php",
+            {},
+            {},
+            {"controller": controller, "action": action, **overrides},
+            overrides,
+        )
+        identity = _current_upstream_identity()
+        core_overrides = {**identity, **overrides}
         try:
-            response = client.request_core(name, **overrides)
+            response = client.request_core(name, **core_overrides)
         except Exception as exc:
             _append_call_log(
                 {
@@ -1624,6 +2444,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     "status_code": 502,
                     "duration_ms": int((time.time() - requested_at) * 1000),
                     "overrides": _safe_log_values(overrides),
+                    "request": request_log,
+                    "response": None,
                     "error": str(exc),
                 }
             )
@@ -1644,6 +2466,29 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             body: object = response.json()
         except ValueError:
             body = response.text
+        relogin_attempted = False
+        relogin_succeeded = False
+        if _is_upstream_auth_error(body):
+            refreshed_identity = _current_upstream_identity(force=True)
+            if refreshed_identity and refreshed_identity != identity:
+                identity = refreshed_identity
+                core_overrides = {**identity, **overrides}
+                relogin_attempted = True
+                try:
+                    response = client.request_core(name, **core_overrides)
+                    duration_ms = int((time.time() - requested_at) * 1000)
+                    content_type = response.headers.get("Content-Type", "")
+                    try:
+                        body = response.json()
+                    except ValueError:
+                        body = response.text
+                    relogin_succeeded = not _is_upstream_auth_error(body)
+                except Exception:
+                    pass
+        upstream_error = "" if response.ok else f"upstream HTTP {response.status_code}"
+        upstream_body_error = _upstream_error_message(body)
+        if upstream_body_error:
+            upstream_error = upstream_body_error
 
         _append_call_log(
             {
@@ -1657,58 +2502,98 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "endpoint": f"/api/core/{name}",
                 "target_url": response.url,
                 "http_method": "POST",
-                "status": "ok" if response.ok else "upstream_error",
+                "status": "ok" if not upstream_error else "upstream_error",
                 "status_code": response.status_code,
                 "duration_ms": duration_ms,
                 "overrides": _safe_log_values(overrides),
+                "request": request_log,
+                "response": _response_log_payload(response, body),
+                "upstream_relogin_attempted": relogin_attempted,
+                "upstream_relogin_succeeded": relogin_succeeded,
             }
         )
         self._send_json(
-            {
-                "requested_at": requested_at,
-                "status_code": response.status_code,
-                "content_type": content_type,
-                "upstream_url": response.url,
-                "core_api": {
-                    "name": name,
-                    "host": host,
-                    "controller": controller,
-                    "action": action,
-                },
-                "body": body,
-            },
-            status=200 if response.ok else 502,
+            (
+                {
+                    "requested_at": requested_at,
+                    "status_code": response.status_code,
+                    "content_type": content_type,
+                    "core_api": {
+                        "name": name,
+                        "host": host,
+                        "controller": controller,
+                        "action": action,
+                    },
+                    "body": body,
+                    "upstream_relogin_attempted": relogin_attempted,
+                    "upstream_relogin_succeeded": relogin_succeeded,
+                }
+                if not upstream_error
+                else {
+                    "error": "upstream_error",
+                    "message": upstream_error,
+                    "requested_at": requested_at,
+                    "status_code": response.status_code,
+                    "content_type": content_type,
+                    "core_api": {
+                        "name": name,
+                        "host": host,
+                        "controller": controller,
+                        "action": action,
+                    },
+                    "body": body,
+                    "upstream_relogin_attempted": relogin_attempted,
+                    "upstream_relogin_succeeded": relogin_succeeded,
+                }
+            ),
+            status=200 if not upstream_error else 502,
         )
 
     def _require_user(self) -> tuple[dict[str, object] | None, str | None]:
         return AUTH.session_user(self._session_token())
 
+    def _require_api_key_user(self) -> tuple[dict[str, object] | None, str | None]:
+        return AUTH.user_for_interface_credentials(
+            str(self.headers.get("x-username") or ""),
+            str(self.headers.get("x-password") or ""),
+            self._interface_api_key(),
+        )
+
+    def _require_interface_or_session_user(self) -> tuple[dict[str, object] | None, str | None]:
+        if self._interface_api_key():
+            return self._require_api_key_user()
+        return self._require_user()
+
     def _interface_api_key(self) -> str:
         return str(self.headers.get(INTERFACE_API_KEY_HEADER) or "").strip()
 
     def _validate_interface_api_key(self, user: dict[str, object]) -> bool:
-        code = self._interface_api_key()
-        ok, error = AUTH.validate_interface_activation_code(
+        ok, error = AUTH.validate_interface_user_activation(
             str(user.get("username", "")),
             str(user.get("role", "")),
-            code,
         )
         if ok:
             return True
-        status = 403 if error in {"disabled", "expired"} else 401
         self._send_json(
             {
                 "error": error or "invalid_activation_code",
-                "message": f"接口调用需要在 Header 中携带有效激活码：{INTERFACE_API_KEY_HEADER}",
+                "message": "\u5f53\u524d\u8d26\u53f7\u672a\u7ed1\u5b9a\u6709\u6548\u6fc0\u6d3b\u7801\uff0c\u65e0\u6cd5\u8c03\u7528\u63a5\u53e3",
             },
-            status=status,
+            status=403,
         )
         return False
 
+    def _auth_failure_status(self, error: str) -> int:
+        if error in {"disabled", "expired", "activation_code_disabled", "activation_code_not_bound_to_user"}:
+            return 403
+        return 401
+
     def _send_auth_failure(self, error: str, json_response: bool) -> None:
         if json_response:
-            status = 403 if error in {"disabled", "expired"} else 401
-            self._send_json({"error": error, "message": error}, status=status)
+            self._send_json(
+                {"error": error, "message": error, "auth_error": True},
+                status=self._auth_failure_status(error),
+            )
             return
         target = "/expired.html" if error == "expired" else f"/login.html?next={self.path}"
         self.send_response(302)

@@ -27,7 +27,6 @@ const busyId = ref<string | null>(null);
 const nameBusyId = ref<string | null>(null);
 const toast = ref("");
 const toastType = ref<"success" | "error">("success");
-const apiKey = ref(localStorage.getItem("kpl_interface_api_key") || "");
 
 let toastTimer = 0;
 
@@ -56,8 +55,8 @@ const filtered = computed(() => {
       item.endpoint,
       item.aliasEndpoint,
       item.host,
-      JSON.stringify(item.params),
-      JSON.stringify(item.data)
+      user.value?.role === "admin" ? JSON.stringify(item.params) : "",
+      user.value?.role === "admin" ? JSON.stringify(item.data) : ""
     ]
       .join(" ")
       .toLowerCase();
@@ -104,14 +103,9 @@ async function refreshScenarios() {
 
 async function runScenarioCall(item: Scenario) {
   if (busyId.value) return;
-  if (!apiKey.value.trim()) {
-    showToast("请先填写接口 API Key", "error");
-    return;
-  }
-  localStorage.setItem("kpl_interface_api_key", apiKey.value.trim());
   busyId.value = item.sessionId;
   try {
-    const result = await callScenario(item, apiKey.value);
+    const result = await callScenario(item);
     window.alert(`调用完成: ${result.status}\n\n${result.text.slice(0, 900)}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -192,21 +186,6 @@ onMounted(() => {
           <StatsBar :items="scenarios" :current-group="group" />
         </div>
 
-        <section class="panel api-key-panel">
-          <div class="api-key-copy">
-            <strong>接口 API Key</strong>
-            <span>所有接口调用都会通过 Header: x-api-key 进行验证。</span>
-          </div>
-          <input
-            v-model.trim="apiKey"
-            class="api-key-input"
-            type="text"
-            placeholder="输入 x-api-key"
-            autocomplete="off"
-            @change="localStorage.setItem('kpl_interface_api_key', apiKey.trim())"
-          />
-        </section>
-
         <section class="panel doc-panel">
           <div class="panel-head">
             <div>
@@ -229,7 +208,6 @@ onMounted(() => {
                 :item="item"
                 :user="user"
                 :level-options="levelOptions"
-                :api-key="apiKey"
                 :busy="busyId === item.sessionId"
                 :name-busy="nameBusyId === item.sessionId"
                 @call="runScenarioCall"
