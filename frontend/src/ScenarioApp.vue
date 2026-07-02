@@ -30,8 +30,36 @@ const toastType = ref<"success" | "error">("success");
 
 let toastTimer = 0;
 
-const groups = computed(() => ["全部", ...new Set(scenarios.value.map((item) => item.group))]);
-const hosts = computed(() => [...new Set(scenarios.value.map((item) => item.host).filter(Boolean))]);
+const levelSortOrder: Record<string, number> = {
+  rare: 0,
+  important: 1,
+  normal: 2,
+  pending_delete: 3
+};
+
+function scenarioSortText(item: Scenario) {
+  return String(item.titleCn || item.title || item.sessionId || item.endpoint || "");
+}
+
+function sortScenarios(items: Scenario[]) {
+  return [...items].sort((a, b) => {
+    const levelResult =
+      (levelSortOrder[a.level] ?? levelSortOrder.normal) -
+      (levelSortOrder[b.level] ?? levelSortOrder.normal);
+    if (levelResult) return levelResult;
+
+    const nameResult = scenarioSortText(a).localeCompare(scenarioSortText(b), "zh-Hans-CN", {
+      numeric: true
+    });
+    if (nameResult) return nameResult;
+
+    return String(a.sessionId).localeCompare(String(b.sessionId), "zh-Hans-CN", { numeric: true });
+  });
+}
+
+const sortedScenarios = computed(() => sortScenarios(scenarios.value));
+const groups = computed(() => ["全部", ...new Set(sortedScenarios.value.map((item) => item.group))]);
+const hosts = computed(() => [...new Set(sortedScenarios.value.map((item) => item.host).filter(Boolean))]);
 const groupCounts = computed(() => {
   const counts: Record<string, number> = { 全部: scenarios.value.length };
   scenarios.value.forEach((item) => {
@@ -42,7 +70,7 @@ const groupCounts = computed(() => {
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase();
-  return scenarios.value.filter((item) => {
+  return sortedScenarios.value.filter((item) => {
     const matchGroup = group.value === "全部" || item.group === group.value;
     const matchHost = host.value === "all" || item.host === host.value;
     const haystack = [

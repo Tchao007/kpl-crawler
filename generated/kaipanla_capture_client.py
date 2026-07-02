@@ -6348,7 +6348,7 @@ class KaipanlaCapturedClient:
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(INDEXPLATE_GETINDEXLIST, data=data)
 
-    def stocklinedata_getklineday_w14(self, st=None, index=None, type=None, stockid=None, **overrides):
+    def stocklinedata_getklineday_w14(self, st=None, index=None, type=None, stockid=None, is_fs=None, **overrides):
         """Replay session 108: StockLineData.GetKLineDay_W14."""
         data = dict(STOCKLINEDATA_GETKLINEDAY_W14['data'])
         if st is not None:
@@ -6359,6 +6359,8 @@ class KaipanlaCapturedClient:
             data['Type'] = str(type)
         if stockid is not None:
             data['StockID'] = str(stockid)
+        if is_fs is not None:
+            data['Is_FS'] = str(is_fs)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(STOCKLINEDATA_GETKLINEDAY_W14, data=data)
 
@@ -6582,11 +6584,13 @@ class KaipanlaCapturedClient:
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(STOCKL2DATA_GETZHANGTINGGENE, data=data)
 
-    def stockl2data_getstockidplate_new(self, stockid=None, **overrides):
+    def stockl2data_getstockidplate_new(self, stockid=None, ist=None, **overrides):
         """Replay session 217: StockL2Data.GetStockIDPlate_New."""
         data = dict(STOCKL2DATA_GETSTOCKIDPLATE_NEW['data'])
         if stockid is not None:
             data['StockID'] = str(stockid)
+        if ist is not None:
+            data['isT'] = str(ist)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(STOCKL2DATA_GETSTOCKIDPLATE_NEW, data=data)
 
@@ -6828,7 +6832,7 @@ class KaipanlaCapturedClient:
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(STOCKL2DATA_GETSTOCKPERCENTTURNOVERTEN, data=data)
 
-    def stockl2data_getweituo(self, st=None, type=None, stockid=None, **overrides):
+    def stockl2data_getweituo(self, st=None, type=None, stockid=None, tur=None, vol=None, **overrides):
         """Replay session 375: StockL2Data.GetWeiTuo."""
         data = dict(STOCKL2DATA_GETWEITUO['data'])
         if st is not None:
@@ -6837,6 +6841,10 @@ class KaipanlaCapturedClient:
             data['Type'] = str(type)
         if stockid is not None:
             data['StockID'] = str(stockid)
+        if tur is not None:
+            data['Tur'] = str(tur)
+        if vol is not None:
+            data['Vol'] = str(vol)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(STOCKL2DATA_GETWEITUO, data=data)
 

@@ -7,9 +7,10 @@ import argparse
 import json
 import mimetypes
 import os
+import re
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
@@ -56,23 +57,69 @@ SESSION_COOKIE = "kpl_session"
 AUTH = AuthStore(AUTH_DB_FILE)
 SENSITIVE_LOG_KEYS = {"token", "userid", "deviceid", "clientsign", "log", "datalist", "x-api-key"}
 MAX_CALL_LOGS = 1000
+MAX_CALL_LOG_TAIL_BYTES = 2 * 1024 * 1024
+MAX_FRIDA_IDENTITY_TAIL_BYTES = 4 * 1024 * 1024
 UPSTREAM_IDENTITY_CACHE: dict[str, object] = {"mtime": 0.0, "identity": {}}
 INTERFACE_API_KEY_HEADER = "x-api-key"
 LEGACY_INTERFACE_API_KEY_FIELDS = {"activation_code", "ActivationCode", "api_activation_code", "code"}
 CORE_LOCAL_ADDED_TIME = "2026-06-28"
 PENDING_DELETE_GROUP = "待删除模块"
+MARKET_FENGK_GROUP = "市场风口模块"
+MARKET_FENGK_SESSION_IDS = {"429", "430", "432", "18003", "18013", "18019", "18021", "18071"}
+MARKET_VOLUME_GROUP = "市场量能"
+EMOTION_GROUP = "情绪模块"
+HQ_CORE_GROUP = "行情核心"
+STOCK_DETAIL_GROUP = "个股详情"
+INFO_CONTENT_GROUP = "资讯内容"
+TOPIC_DATA_GROUP = "题材数据"
+LHB_GROUP = "龙虎榜"
+SYSTEM_CONFIG_GROUP = "系统配置接口"
+BEIJING_TZ = timezone(timedelta(hours=8))
+TIMESTAMP_FIELD_NAMES = {
+    "createtime",
+    "create_time",
+    "datetime",
+    "endtime",
+    "lasttime",
+    "mtime",
+    "opentime",
+    "requested_at",
+    "servertime",
+    "server_time",
+    "serverts",
+    "starttime",
+    "timestamp",
+    "time",
+    "updatetime",
+    "update_time",
+    "updatedat",
+    "updated_at",
+    "uptime",
+}
 STATUS_ONLY_RESPONSE_KEYS = {
     "code",
+    "coin",
+    "complete",
+    "complete_num",
     "errcode",
     "info",
+    "kaipanb",
     "message",
     "msg",
+    "num",
     "serverts",
     "status",
     "success",
     "t",
     "time",
     "ttag",
+}
+EMPTY_LIST_RESPONSE_KEYS = STATUS_ONLY_RESPONSE_KEYS | {
+    "day",
+    "list",
+    "msgid",
+    "show",
+    "uptime",
 }
 CORE_LOCAL_TITLES = {
     "five_level": {
@@ -92,12 +139,95 @@ def _safe_route_part(value: str) -> str:
     return "".join(ch.lower() if ch.isalnum() else "_" for ch in value).strip("_")
 
 
+def _epoch_to_beijing_text(value: object) -> str | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        epoch = float(value)
+    elif isinstance(value, str):
+        text = value.strip()
+        if not text or not re.fullmatch(r"\d+(?:\.\d+)?", text):
+            return None
+        epoch = float(text)
+    else:
+        return None
+
+    if epoch > 10_000_000_000:
+        epoch = epoch / 1000
+    if epoch < 946_684_800 or epoch > 4_102_444_800:
+        return None
+    return datetime.fromtimestamp(epoch, BEIJING_TZ).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _is_timestamp_field_name(key: object) -> bool:
+    name = str(key or "").strip().lower()
+    if not name or name.endswith(("_beijing", "_bj", "_text")):
+        return False
+    return name in TIMESTAMP_FIELD_NAMES or name.endswith(("time", "timestamp"))
+
+
+def _with_beijing_time_fields(payload: object) -> object:
+    if isinstance(payload, list):
+        return [_with_beijing_time_fields(item) for item in payload]
+    if not isinstance(payload, dict):
+        return payload
+
+    converted: dict[object, object] = {}
+    additions: dict[str, str] = {}
+    for key, value in payload.items():
+        converted_value = _with_beijing_time_fields(value)
+        converted[key] = converted_value
+        if _is_timestamp_field_name(key):
+            beijing_text = _epoch_to_beijing_text(value)
+            if beijing_text:
+                additions[f"{key}_beijing"] = beijing_text
+    converted.update(additions)
+    return converted
+
+
+def _read_tail_lines(path: Path, max_bytes: int) -> list[str]:
+    try:
+        size = path.stat().st_size
+        with path.open("rb") as handle:
+            if size > max_bytes:
+                handle.seek(-max_bytes, os.SEEK_END)
+                handle.readline()
+            data = handle.read()
+    except OSError:
+        return []
+    return data.decode("utf-8", errors="ignore").splitlines()
+
+
 SCENARIO_LEVELS = {
-    "normal": "一般",
-    "important": "重要",
     "rare": "稀缺",
+    "important": "重要",
+    "normal": "一般",
     "pending_delete": "待删除",
 }
+
+SCENARIO_LEVEL_SORT_ORDER = {
+    "rare": 0,
+    "important": 1,
+    "normal": 2,
+    "pending_delete": 3,
+}
+
+
+def _scenario_display_sort_key(scenario: dict[str, object]) -> tuple[int, str, str, str]:
+    level = str(scenario.get("level") or "normal")
+    title = str(scenario.get("title_cn") or scenario.get("title") or "")
+    session_id = str(scenario.get("session_id") or "")
+    endpoint = str(scenario.get("endpoint") or "")
+    return (
+        SCENARIO_LEVEL_SORT_ORDER.get(level, SCENARIO_LEVEL_SORT_ORDER["normal"]),
+        title.lower(),
+        session_id,
+        endpoint,
+    )
+
+
+def _sort_scenarios_for_display(scenarios: list[dict[str, object]]) -> list[dict[str, object]]:
+    return sorted(scenarios, key=_scenario_display_sort_key)
 
 
 def _load_scenario_meta_data() -> dict[str, dict[str, str]]:
@@ -234,8 +364,124 @@ def _is_pending_delete_scenario(scenario: dict[str, object]) -> bool:
     )
 
 
-def _scenario_group_for(level: str) -> str:
-    return PENDING_DELETE_GROUP if level == "pending_delete" else ""
+def _is_market_fengk_scenario(
+    spec: dict[str, object] | None = None,
+    controller: object = "",
+    action: object = "",
+    title_cn: object = "",
+) -> bool:
+    spec = spec or {}
+    session_id = str(spec.get("session_id") or "")
+    if session_id in MARKET_FENGK_SESSION_IDS:
+        return True
+    data = spec.get("data") if isinstance(spec.get("data"), dict) else {}
+    text = " ".join(
+        str(value or "")
+        for value in (
+            controller,
+            action,
+            title_cn,
+            data.get("c"),
+            data.get("a"),
+            data.get("FuncName"),
+            spec.get("title"),
+            spec.get("title_cn"),
+        )
+    ).lower()
+    return (
+        "stockfengkdata" in text
+        or "forumstuyere" in text
+        or "fengk" in text
+        or "tuyere" in text
+        or "市场风口" in text
+        or "风口" in text
+    )
+
+
+def _scenario_group_for(
+    level: str,
+    spec: dict[str, object] | None = None,
+    controller: object = "",
+    action: object = "",
+    title_cn: object = "",
+) -> str:
+    if level == "pending_delete":
+        return PENDING_DELETE_GROUP
+    if _is_market_fengk_scenario(spec, controller, action, title_cn):
+        return MARKET_FENGK_GROUP
+
+    spec = spec or {}
+    session_id = str(spec.get("session_id") or "")
+    data = spec.get("data") if isinstance(spec.get("data"), dict) else {}
+    url = str(spec.get("url") or "").lower()
+    text = " ".join(
+        str(value or "")
+        for value in (
+            controller,
+            action,
+            title_cn,
+            data.get("c"),
+            data.get("a"),
+            data.get("FuncName"),
+            spec.get("title"),
+            spec.get("title_cn"),
+            spec.get("url"),
+        )
+    ).lower()
+
+    if "市场量能" in text or re.match(r"^182(2[5-9]|3[0-2])$", session_id):
+        return MARKET_VOLUME_GROUP
+    if (
+        "情绪" in text
+        or "大幅回撤" in text
+        or "涨停表现" in text
+        or "风向标" in text
+        or re.match(r"^182(0[8-9]|1[0-9]|2[0-4]|3[3-9]|4[0-8])$", session_id)
+    ):
+        return EMOTION_GROUP
+    if "龙虎榜" in text or "longhubang" in text or "businessgroup" in text or "userbusiness" in text:
+        return LHB_GROUP
+    if "公司公告" in text or "公司研报" in text or "研报" in text or "apparticle" in url:
+        return INFO_CONTENT_GROUP
+    if "题材" in text or "theme" in text:
+        return TOPIC_DATA_GROUP
+    if (
+        "个股" in text
+        or "股东" in text
+        or "持仓" in text
+        or "stock" in text and ("notice" not in text and "stockline" not in text and "stockl2history" not in text)
+    ):
+        return STOCK_DETAIL_GROUP
+    if (
+        "行情" in text
+        or "指数" in text
+        or "k线" in text
+        or "kline" in text
+        or "zhishu" in text
+        or "stockline" in text
+        or "stockl2history" in text
+        or "apphwhq" in url
+        or "apphis" in url
+    ):
+        return HQ_CORE_GROUP
+    if (
+        "appuser" in url
+        or "applog" in url
+        or "getsockip" in text
+        or "userinfo" in text
+        or "userselectstock" in text
+        or "datastatistics" in text
+        or "databatchstatistics" in text
+        or "sysappversion" in text
+        or "system" in text
+        or "log_" in text
+        or "用户" in text
+        or "系统" in text
+        or "网络" in text
+        or "埋点" in text
+    ):
+        return SYSTEM_CONFIG_GROUP
+    return ""
 
 
 def _mark_scenario_pending_delete(session_id: object) -> None:
@@ -613,6 +859,7 @@ def _fetch_online_weituo(stock_id: str, overrides: dict[str, str]) -> tuple[obje
         "StockID": stock_id,
         "st": str(overrides.get("st") or overrides.get("St") or "25"),
         "Type": str(overrides.get("Type") or "0"),
+        "Tur": str(overrides.get("Tur") or "30"),
         "Vol": str(overrides.get("Vol") or "500"),
     }
     response = client.stockl2data_getweituo(**request_overrides)
@@ -664,10 +911,7 @@ def _latest_upstream_identity(force: bool = False) -> dict[str, str]:
         cached = UPSTREAM_IDENTITY_CACHE.get("identity")
         return dict(cached) if isinstance(cached, dict) else {}
     identity: dict[str, str] = {}
-    try:
-        lines = FRIDA_CAPTURE_LOG.read_text(encoding="utf-8", errors="ignore").splitlines()
-    except OSError:
-        lines = []
+    lines = _read_tail_lines(FRIDA_CAPTURE_LOG, MAX_FRIDA_IDENTITY_TAIL_BYTES)
     for line in reversed(lines[-5000:]):
         try:
             item = json.loads(line)
@@ -718,10 +962,7 @@ def _append_call_log(record: dict[str, object]) -> None:
 def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
     if not CALL_LOG_FILE.exists():
         return []
-    try:
-        lines = CALL_LOG_FILE.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return []
+    lines = _read_tail_lines(CALL_LOG_FILE, MAX_CALL_LOG_TAIL_BYTES)
     records: list[dict[str, object]] = []
     for line in reversed(lines[-MAX_CALL_LOGS:]):
         try:
@@ -766,10 +1007,31 @@ def _is_status_only_response_body(payload: object) -> bool:
     return all(_is_scalar_status_value(value) for value in body.values())
 
 
+def _is_empty_list_response_body(payload: object) -> bool:
+    body = _unwrap_response_body(payload)
+    if not isinstance(body, dict) or not body:
+        return False
+    keys = {str(key).lower() for key in body}
+    if not keys <= EMPTY_LIST_RESPONSE_KEYS:
+        return False
+    if not isinstance(body.get("List"), list) or body.get("List"):
+        return False
+    if str(body.get("errcode", "0")).strip() not in {"", "0"}:
+        return False
+    return all(
+        key == "List" or _is_scalar_status_value(value)
+        for key, value in body.items()
+    )
+
+
+def _is_non_data_response_body(payload: object) -> bool:
+    return _is_status_only_response_body(payload) or _is_empty_list_response_body(payload)
+
+
 def _load_pending_delete_session_ids_from_logs() -> set[str]:
     session_ids: set[str] = set()
     for record in _load_call_logs(limit=MAX_CALL_LOGS):
-        if not _is_status_only_response_body(record):
+        if not _is_non_data_response_body(record):
             continue
         session_id = str(record.get("session_id") or "").strip()
         if session_id:
@@ -1020,8 +1282,8 @@ TITLE_CN_FIXES = {
     "18003": "市场风口数据",
     "18012": "异动看盘列表",
     "18013": "异动看盘详情",
-    "18019": "市场情绪指标",
-    "18021": "异动股票列表",
+    "18019": "历史市场情绪指标",
+    "18021": "历史异动股票列表",
     "18026": "市场主题机会",
     "18054": "异动看盘 P41",
     "18055": "上证指数数据",
@@ -1152,18 +1414,74 @@ def _fixed_title_cn(session_id: str, value: str) -> str:
     return value
 
 
+def _is_history_spec(spec: dict[str, object]) -> bool:
+    url = str(spec.get("url") or "").lower()
+    session_id = str(spec.get("session_id") or "")
+    data = spec.get("data") if isinstance(spec.get("data"), dict) else {}
+    title = " ".join(
+        str(value or "")
+        for value in (
+            spec.get("title"),
+            spec.get("title_cn"),
+            data.get("c"),
+            data.get("a"),
+        )
+    ).lower()
+    if "apphis.longhuvip.com" in url:
+        return True
+    if "history" in title or "his" in str(data.get("c") or "").lower():
+        return True
+    return session_id in {
+        "18019",
+        "18021",
+        "18218",
+        "18219",
+        "18220",
+        "18221",
+        "18222",
+        "18223",
+        "18224",
+        "18229",
+        "18231",
+        "18232",
+        "18239",
+        "18240",
+        "18241",
+        "18242",
+        "18243",
+        "18244",
+        "18245",
+        "18285",
+        "18286",
+        "18287",
+        "18288",
+        "18289",
+        "18290",
+        "18291",
+        "18295",
+    }
+
+
+def _history_title_cn_for(spec: dict[str, object], title_cn: str) -> str:
+    if not title_cn or not _is_history_spec(spec):
+        return title_cn
+    if title_cn.startswith("历史"):
+        return title_cn
+    return f"历史{title_cn}"
+
+
 def _title_cn_for(spec: dict[str, object], controller: object, action: object) -> str:
     session_id = str(spec.get("session_id") or "")
     meta_title = _scenario_meta_for(session_id).get("title_cn", "")
     if meta_title and not _looks_garbled_title(meta_title):
-        return meta_title
+        return _history_title_cn_for(spec, meta_title)
     spec_title = str(spec.get("title_cn", "")).strip()
     fixed = _fixed_title_cn(session_id, spec_title)
     if fixed:
-        return fixed
+        return _history_title_cn_for(spec, fixed)
     if session_id in TITLE_CN_BY_SESSION:
-        return _fixed_title_cn(session_id, TITLE_CN_BY_SESSION[session_id])
-    return f"{controller}.{action}"
+        return _history_title_cn_for(spec, _fixed_title_cn(session_id, TITLE_CN_BY_SESSION[session_id]))
+    return _history_title_cn_for(spec, f"{controller}.{action}")
 
 
 def _title_for(spec: dict[str, object], controller: object, action: object) -> str:
@@ -1224,16 +1542,18 @@ def _build_scenarios() -> list[dict[str, object]]:
             else f"{base_alias_endpoint}/{_safe_route_part(str(spec['session_id']))}"
         )
         level = _effective_scenario_level_for(spec["session_id"])
+        title = _title_for(spec, controller, action)
+        title_cn = _title_cn_for(spec, controller, action)
         scenarios.append(
             {
                 "session_id": spec["session_id"],
-                "title": _title_for(spec, controller, action),
-                "title_cn": _title_cn_for(spec, controller, action),
+                "title": title,
+                "title_cn": title_cn,
                 "added_time": _interface_added_time_for(spec),
                 "maintenance_time": _maintenance_time_for(spec),
                 "level": level,
                 "level_label": SCENARIO_LEVELS[level],
-                "group": _scenario_group_for(level),
+                "group": _scenario_group_for(level, spec, controller, action, title_cn),
                 "method_name": method_name,
                 "http_method": spec["method"],
                 "target_url": spec["url"],
@@ -1310,7 +1630,7 @@ def _build_scenarios() -> list[dict[str, object]]:
     return scenarios
 
 
-SCENARIOS = _build_scenarios()
+SCENARIOS: list[dict[str, object]] = []
 ROUTES: dict[str, dict[str, object]] = {}
 
 
@@ -1437,6 +1757,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     if not _is_system_config_scenario(item) and not _is_pending_delete_scenario(item)
                 ]
             )
+            visible_scenarios = _sort_scenarios_for_display(list(visible_scenarios))
             self._send_json(
                 {
                     "count": len(visible_scenarios),
@@ -1621,7 +1942,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         upstream_body_error = _upstream_error_message(payload)
         if upstream_body_error:
             upstream_error = upstream_body_error
-        if not upstream_error and _is_status_only_response_body(payload):
+        if not upstream_error and _is_non_data_response_body(payload):
             _mark_scenario_pending_delete(scenario.get("session_id", ""))
 
         _append_call_log(
@@ -1890,7 +2211,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                             "endpoint": scenario["endpoint"],
                             "target_url": scenario["target_url"],
                         }
-                        for scenario in SCENARIOS
+                        for scenario in _sort_scenarios_for_display(SCENARIOS)
                     ],
                 }
             )
@@ -2685,6 +3006,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         status: int = 200,
         extra_headers: list[tuple[str, str]] | None = None,
     ) -> None:
+        payload = _with_beijing_time_fields(payload)
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
         self.send_response(status)
         self._send_cors_headers()

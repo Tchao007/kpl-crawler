@@ -480,10 +480,13 @@
     }
 
     function inferGroup(item, host) {
+      if (item.level === "pending_delete") return "待删除模块";
+      if (item.group) return String(item.group);
       const title = String(item.title || "");
       const titleCn = String(item.title_cn || item.titleCn || "");
       const sessionId = String(item.session_id || item.sessionId || "");
       const text = `${host} ${title} ${titleCn}`.toLowerCase();
+      if (text.includes("stockfengkdata") || text.includes("forumstuyere") || text.includes("fengk") || text.includes("tuyere") || text.includes("市场风口") || text.includes("风口") || /^(429|430|432|18003|18013|18019|18021|18071)$/.test(sessionId)) return "市场风口模块";
       if (text.includes("local_hqstock") || text.includes("hqstock")) return "行情核心";
       if (text.includes("市场量能") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "市场量能";
       if (text.includes("情绪") || text.includes("大幅回撤") || text.includes("涨停表现") || text.includes("风向标") || /^1820[8-9]$|^1821[0-9]$|^1822[0-4]$|^1823[3-9]$|^1824[0-8]$/.test(sessionId)) return "情绪模块";
@@ -560,6 +563,27 @@
       return map;
     }
 
+    const LEVEL_SORT_ORDER = {
+      rare: 0,
+      important: 1,
+      normal: 2,
+      pending_delete: 3
+    };
+
+    function scenarioSortText(item) {
+      return String(item.titleCn || item.title || item.sessionId || item.endpoint || "");
+    }
+
+    function sortScenarioItems(items) {
+      return [...items].sort((a, b) => {
+        const levelResult = (LEVEL_SORT_ORDER[a.level] ?? LEVEL_SORT_ORDER.normal) - (LEVEL_SORT_ORDER[b.level] ?? LEVEL_SORT_ORDER.normal);
+        if (levelResult) return levelResult;
+        const nameResult = scenarioSortText(a).localeCompare(scenarioSortText(b), "zh-Hans-CN", { numeric: true });
+        if (nameResult) return nameResult;
+        return String(a.sessionId).localeCompare(String(b.sessionId), "zh-Hans-CN", { numeric: true });
+      });
+    }
+
     function renderStats(items) {
       const hosts = new Set(items.map((item) => item.host).filter(Boolean));
       const groups = new Set(items.map((item) => item.group));
@@ -590,7 +614,8 @@
     }
 
     function render(items) {
-      state.filtered = items.filter((item) => {
+      const sortedItems = sortScenarioItems(items);
+      state.filtered = sortScenarioItems(sortedItems.filter((item) => {
         const matchGroup = state.group === "全部" || item.group === state.group;
         const matchHost = state.host === "all" || item.host === state.host;
         const haystack = [
@@ -608,13 +633,13 @@
         ].join(" ").toLowerCase();
         const matchQuery = !state.query || haystack.includes(state.query.toLowerCase());
         return matchGroup && matchHost && matchQuery;
-      });
+      }));
 
-      renderStats(items);
-      renderGroupFilters(items);
-      renderHostOptions(items);
+      renderStats(sortedItems);
+      renderGroupFilters(sortedItems);
+      renderHostOptions(sortedItems);
 
-      el.panelTitle.textContent = `场景列表 · ${state.filtered.length} / ${items.length}`;
+      el.panelTitle.textContent = `场景列表 · ${state.filtered.length} / ${sortedItems.length}`;
       el.panelHint.textContent = state.loading ? "加载中" : "单条点击即可调用对应场景";
 
       const grouped = groupList(state.filtered, "group");

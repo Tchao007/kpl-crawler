@@ -81,8 +81,8 @@ export function hostFromUrl(url: string): string {
 }
 
 export function inferGroup(item: RawScenario, host: string): string {
-  if (item.group) return String(item.group);
   if (item.level === "pending_delete") return "待删除模块";
+  if (item.group) return String(item.group);
 
   const title = String(item.title || "");
   const titleCn = String(item.title_cn || item.titleCn || "");
@@ -90,6 +90,17 @@ export function inferGroup(item: RawScenario, host: string): string {
   const text = `${host} ${title} ${titleCn}`.toLowerCase();
 
   if (text.includes("local_hqstock") || text.includes("hqstock")) return "行情核心";
+  if (
+    text.includes("stockfengkdata") ||
+    text.includes("forumstuyere") ||
+    text.includes("fengk") ||
+    text.includes("tuyere") ||
+    text.includes("市场风口") ||
+    text.includes("风口") ||
+    /^(429|430|432|18003|18013|18019|18021|18071)$/.test(sessionId)
+  ) {
+    return "市场风口模块";
+  }
   if (text.includes("市场量能") || /^1822[5-9]$|^1823[0-2]$/.test(sessionId)) return "市场量能";
   if (
     text.includes("情绪") ||
@@ -100,8 +111,34 @@ export function inferGroup(item: RawScenario, host: string): string {
   ) {
     return "情绪模块";
   }
-  if (text.includes("apphwhq")) return "行情核心";
-  if (text.includes("apphis")) return "历史数据";
+  if (text.includes("longhubang") || text.includes("businessgroup") || text.includes("userbusiness") || text.includes("龙虎榜")) {
+    return "龙虎榜";
+  }
+  if (text.includes("公司公告") || text.includes("公司研报") || text.includes("研报") || text.includes("apparticle")) {
+    return "资讯内容";
+  }
+  if (text.includes("题材") || text.includes("theme")) return "题材数据";
+  if (
+    text.includes("个股") ||
+    text.includes("股东") ||
+    text.includes("持仓") ||
+    (text.includes("stock") && !text.includes("stockline") && !text.includes("stockl2history") && !text.includes("notice"))
+  ) {
+    return "个股详情";
+  }
+  if (
+    text.includes("行情") ||
+    text.includes("指数") ||
+    text.includes("k线") ||
+    text.includes("kline") ||
+    text.includes("zhishu") ||
+    text.includes("stockline") ||
+    text.includes("stockl2history") ||
+    text.includes("apphwhq") ||
+    text.includes("apphis")
+  ) {
+    return "行情核心";
+  }
   if (text.includes("apparticle")) return "资讯内容";
   if (
     text.includes("appuser") ||
@@ -122,7 +159,6 @@ export function inferGroup(item: RawScenario, host: string): string {
     return "系统配置接口";
   }
   if (text.includes("applhb")) {
-    if (text.includes("longhubang") || text.includes("龙虎榜")) return "龙虎榜";
     if (text.includes("stock") || text.includes("个股") || text.includes("盘口")) return "个股详情";
     return "龙虎榜";
   }
