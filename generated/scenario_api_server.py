@@ -27,6 +27,13 @@ from kpl_hqstock_decoder import (
     latest_time_sales,
     normalize_stock_id,
 )
+from upstream_guard import (
+    UpstreamCircuitOpen,
+    UpstreamGuard,
+    UpstreamRateLimited,
+    host_from_url,
+    stable_cache_key,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -51,6 +58,7 @@ AUTH_DB_FILE = ROOT / "users.json"
 SCENARIO_LEVEL_FILE = ROOT / "scenario_levels.json"
 SCENARIO_META_FILE = ROOT / "scenario_meta.json"
 CALL_LOG_FILE = ROOT / "scenario_call_logs.jsonl"
+UPSTREAM_IDENTITY_FILE = ROOT / "upstream_identity.local.json"
 FRIDA_CAPTURE_LOG = ROOT.parent / "outputs" / "frida" / "kpl_capture.ndjson"
 DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
 SESSION_COOKIE = "kpl_session"
@@ -74,6 +82,11 @@ INFO_CONTENT_GROUP = "资讯内容"
 TOPIC_DATA_GROUP = "题材数据"
 LHB_GROUP = "龙虎榜"
 SYSTEM_CONFIG_GROUP = "系统配置接口"
+UPSTREAM_GUARD = UpstreamGuard(
+    min_interval=float(os.environ.get("KPL_UPSTREAM_MIN_INTERVAL", "2.0")),
+    max_per_minute=int(os.environ.get("KPL_UPSTREAM_MAX_PER_MINUTE", "24")),
+    max_per_hour=int(os.environ.get("KPL_UPSTREAM_MAX_PER_HOUR", "300")),
+)
 BEIJING_TZ = timezone(timedelta(hours=8))
 TIMESTAMP_FIELD_NAMES = {
     "createtime",
@@ -862,11 +875,15 @@ def _fetch_online_weituo(stock_id: str, overrides: dict[str, str]) -> tuple[obje
         "Tur": str(overrides.get("Tur") or "30"),
         "Vol": str(overrides.get("Vol") or "500"),
     }
+    host = "apphwhq.longhuvip.com"
+    endpoint = "/api/stockl2data/getweituo"
+    UPSTREAM_GUARD.before_request(host, endpoint)
     response = client.stockl2data_getweituo(**request_overrides)
     try:
         body: object = response.json()
     except ValueError:
         body = response.text
+    UPSTREAM_GUARD.record_result(host, endpoint, body, _upstream_error_message(body))
     return response, body
 
 
@@ -935,11 +952,22 @@ def _latest_upstream_identity(force: bool = False) -> dict[str, str]:
 
 
 def _current_upstream_identity(force: bool = False) -> dict[str, str]:
+    file_identity: dict[str, str] = {}
+    if UPSTREAM_IDENTITY_FILE.exists():
+        try:
+            payload = json.loads(UPSTREAM_IDENTITY_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+        if isinstance(payload, dict):
+            file_identity = {
+                key: str(payload.get(key) or "").strip()
+                for key in ("UserID", "Token", "DeviceID")
+            }
     captured_identity = _latest_upstream_identity(force=force)
     identity = {
-        "UserID": os.environ.get("KPL_UPSTREAM_USER_ID") or captured_identity.get("UserID", ""),
-        "Token": os.environ.get("KPL_UPSTREAM_TOKEN") or captured_identity.get("Token", ""),
-        "DeviceID": os.environ.get("KPL_UPSTREAM_DEVICE_ID") or captured_identity.get("DeviceID", ""),
+        "UserID": os.environ.get("KPL_UPSTREAM_USER_ID") or file_identity.get("UserID") or captured_identity.get("UserID", ""),
+        "Token": os.environ.get("KPL_UPSTREAM_TOKEN") or file_identity.get("Token") or captured_identity.get("Token", ""),
+        "DeviceID": os.environ.get("KPL_UPSTREAM_DEVICE_ID") or file_identity.get("DeviceID") or captured_identity.get("DeviceID", ""),
     }
     return {key: value for key, value in identity.items() if value and not _is_placeholder_value(value)}
 
@@ -1518,6 +1546,103 @@ def _is_system_config_scenario(scenario: dict[str, object]) -> bool:
     return any(marker in text for marker in system_markers)
 
 
+def _scenario_risk_policy(
+    level: str,
+    spec: dict[str, object] | None = None,
+    scenario: dict[str, object] | None = None,
+) -> dict[str, object]:
+    spec = spec or {}
+    scenario = scenario or {}
+    data = spec.get("data") if isinstance(spec.get("data"), dict) else {}
+    host = host_from_url(spec.get("url") or scenario.get("target_url") or "")
+    text = " ".join(
+        str(value or "")
+        for value in (
+            host,
+            spec.get("url"),
+            data.get("c"),
+            data.get("a"),
+            scenario.get("title"),
+            scenario.get("title_cn"),
+            scenario.get("method_name"),
+            scenario.get("endpoint"),
+        )
+    ).lower()
+    if level == "pending_delete":
+        return {
+            "risk_level": "critical",
+            "call_policy": "admin_only",
+            "call_disabled": True,
+            "risk_reason": "Non-data or pending-delete interface",
+            "cache_ttl": 0,
+        }
+    high_markers = (
+        "applog",
+        "datastatistics",
+        "databatchstatistics",
+        "userinfo",
+        "userselectstock",
+        "userselect",
+        "system",
+        "sysappversion",
+        "getsockip",
+        "log_",
+    )
+    if any(marker in text for marker in high_markers):
+        return {
+            "risk_level": "high",
+            "call_policy": "admin_only",
+            "call_disabled": True,
+            "risk_reason": "User state, system config or tracking endpoint",
+            "cache_ttl": 0,
+        }
+    if "apphis.longhuvip.com" in text or _is_history_spec(spec):
+        return {
+            "risk_level": "medium",
+            "call_policy": "rate_limited_cached",
+            "call_disabled": False,
+            "risk_reason": "Historical upstream endpoint",
+            "cache_ttl": 600,
+        }
+    if "theme" in text or "zhishu" in text or "stockfengk" in text:
+        return {
+            "risk_level": "medium",
+            "call_policy": "rate_limited_cached",
+            "call_disabled": False,
+            "risk_reason": "Market data endpoint",
+            "cache_ttl": 30,
+        }
+    return {
+        "risk_level": "low",
+        "call_policy": "rate_limited_cached",
+        "call_disabled": False,
+        "risk_reason": "Standard upstream endpoint",
+        "cache_ttl": 5,
+    }
+
+
+def _cache_ttl_for_scenario(scenario: dict[str, object]) -> int:
+    try:
+        return max(0, int(scenario.get("cache_ttl", 0)))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _guard_error_payload(error: Exception, requested_at: float) -> tuple[dict[str, object], int]:
+    retry_after = int(getattr(error, "retry_after", 60) or 60)
+    code = "upstream_circuit_open" if isinstance(error, UpstreamCircuitOpen) else "upstream_rate_limited"
+    status = 429 if isinstance(error, UpstreamRateLimited) else 503
+    return (
+        {
+            "error": code,
+            "message": str(error),
+            "requested_at": requested_at,
+            "retry_after": retry_after,
+        },
+        status,
+    )
+
+
 def _build_scenarios() -> list[dict[str, object]]:
     scenarios: list[dict[str, object]] = []
     used_method_names: dict[str, int] = {}
@@ -1544,6 +1669,7 @@ def _build_scenarios() -> list[dict[str, object]]:
         level = _effective_scenario_level_for(spec["session_id"])
         title = _title_for(spec, controller, action)
         title_cn = _title_cn_for(spec, controller, action)
+        risk_policy = _scenario_risk_policy(level, spec, {"title": title, "title_cn": title_cn, "endpoint": endpoint})
         scenarios.append(
             {
                 "session_id": spec["session_id"],
@@ -1554,6 +1680,11 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "level": level,
                 "level_label": SCENARIO_LEVELS[level],
                 "group": _scenario_group_for(level, spec, controller, action, title_cn),
+                "risk_level": risk_policy["risk_level"],
+                "call_policy": risk_policy["call_policy"],
+                "call_disabled": risk_policy["call_disabled"],
+                "risk_reason": risk_policy["risk_reason"],
+                "cache_ttl": risk_policy["cache_ttl"],
                 "method_name": method_name,
                 "http_method": spec["method"],
                 "target_url": spec["url"],
@@ -1604,6 +1735,7 @@ def _build_scenarios() -> list[dict[str, object]]:
         maintenance_time = core_meta.get("maintenance_time", CORE_LOCAL_ADDED_TIME)
         added_time = CORE_LOCAL_ADDED_TIME
         level = _effective_scenario_level_for(session_id)
+        risk_policy = _scenario_risk_policy(level, scenario={"title": title, "title_cn": title_cn, "endpoint": f"/api/{method_name}", "target_url": str(HQSTOCK_LOG)})
         scenarios.append(
             {
                 "session_id": session_id,
@@ -1614,6 +1746,11 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "level": level,
                 "level_label": SCENARIO_LEVELS[level],
                 "group": _scenario_group_for(level),
+                "risk_level": risk_policy["risk_level"],
+                "call_policy": risk_policy["call_policy"],
+                "call_disabled": risk_policy["call_disabled"],
+                "risk_reason": risk_policy["risk_reason"],
+                "cache_ttl": risk_policy["cache_ttl"],
                 "method_name": method_name,
                 "http_method": "GET",
                 "target_url": str(HQSTOCK_LOG),
@@ -1684,6 +1821,17 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
     def _handle_request(self) -> None:
         parsed = urlparse(self.path)
         path = unquote(parsed.path.rstrip("/") or "/")
+
+        if path == "/api/health":
+            self._send_json(
+                {
+                    "ok": True,
+                    "service": "KaipanlaScenarioAPI",
+                    "scenarios": len(SCENARIOS),
+                    "time": datetime.now(BEIJING_TZ).isoformat(timespec="seconds"),
+                }
+            )
+            return
 
         if path in {f"/{LOGIN_FILE}", "/login"}:
             self._serve_file(ROOT / LOGIN_FILE, "text/html; charset=utf-8")
@@ -1824,6 +1972,9 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             if user.get("role") != "admin" and _is_pending_delete_scenario(route["scenario"]):
                 self._send_json({"error": "forbidden", "message": "Admin role required"}, status=403)
                 return
+            if user.get("role") != "admin" and route["scenario"].get("call_disabled"):
+                self._send_json({"error": "forbidden", "message": "High-risk interface is admin only"}, status=403)
+                return
             query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
             body_values = self._read_body_values()
             overrides = {**query_values, **body_values}
@@ -1864,6 +2015,91 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             data,
             overrides,
         )
+        host = host_from_url(spec.get("url"))
+        endpoint = str(scenario.get("endpoint") or "")
+        cache_ttl = _cache_ttl_for_scenario(scenario)
+        cache_key = stable_cache_key(spec.get("method"), spec.get("url"), params, data, endpoint)
+        cached = UPSTREAM_GUARD.cache_get(cache_key) if cache_ttl else None
+        if cached:
+            payload, cache_info = cached
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": scenario.get("session_id", ""),
+                    "title": scenario.get("title", ""),
+                    "title_cn": scenario.get("title_cn", ""),
+                    "endpoint": endpoint,
+                    "target_url": scenario.get("target_url", spec.get("url", "")),
+                    "http_method": scenario.get("http_method", spec.get("method", "")),
+                    "status": "ok",
+                    "status_code": cache_info.get("status_code", 200),
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "content_type": cache_info.get("content_type", "application/json"),
+                    "overrides": _safe_log_values(overrides),
+                    "request": request_log,
+                    "response": None,
+                    "cache": cache_info,
+                    "risk_level": scenario.get("risk_level", ""),
+                    "call_policy": scenario.get("call_policy", ""),
+                }
+            )
+            if _is_body_only_market_scenario(scenario):
+                self._send_json(payload)
+                return
+            if _is_theme_infogr_scenario(scenario):
+                self._send_json(_dataframe_payload(payload))
+                return
+            if scenario.get("stock_newestday_body_only"):
+                self._send_json(_dataframe_payload(_stock_newestday_payload(payload)))
+                return
+            response_body = _stock_newestday_payload(payload) if _is_stock_getnewestday_scenario(scenario) else payload
+            self._send_json(
+                {
+                    "requested_at": requested_at,
+                    "status_code": cache_info.get("status_code", 200),
+                    "content_type": cache_info.get("content_type", "application/json"),
+                    "body": response_body,
+                    "upstream_error": "",
+                    "cache": cache_info,
+                    "upstream_relogin_attempted": False,
+                    "upstream_relogin_succeeded": False,
+                }
+            )
+            return
+
+        try:
+            guard_info = UPSTREAM_GUARD.before_request(host, endpoint)
+        except (UpstreamCircuitOpen, UpstreamRateLimited) as exc:
+            payload, status = _guard_error_payload(exc, requested_at)
+            _append_call_log(
+                {
+                    "requested_at": requested_at,
+                    "requested_at_text": started_iso,
+                    "username": user.get("username", ""),
+                    "role": user.get("role", ""),
+                    "session_id": scenario.get("session_id", ""),
+                    "title": scenario.get("title", ""),
+                    "title_cn": scenario.get("title_cn", ""),
+                    "endpoint": endpoint,
+                    "target_url": scenario.get("target_url", spec.get("url", "")),
+                    "http_method": scenario.get("http_method", spec.get("method", "")),
+                    "status": payload["error"],
+                    "status_code": status,
+                    "duration_ms": int((time.time() - requested_at) * 1000),
+                    "overrides": _safe_log_values(overrides),
+                    "request": request_log,
+                    "response": None,
+                    "cache": {"hit": False},
+                    "risk_level": scenario.get("risk_level", ""),
+                    "call_policy": scenario.get("call_policy", ""),
+                    "retry_after": payload.get("retry_after"),
+                }
+            )
+            self._send_json(payload, status=status)
+            return
 
         try:
             response = client.request(spec, data=data, params=params)
@@ -1886,6 +2122,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     "overrides": _safe_log_values(overrides),
                     "request": request_log,
                     "response": None,
+                    "cache": {"hit": False},
+                    "guard": guard_info,
+                    "risk_level": scenario.get("risk_level", ""),
+                    "call_policy": scenario.get("call_policy", ""),
                     "error": str(exc),
                 }
             )
@@ -1942,8 +2182,11 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         upstream_body_error = _upstream_error_message(payload)
         if upstream_body_error:
             upstream_error = upstream_body_error
+        guard_result = UPSTREAM_GUARD.record_result(host, endpoint, payload, upstream_error)
         if not upstream_error and _is_non_data_response_body(payload):
             _mark_scenario_pending_delete(scenario.get("session_id", ""))
+        if not upstream_error:
+            UPSTREAM_GUARD.cache_set(cache_key, payload, content_type, response.status_code, cache_ttl)
 
         _append_call_log(
             {
@@ -1964,6 +2207,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "overrides": _safe_log_values(overrides),
                 "request": request_log,
                 "response": _response_log_payload(response, payload),
+                "cache": {"hit": False, "ttl": cache_ttl},
+                "guard": {**guard_info, **guard_result},
+                "risk_level": scenario.get("risk_level", ""),
+                "call_policy": scenario.get("call_policy", ""),
                 "upstream_relogin_attempted": relogin_attempted,
                 "upstream_relogin_succeeded": relogin_succeeded,
             }
@@ -1989,6 +2236,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "content_type": content_type,
                 "body": response_body,
                 "upstream_error": upstream_error,
+                "cache": {"hit": False, "ttl": cache_ttl},
                 "upstream_relogin_attempted": relogin_attempted,
                 "upstream_relogin_succeeded": relogin_succeeded,
             }
@@ -2000,6 +2248,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "status_code": response.status_code,
                 "content_type": content_type,
                 "body": payload,
+                "cache": {"hit": False, "ttl": cache_ttl},
                 "upstream_relogin_attempted": relogin_attempted,
                 "upstream_relogin_succeeded": relogin_succeeded,
             },
@@ -2028,6 +2277,22 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         _apply_upstream_identity(data, identity)
         params["_ts"] = str(int(requested_at * 1000))
         request_log = _request_log_payload(spec.get("method", ""), spec.get("url", ""), spec.get("headers", {}), params, data, overrides)
+        host = host_from_url(spec.get("url"))
+        endpoint = str(scenario.get("endpoint") or "")
+        cache_ttl = _cache_ttl_for_scenario(scenario) or 5
+        cache_key = stable_cache_key(spec.get("method"), spec.get("url"), params, data, endpoint)
+        cached = UPSTREAM_GUARD.cache_get(cache_key)
+        if cached:
+            payload, cache_info = cached
+            body = _stock_newestday_payload(payload)
+            self._send_json({**body, "cache": cache_info} if isinstance(body, dict) else body)
+            return
+        try:
+            guard_info = UPSTREAM_GUARD.before_request(host, endpoint)
+        except (UpstreamCircuitOpen, UpstreamRateLimited) as exc:
+            payload, status = _guard_error_payload(exc, requested_at)
+            self._send_json(payload, status=status)
+            return
         try:
             response = client.request(spec, data=data, params=params)
             content_type = response.headers.get("Content-Type", "")
@@ -2054,6 +2319,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     "overrides": _safe_log_values(overrides),
                     "request": request_log,
                     "response": None,
+                    "cache": {"hit": False},
+                    "guard": guard_info,
                     "error": str(exc),
                 }
             )
@@ -2064,6 +2331,9 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         upstream_body_error = _upstream_error_message(payload)
         if upstream_body_error:
             upstream_error = upstream_body_error
+        guard_result = UPSTREAM_GUARD.record_result(host, endpoint, payload, upstream_error)
+        if not upstream_error:
+            UPSTREAM_GUARD.cache_set(cache_key, payload, content_type, response.status_code, cache_ttl)
         body = _stock_newestday_payload(payload)
         _append_call_log(
             {
@@ -2084,9 +2354,16 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "overrides": _safe_log_values(overrides),
                 "request": request_log,
                 "response": _response_log_payload(response, payload),
+                "cache": {"hit": False, "ttl": cache_ttl},
+                "guard": {**guard_info, **guard_result},
             }
         )
-        self._send_json(body if not upstream_error else {"error": "upstream_error", "message": upstream_error, "body": body}, status=200 if not upstream_error else 502)
+        self._send_json(
+            {**body, "cache": {"hit": False, "ttl": cache_ttl}}
+            if not upstream_error and isinstance(body, dict)
+            else {"error": "upstream_error", "message": upstream_error, "body": body, "cache": {"hit": False, "ttl": cache_ttl}},
+            status=200 if not upstream_error else 502,
+        )
 
     def _handle_auth_api(self, path: str) -> None:
         if path == "/api/auth/login" and self.command == "POST":
@@ -2746,6 +3023,36 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         )
         identity = _current_upstream_identity()
         core_overrides = {**identity, **overrides}
+        endpoint = f"/api/core/{name}"
+        cache_ttl = 5
+        cache_key = stable_cache_key("CORE", name, core_overrides, endpoint)
+        cached = UPSTREAM_GUARD.cache_get(cache_key)
+        if cached:
+            body, cache_info = cached
+            self._send_json(
+                {
+                    "requested_at": requested_at,
+                    "status_code": cache_info.get("status_code", 200),
+                    "content_type": cache_info.get("content_type", "application/json"),
+                    "core_api": {
+                        "name": name,
+                        "host": host,
+                        "controller": controller,
+                        "action": action,
+                    },
+                    "body": body,
+                    "cache": cache_info,
+                    "upstream_relogin_attempted": False,
+                    "upstream_relogin_succeeded": False,
+                }
+            )
+            return
+        try:
+            guard_info = UPSTREAM_GUARD.before_request(host, endpoint)
+        except (UpstreamCircuitOpen, UpstreamRateLimited) as exc:
+            payload, status = _guard_error_payload(exc, requested_at)
+            self._send_json(payload, status=status)
+            return
         try:
             response = client.request_core(name, **core_overrides)
         except Exception as exc:
@@ -2767,6 +3074,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     "overrides": _safe_log_values(overrides),
                     "request": request_log,
                     "response": None,
+                    "cache": {"hit": False},
+                    "guard": guard_info,
                     "error": str(exc),
                 }
             )
@@ -2810,6 +3119,9 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         upstream_body_error = _upstream_error_message(body)
         if upstream_body_error:
             upstream_error = upstream_body_error
+        guard_result = UPSTREAM_GUARD.record_result(host, endpoint, body, upstream_error)
+        if not upstream_error:
+            UPSTREAM_GUARD.cache_set(cache_key, body, content_type, response.status_code, cache_ttl)
 
         _append_call_log(
             {
@@ -2829,6 +3141,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 "overrides": _safe_log_values(overrides),
                 "request": request_log,
                 "response": _response_log_payload(response, body),
+                "cache": {"hit": False, "ttl": cache_ttl},
+                "guard": {**guard_info, **guard_result},
                 "upstream_relogin_attempted": relogin_attempted,
                 "upstream_relogin_succeeded": relogin_succeeded,
             }
@@ -2846,6 +3160,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                         "action": action,
                     },
                     "body": body,
+                    "cache": {"hit": False, "ttl": cache_ttl},
                     "upstream_relogin_attempted": relogin_attempted,
                     "upstream_relogin_succeeded": relogin_succeeded,
                 }
@@ -2863,6 +3178,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                         "action": action,
                     },
                     "body": body,
+                    "cache": {"hit": False, "ttl": cache_ttl},
                     "upstream_relogin_attempted": relogin_attempted,
                     "upstream_relogin_succeeded": relogin_succeeded,
                 }

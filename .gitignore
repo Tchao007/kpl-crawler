@@ -10,3 +10,9 @@ generated/scenario_levels.json
 generated/scenario_levels.tmp
 generated/scenario_meta.json
 generated/scenario_meta.tmp
+generated/upstream_identity.local.json
+generated/scenario_call_logs.jsonl
+outputs/
+capture_0627_01/
+render_tmp/
+.codex_work/

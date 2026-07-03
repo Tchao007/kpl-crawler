@@ -45,6 +45,7 @@ const fallbackLevels: LevelOption[] = [
 ];
 
 const dataEntries = computed(() => Object.entries(props.item.data || {}).slice(0, 6));
+const callBlocked = computed(() => Boolean(props.item.callDisabled && props.user?.role !== "admin"));
 </script>
 
 <template>
@@ -86,6 +87,13 @@ const dataEntries = computed(() => Object.entries(props.item.data || {}).slice(0
       </div>
     </div>
 
+    <div class="risk-row" :class="`risk-${item.riskLevel}`">
+      <span>{{ item.riskLevel }}</span>
+      <span>{{ item.callPolicy }}</span>
+      <span v-if="item.cacheTtl">缓存 {{ item.cacheTtl }}s</span>
+      <span v-if="item.riskReason">{{ item.riskReason }}</span>
+    </div>
+
     <div v-if="user?.role === 'admin'" class="name-editor">
       <label>
         <span>英文名</span>
@@ -118,10 +126,10 @@ const dataEntries = computed(() => Object.entries(props.item.data || {}).slice(0
     </div>
 
     <div class="actions">
-      <button class="tiny primary" type="button" :disabled="busy" @click="emit('call', item)">
-        {{ busy ? "调用中" : "调用接口" }}
+      <button class="tiny primary" type="button" :disabled="busy || callBlocked" @click="emit('call', item)">
+        {{ callBlocked ? "已限制" : busy ? "调用中" : "调用接口" }}
       </button>
-      <a class="tiny" :href="buildRequestUrl(item)" target="_blank" rel="noreferrer">打开 URL</a>
+      <a v-if="!callBlocked" class="tiny" :href="buildRequestUrl(item)" target="_blank" rel="noreferrer">打开 URL</a>
     </div>
   </article>
 </template>

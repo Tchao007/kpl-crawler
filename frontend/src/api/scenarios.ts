@@ -35,6 +35,16 @@ export interface RawScenario {
   level_label?: string;
   levelLabel?: string;
   group?: string;
+  risk_level?: string;
+  riskLevel?: string;
+  call_policy?: string;
+  callPolicy?: string;
+  call_disabled?: boolean;
+  callDisabled?: boolean;
+  risk_reason?: string;
+  riskReason?: string;
+  cache_ttl?: number;
+  cacheTtl?: number;
   params?: Record<string, string>;
   data?: Record<string, string>;
   hide_url_fields?: string[];
@@ -63,6 +73,11 @@ export interface Scenario {
   isCore: boolean;
   host: string;
   group: string;
+  riskLevel: string;
+  callPolicy: string;
+  callDisabled: boolean;
+  riskReason: string;
+  cacheTtl: number;
 }
 
 export interface ScenariosPayload {
@@ -185,7 +200,12 @@ export function normalizeScenario(item: RawScenario): Scenario {
     hideUrlFields: item.hide_url_fields || item.hideUrlFields || [],
     isCore: Boolean(item.is_core || item.isCore),
     host,
-    group: inferGroup(item, host)
+    group: inferGroup(item, host),
+    riskLevel: item.risk_level || item.riskLevel || "low",
+    callPolicy: item.call_policy || item.callPolicy || "rate_limited_cached",
+    callDisabled: Boolean(item.call_disabled || item.callDisabled),
+    riskReason: item.risk_reason || item.riskReason || "",
+    cacheTtl: Number(item.cache_ttl ?? item.cacheTtl ?? 0)
   };
 }
 
