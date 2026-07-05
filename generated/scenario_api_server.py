@@ -27,6 +27,16 @@ from kpl_hqstock_decoder import (
     latest_time_sales,
     normalize_stock_id,
 )
+from kpl_topic_rank_decoder import (
+    DEFAULT_LOG as TOPIC_RANK_LOG,
+    TOPIC_RANK_API,
+    TOPIC_TABLE_API,
+    available_topic_table_topics,
+    available_topic_rank_days,
+    latest_topic_table_content,
+    latest_topic_rank_list,
+    normalize_day as normalize_topic_rank_day,
+)
 from upstream_guard import (
     UpstreamCircuitOpen,
     UpstreamGuard,
@@ -73,7 +83,7 @@ LEGACY_INTERFACE_API_KEY_FIELDS = {"activation_code", "ActivationCode", "api_act
 CORE_LOCAL_ADDED_TIME = "2026-06-28"
 PENDING_DELETE_GROUP = "待删除模块"
 MARKET_FENGK_GROUP = "市场风口模块"
-MARKET_FENGK_SESSION_IDS = {"429", "430", "432", "18003", "18013", "18019", "18021", "18071"}
+MARKET_FENGK_SESSION_IDS = {"429", "430", "432", "18003", "18013", "18019", "18021", "18071", "18337", "18338"}
 MARKET_VOLUME_GROUP = "市场量能"
 EMOTION_GROUP = "情绪模块"
 HQ_CORE_GROUP = "行情核心"
@@ -226,13 +236,25 @@ SCENARIO_LEVEL_SORT_ORDER = {
 }
 
 
-def _scenario_display_sort_key(scenario: dict[str, object]) -> tuple[int, str, str, str]:
+def _scenario_date_sort_value(value: object) -> int:
+    text = str(value or "").strip()
+    if not text:
+        return 0
+    digits = re.sub(r"\D", "", text)
+    if len(digits) >= 8:
+        return int(digits[:8])
+    return 0
+
+
+def _scenario_display_sort_key(scenario: dict[str, object]) -> tuple[int, int, str, str, str]:
     level = str(scenario.get("level") or "normal")
+    added_time = scenario.get("added_time") or scenario.get("addedTime")
     title = str(scenario.get("title_cn") or scenario.get("title") or "")
     session_id = str(scenario.get("session_id") or "")
     endpoint = str(scenario.get("endpoint") or "")
     return (
         SCENARIO_LEVEL_SORT_ORDER.get(level, SCENARIO_LEVEL_SORT_ORDER["normal"]),
+        -_scenario_date_sort_value(added_time),
         title.lower(),
         session_id,
         endpoint,
@@ -1643,6 +1665,18 @@ def _guard_error_payload(error: Exception, requested_at: float) -> tuple[dict[st
     )
 
 
+def _normalized_scene_overrides(spec: dict[str, object], overrides: dict[str, str]) -> dict[str, str]:
+    data = spec.get("data") if isinstance(spec.get("data"), dict) else {}
+    controller = str(data.get("c") or "").lower()
+    action = str(data.get("a") or "").lower()
+    normalized = dict(overrides)
+    if controller == "theme" and action == "infoget":
+        lower_id = normalized.pop("id", None)
+        if lower_id is not None and "ID" not in normalized:
+            normalized["ID"] = lower_id
+    return normalized
+
+
 def _build_scenarios() -> list[dict[str, object]]:
     scenarios: list[dict[str, object]] = []
     used_method_names: dict[str, int] = {}
@@ -1764,6 +1798,86 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "hide_url_fields": [],
             }
         )
+    topic_rank_level = _effective_scenario_level_for("topic_rank:3009")
+    topic_rank_policy = _scenario_risk_policy(
+        topic_rank_level,
+        scenario={
+            "title": "global.3009 Topic Rank List",
+            "title_cn": "\u9898\u6750\u5e93-\u6bcf\u65e5\u699c\u5355\u5217\u8868",
+            "endpoint": TOPIC_RANK_API["endpoint"],
+            "target_url": str(TOPIC_RANK_LOG),
+        },
+    )
+    scenarios.append(
+        {
+            "session_id": "topic_rank:3009",
+            "title": "global.3009 Topic Rank List",
+            "title_cn": "\u9898\u6750\u5e93-\u6bcf\u65e5\u699c\u5355\u5217\u8868",
+            "added_time": "2026-07-05",
+            "maintenance_time": "2026-07-05",
+            "level": topic_rank_level,
+            "level_label": SCENARIO_LEVELS[topic_rank_level],
+            "group": TOPIC_DATA_GROUP,
+            "risk_level": topic_rank_policy["risk_level"],
+            "call_policy": topic_rank_policy["call_policy"],
+            "call_disabled": topic_rank_policy["call_disabled"],
+            "risk_reason": topic_rank_policy["risk_reason"],
+            "cache_ttl": 0,
+            "method_name": TOPIC_RANK_API["name"],
+            "http_method": "GET",
+            "target_url": str(TOPIC_RANK_LOG),
+            "endpoint": TOPIC_RANK_API["endpoint"],
+            "alias_endpoint": TOPIC_RANK_API["alias_endpoint"],
+            "params": {"date": "20260705", "limit": "100"},
+            "url_params": ["date", "day", "Day", "limit"],
+            "data": {},
+            "host": "global|26:20020",
+            "source": TOPIC_RANK_API["source"],
+            "packet_code": TOPIC_RANK_API["packet_code"],
+            "is_local": True,
+            "hide_url_fields": [],
+        }
+    )
+    topic_table_level = _effective_scenario_level_for("topic_table:3010")
+    topic_table_policy = _scenario_risk_policy(
+        topic_table_level,
+        scenario={
+            "title": "global.3010 Topic Table Content",
+            "title_cn": "\u9898\u6750\u5e93-\u5c0f\u8868\u683c\u5185\u5bb9",
+            "endpoint": TOPIC_TABLE_API["endpoint"],
+            "target_url": str(TOPIC_RANK_LOG),
+        },
+    )
+    scenarios.append(
+        {
+            "session_id": "topic_table:3010",
+            "title": "global.3010 Topic Table Content",
+            "title_cn": "\u9898\u6750\u5e93-\u5c0f\u8868\u683c\u5185\u5bb9",
+            "added_time": "2026-07-05",
+            "maintenance_time": "2026-07-05",
+            "level": topic_table_level,
+            "level_label": SCENARIO_LEVELS[topic_table_level],
+            "group": TOPIC_DATA_GROUP,
+            "risk_level": topic_table_policy["risk_level"],
+            "call_policy": topic_table_policy["call_policy"],
+            "call_disabled": topic_table_policy["call_disabled"],
+            "risk_reason": topic_table_policy["risk_reason"],
+            "cache_ttl": 0,
+            "method_name": TOPIC_TABLE_API["name"],
+            "http_method": "GET",
+            "target_url": str(TOPIC_RANK_LOG),
+            "endpoint": TOPIC_TABLE_API["endpoint"],
+            "alias_endpoint": TOPIC_TABLE_API["alias_endpoint"],
+            "params": {"topic_id": "395", "date": "20260705", "limit": "100"},
+            "url_params": ["topic_id", "id", "ID", "TopicID", "date", "day", "Day", "limit"],
+            "data": {},
+            "host": "global|26:20020",
+            "source": TOPIC_TABLE_API["source"],
+            "packet_code": TOPIC_TABLE_API["packet_code"],
+            "is_local": True,
+            "hide_url_fields": [],
+        }
+    )
     return scenarios
 
 
@@ -1919,6 +2033,18 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             )
             return
 
+        if (
+            path == "/api/topic"
+            or path.startswith("/api/topic/")
+            or path in {TOPIC_RANK_API["alias_endpoint"], TOPIC_TABLE_API["alias_endpoint"]}
+        ):
+            user, error = self._require_interface_or_session_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            self._handle_topic_rank_api(user, path)
+            return
+
         if path.startswith("/api/topic-library"):
             user, error = self._require_user()
             if error:
@@ -1983,6 +2109,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 return
             for key in LEGACY_INTERFACE_API_KEY_FIELDS:
                 overrides.pop(key, None)
+            overrides = _normalized_scene_overrides(route["spec"], overrides)
             if route.get("core_name"):
                 self._call_core_scene(user, route["scenario"], str(route["core_name"]), overrides)
                 return
@@ -2727,6 +2854,196 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 
         self._send_json({"error": "not_found", "path": path}, status=404)
 
+    def _handle_topic_rank_api(self, user: dict[str, object], path: str) -> None:
+        if self.command not in {"GET", "POST"}:
+            self._send_json({"error": "method_not_allowed"}, status=405)
+            return
+        if path == "/api/topic":
+            self._send_json(
+                {
+                    "apis": [
+                        {
+                            "name": TOPIC_RANK_API["name"],
+                            "source": TOPIC_RANK_API["source"],
+                            "packet_code": TOPIC_RANK_API["packet_code"],
+                            "endpoint": TOPIC_RANK_API["endpoint"],
+                            "alias_endpoint": TOPIC_RANK_API["alias_endpoint"],
+                            "description": TOPIC_RANK_API["description"],
+                        },
+                        {
+                            "name": TOPIC_TABLE_API["name"],
+                            "source": TOPIC_TABLE_API["source"],
+                            "packet_code": TOPIC_TABLE_API["packet_code"],
+                            "endpoint": TOPIC_TABLE_API["endpoint"],
+                            "alias_endpoint": TOPIC_TABLE_API["alias_endpoint"],
+                            "description": TOPIC_TABLE_API["description"],
+                        },
+                    ],
+                    "log": str(TOPIC_RANK_LOG),
+                }
+            )
+            return
+        if path in {TOPIC_TABLE_API["endpoint"], TOPIC_TABLE_API["alias_endpoint"]}:
+            self._handle_topic_table_content_api(user, path)
+            return
+        if path not in {TOPIC_RANK_API["endpoint"], TOPIC_RANK_API["alias_endpoint"]}:
+            self._send_json({"error": "not_found", "message": f"unknown topic api: {path}"}, status=404)
+            return
+
+        parsed = urlparse(self.path)
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values()
+        values = {**query_values, **body_values}
+        if not self._validate_interface_api_key(user):
+            return
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+            values.pop(key, None)
+        day = normalize_topic_rank_day(values.get("date") or values.get("day") or values.get("Day"))
+        try:
+            limit = int(values.get("limit", "0") or "0")
+        except ValueError:
+            limit = 0
+        limit = max(0, min(limit, 1000))
+
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        result = latest_topic_rank_list(day=day, limit=limit or None)
+        status_code = 200 if result else 404
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": "topic_rank:3009",
+                "title": "global.3009 Topic Rank List",
+                "title_cn": "\u9898\u6750\u5e93-\u6bcf\u65e5\u699c\u5355\u5217\u8868",
+                "endpoint": TOPIC_RANK_API["endpoint"],
+                "target_url": str(TOPIC_RANK_LOG),
+                "http_method": self.command,
+                "status": "ok" if result else "not_found",
+                "status_code": status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(values),
+                "request": {
+                    "source": TOPIC_RANK_API["source"],
+                    "route": "global|26:20020/3009-0/",
+                    "date": day,
+                    "limit": limit,
+                },
+                "response": {
+                    "content_type": "application/json",
+                    "body": {"count": result.get("count") if result else 0},
+                },
+                "error": "" if result else "topic rank packet not found",
+            }
+        )
+        if not result:
+            self._send_json(
+                {
+                    "error": "not_found",
+                    "message": "No topic rank packet found for requested date.",
+                    "date": day,
+                    "available_dates": available_topic_rank_days(),
+                    "source_log": str(TOPIC_RANK_LOG),
+                },
+                status=404,
+            )
+            return
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "topic_api": TOPIC_RANK_API,
+                "date": result.get("day"),
+                "source_log": str(TOPIC_RANK_LOG),
+                "body": result,
+            }
+        )
+
+    def _handle_topic_table_content_api(self, user: dict[str, object], path: str) -> None:
+        parsed = urlparse(self.path)
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values()
+        values = {**query_values, **body_values}
+        if not self._validate_interface_api_key(user):
+            return
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+            values.pop(key, None)
+        topic_id = str(
+            values.get("topic_id")
+            or values.get("id")
+            or values.get("ID")
+            or values.get("TopicID")
+            or ""
+        ).strip()
+        if not topic_id:
+            self._send_json({"error": "missing_topic_id", "message": "Pass topic_id=395"}, status=400)
+            return
+        day = normalize_topic_rank_day(values.get("date") or values.get("day") or values.get("Day"))
+        try:
+            limit = int(values.get("limit", "0") or "0")
+        except ValueError:
+            limit = 0
+        limit = max(0, min(limit, 1000))
+
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
+        result = latest_topic_table_content(topic_id, day=day, limit=limit or None)
+        status_code = 200 if result else 404
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": "topic_table:3010",
+                "title": "global.3010 Topic Table Content",
+                "title_cn": "\u9898\u6750\u5e93-\u5c0f\u8868\u683c\u5185\u5bb9",
+                "endpoint": TOPIC_TABLE_API["endpoint"],
+                "target_url": str(TOPIC_RANK_LOG),
+                "http_method": self.command,
+                "status": "ok" if result else "not_found",
+                "status_code": status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(values),
+                "request": {
+                    "source": TOPIC_TABLE_API["source"],
+                    "route": f"global|26:20020/3010-0/{topic_id}",
+                    "topic_id": topic_id,
+                    "date": day,
+                    "limit": limit,
+                },
+                "response": {
+                    "content_type": "application/json",
+                    "body": {"count": (result.get("body") or {}).get("count") if result else 0},
+                },
+                "error": "" if result else "topic table packet not found",
+            }
+        )
+        if not result:
+            self._send_json(
+                {
+                    "error": "not_found",
+                    "message": "No topic small-table packet found for requested topic/date.",
+                    "topic_id": topic_id,
+                    "date": day,
+                    "available_topics": available_topic_table_topics(),
+                    "source_log": str(TOPIC_RANK_LOG),
+                },
+                status=404,
+            )
+            return
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "topic_api": TOPIC_TABLE_API,
+                "topic_id": topic_id,
+                "date": result.get("day"),
+                "source_log": str(TOPIC_RANK_LOG),
+                "body": result,
+            }
+        )
+
     def _handle_hq_api(self, user: dict[str, object], path: str) -> None:
         if self.command not in {"GET", "POST"}:
             self._send_json({"error": "method_not_allowed"}, status=405)
@@ -3339,7 +3656,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
     def _send_cors_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, X-API-Key, x-api-key, Authorization, activation_code, api_activation_code",
+        )
 
 
 def main() -> None:

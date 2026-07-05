@@ -574,10 +574,17 @@
       return String(item.titleCn || item.title || item.sessionId || item.endpoint || "");
     }
 
+    function scenarioDateSortValue(value) {
+      const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
+      return digits.length === 8 ? Number(digits) : 0;
+    }
+
     function sortScenarioItems(items) {
       return [...items].sort((a, b) => {
         const levelResult = (LEVEL_SORT_ORDER[a.level] ?? LEVEL_SORT_ORDER.normal) - (LEVEL_SORT_ORDER[b.level] ?? LEVEL_SORT_ORDER.normal);
         if (levelResult) return levelResult;
+        const dateResult = scenarioDateSortValue(b.addedTime) - scenarioDateSortValue(a.addedTime);
+        if (dateResult) return dateResult;
         const nameResult = scenarioSortText(a).localeCompare(scenarioSortText(b), "zh-Hans-CN", { numeric: true });
         if (nameResult) return nameResult;
         return String(a.sessionId).localeCompare(String(b.sessionId), "zh-Hans-CN", { numeric: true });
@@ -753,9 +760,10 @@
     function getUrlManagedFields(item) {
       if (!item.data) return [];
       const hiddenFields = new Set(item.hideUrlFields || item.hide_url_fields || []);
+      const configuredFields = (item.urlParams || item.url_params || []).filter((key) => item.data[key] && !hiddenFields.has(key));
       const fields = ["Day", "Date", "DStart", "DEnd", "SDay", "EDay", "GID", "Type", "ZSType"].filter((key) => item.data[key] && !hiddenFields.has(key));
       if (/^\d{4}-\d{2}-\d{2}$/.test(String(item.data.Time || ""))) fields.push("Time");
-      return fields;
+      return [...new Set([...configuredFields, ...fields])];
     }
 
     async function callScenario(item, button) {

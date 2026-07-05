@@ -41,12 +41,20 @@ function scenarioSortText(item: Scenario) {
   return String(item.titleCn || item.title || item.sessionId || item.endpoint || "");
 }
 
+function scenarioDateSortValue(value: string) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
+  return digits.length === 8 ? Number(digits) : 0;
+}
+
 function sortScenarios(items: Scenario[]) {
   return [...items].sort((a, b) => {
     const levelResult =
       (levelSortOrder[a.level] ?? levelSortOrder.normal) -
       (levelSortOrder[b.level] ?? levelSortOrder.normal);
     if (levelResult) return levelResult;
+
+    const dateResult = scenarioDateSortValue(b.addedTime) - scenarioDateSortValue(a.addedTime);
+    if (dateResult) return dateResult;
 
     const nameResult = scenarioSortText(a).localeCompare(scenarioSortText(b), "zh-Hans-CN", {
       numeric: true

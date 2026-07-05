@@ -47,6 +47,8 @@ export interface RawScenario {
   cacheTtl?: number;
   params?: Record<string, string>;
   data?: Record<string, string>;
+  url_params?: string[];
+  urlParams?: string[];
   hide_url_fields?: string[];
   hideUrlFields?: string[];
   is_core?: boolean;
@@ -69,6 +71,7 @@ export interface Scenario {
   levelLabel: string;
   params: Record<string, string>;
   data: Record<string, string>;
+  urlParams: string[];
   hideUrlFields: string[];
   isCore: boolean;
   host: string;
@@ -182,6 +185,12 @@ export function inferGroup(item: RawScenario, host: string): string {
 
 export function normalizeScenario(item: RawScenario): Scenario {
   const host = item.host || hostFromUrl(item.target_url || item.url || "");
+  const endpoint = item.endpoint || "";
+  const data = { ...(item.data || {}) };
+  if ((endpoint === "/api/theme_infoget" || item.alias_endpoint === "/api/theme/infoget") && data.ID) {
+    data.id = data.ID;
+    delete data.ID;
+  }
   return {
     sessionId: String(item.session_id ?? item.sessionId ?? ""),
     title: item.title || item.name || "未命名场景",
@@ -191,12 +200,13 @@ export function normalizeScenario(item: RawScenario): Scenario {
     methodName: item.method_name || item.methodName || "",
     httpMethod: item.http_method || item.httpMethod || "POST",
     targetUrl: item.target_url || item.url || "",
-    endpoint: item.endpoint || "",
+    endpoint,
     aliasEndpoint: item.alias_endpoint || item.aliasEndpoint || "",
     level: item.level || "normal",
     levelLabel: item.level_label || item.levelLabel || "一般",
     params: item.params || {},
-    data: item.data || {},
+    data,
+    urlParams: item.url_params || item.urlParams || [],
     hideUrlFields: item.hide_url_fields || item.hideUrlFields || [],
     isCore: Boolean(item.is_core || item.isCore),
     host,
@@ -211,11 +221,15 @@ export function normalizeScenario(item: RawScenario): Scenario {
 
 export function getUrlManagedFields(item: Scenario): string[] {
   const hiddenFields = new Set(item.hideUrlFields || []);
+  const configuredFields = (item.urlParams || []).filter((key) => item.data[key] && !hiddenFields.has(key));
   const fields = ["Day", "Date", "DStart", "DEnd", "SDay", "EDay", "GID", "Type", "ZSType"].filter(
     (key) => item.data[key] && !hiddenFields.has(key)
   );
+  if ((item.endpoint === "/api/theme_infoget" || item.aliasEndpoint === "/api/theme/infoget") && item.data.id) {
+    fields.push("id");
+  }
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(item.data.Time || ""))) fields.push("Time");
-  return fields;
+  return [...new Set([...configuredFields, ...fields])];
 }
 
 export function buildRequestUrl(item: Scenario): string {

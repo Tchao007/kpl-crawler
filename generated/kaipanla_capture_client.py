@@ -5942,6 +5942,228 @@ DATASTATISTICS_CALDEVICEINFO_FRIDA_18331 = {
 }
 
 
+APPFUNCEXPLAIN_GETFUNCTION_ART_LAST_STRONG_FENGK_FRIDA_18332 = {
+    'session_id': '18332',
+    'added_time': '2026-07-05',
+    'title_cn': '市场风口-最强风口功能说明',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        'a': 'GetFunction_Art_Last',
+        'c': 'AppFuncExplain',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'apiv': 'w44',
+        'UserID': '0',
+        'FuncName': '最强风口',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+PAYFUNCREMINDNEW_GETREMIND_STRONG_FENGK_FRIDA_18333 = {
+    'session_id': '18333',
+    'added_time': '2026-07-05',
+    'title_cn': '市场风口-最强风口提醒状态',
+    'method': 'POST',
+    'url': 'https://appupchina.longhuvip.com/payw1/api/index.php',
+    'params': {},
+    'data': {
+        'a': 'GetRemind',
+        'apiv': 'w44',
+        'c': 'PayFuncRemindNew',
+        'PhoneOSNew': '1',
+        'UserID': '0',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'NID': '24',
+        'Token': '0',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+STOCKFENGKDATA_GETFENGKLISTBEST_REALTIME_FRIDA_18337 = {
+    'session_id': '18337',
+    'added_time': '2026-07-05',
+    'title_cn': '最强风口-实时列表',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {
+        'apiv': 'w44',
+        'PhoneOSNew': '1',
+        'VerSion': '5.23.0.4',
+    },
+    'data': {
+        'c': 'StockFengKData',
+        'a': 'GetFengKListBest',
+        'Time': '',
+        'UserID': '0',
+        'Token': '0',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+    },
+    'headers': {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Origin': 'https://apppage.longhuvip.com',
+        'X-Requested-With': 'com.aiyu.kaipanla',
+        'Sec-Fetch-Site': 'same-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://apppage.longhuvip.com/',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+    },
+}
+
+
+STOCKFENGKDATA_GETFENGKLISTBEST_HISTORY_FRIDA_18338 = {
+    'session_id': '18338',
+    'added_time': '2026-07-05',
+    'title_cn': '历史最强风口-列表',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {
+        'apiv': 'w44',
+        'PhoneOSNew': '1',
+        'VerSion': '5.23.0.4',
+    },
+    'data': {
+        'c': 'StockFengKData',
+        'a': 'GetFengKListBest',
+        'Time': '1500',
+        'Day': '20260702',
+        'UserID': '0',
+        'Token': '0',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+    },
+    'headers': {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 7.1.2; SM-G988N Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.131 Mobile Safari/537.36;kaipanla 5.23.0.4',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Origin': 'https://apppage.longhuvip.com',
+        'X-Requested-With': 'com.aiyu.kaipanla',
+        'Sec-Fetch-Site': 'same-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://apppage.longhuvip.com/',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+    },
+}
+
+
+THEME_INFOSEARCHHOT_TOPIC_LIBRARY_HAR_18339 = {
+    'session_id': '18339',
+    'added_time': '2026-07-05',
+    'title_cn': '题材库-题材热搜',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        'a': 'InfoSearchHot',
+        'c': 'Theme',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'apiv': 'w44',
+        'UserID': '0',
+        'id': '395',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+PAIHANGBANGOPTION_GETTICAISTOCKOPTION_TOPIC_TABLE_HAR_18340 = {
+    'session_id': '18340',
+    'added_time': '2026-07-05',
+    'title_cn': '题材库-小表格配置',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        'a': 'GetTiCaiStockOption',
+        'apiv': 'w44',
+        'c': 'PaiHangBangOption',
+        'PhoneOSNew': '1',
+        'UserID': '0',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+THEME_INFOGET_TOPIC_LIBRARY_HAR_18341 = {
+    'session_id': '18341',
+    'added_time': '2026-07-05',
+    'title_cn': '题材库-题材详情内容',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        'a': 'InfoGet',
+        'c': 'Theme',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'apiv': 'w44',
+        'UserID': '0',
+        'ID': '395',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+COMMENTS_GET_TOPIC_LIBRARY_HAR_18342 = {
+    'session_id': '18342',
+    'added_time': '2026-07-05',
+    'title_cn': '题材库-题材评论',
+    'method': 'POST',
+    'url': 'https://applhb.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'data': {
+        'st': '20',
+        'a': 'Get',
+        'c': 'Comments',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'Tsort': '9',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'Index': '0',
+        'apiv': 'w44',
+        'Type': '4',
+        'StockID': '395',
+        'UserID': '0',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
 REQUESTS = [
     USERINFO_APPNEWS,
     THEME_INFOGR,
@@ -6200,6 +6422,12 @@ REQUESTS = [
     USERINFO_GETINFO_FRIDA_18329,
     USERINFO_MESSAGEGET_FRIDA_18330,
     DATASTATISTICS_CALDEVICEINFO_FRIDA_18331,
+    STOCKFENGKDATA_GETFENGKLISTBEST_REALTIME_FRIDA_18337,
+    STOCKFENGKDATA_GETFENGKLISTBEST_HISTORY_FRIDA_18338,
+    THEME_INFOSEARCHHOT_TOPIC_LIBRARY_HAR_18339,
+    PAIHANGBANGOPTION_GETTICAISTOCKOPTION_TOPIC_TABLE_HAR_18340,
+    THEME_INFOGET_TOPIC_LIBRARY_HAR_18341,
+    COMMENTS_GET_TOPIC_LIBRARY_HAR_18342,
 ]
 
 
@@ -8108,6 +8336,63 @@ class KaipanlaCapturedClient:
             data['Display'] = str(display)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(DATASTATISTICS_CALDEVICEINFO_FRIDA_18331, data=data)
+
+    def stockfengkdata_getfengklistbest_realtime_frida_18337(self, time=None, **overrides):
+        """Replay session 18337: StockFengKData.GetFengKListBest."""
+        data = dict(STOCKFENGKDATA_GETFENGKLISTBEST_REALTIME_FRIDA_18337['data'])
+        if time is not None:
+            data['Time'] = str(time)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKFENGKDATA_GETFENGKLISTBEST_REALTIME_FRIDA_18337, data=data)
+
+    def stockfengkdata_getfengklistbest_history_frida_18338(self, day=None, time=None, **overrides):
+        """Replay session 18338: StockFengKData.GetFengKListBest."""
+        data = dict(STOCKFENGKDATA_GETFENGKLISTBEST_HISTORY_FRIDA_18338['data'])
+        if day is not None:
+            data['Day'] = str(day)
+        if time is not None:
+            data['Time'] = str(time)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKFENGKDATA_GETFENGKLISTBEST_HISTORY_FRIDA_18338, data=data)
+
+    def theme_infosearchhot_topic_library_har_18339(self, id=None, **overrides):
+        """Replay session 18339: Theme.InfoSearchHot."""
+        data = dict(THEME_INFOSEARCHHOT_TOPIC_LIBRARY_HAR_18339['data'])
+        if id is not None:
+            data['ID'] = str(id)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(THEME_INFOSEARCHHOT_TOPIC_LIBRARY_HAR_18339, data=data)
+
+    def paihangbangoption_getticaistockoption_topic_table_har_18340(self, **overrides):
+        """Replay session 18340: PaiHangBangOption.GetTiCaiStockOption."""
+        data = dict(PAIHANGBANGOPTION_GETTICAISTOCKOPTION_TOPIC_TABLE_HAR_18340['data'])
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(PAIHANGBANGOPTION_GETTICAISTOCKOPTION_TOPIC_TABLE_HAR_18340, data=data)
+
+    def theme_infoget_topic_library_har_18341(self, id=None, **overrides):
+        """Replay session 18341: Theme.InfoGet."""
+        data = dict(THEME_INFOGET_TOPIC_LIBRARY_HAR_18341['data'])
+        default_id = data.pop('id', None)
+        if id is None:
+            id = default_id
+        if id is not None:
+            data['ID'] = str(id)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(THEME_INFOGET_TOPIC_LIBRARY_HAR_18341, data=data)
+
+    def comments_get_topic_library_har_18342(self, stockid=None, index=None, st=None, tsort=None, **overrides):
+        """Replay session 18342: Comments.Get."""
+        data = dict(COMMENTS_GET_TOPIC_LIBRARY_HAR_18342['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if index is not None:
+            data['Index'] = str(index)
+        if st is not None:
+            data['st'] = str(st)
+        if tsort is not None:
+            data['Tsort'] = str(tsort)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(COMMENTS_GET_TOPIC_LIBRARY_HAR_18342, data=data)
 
 
 if __name__ == '__main__':

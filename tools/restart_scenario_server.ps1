@@ -13,6 +13,18 @@ $pidPath = Join-Path $root "server.pid"
 $serverScript = Join-Path $root "generated\scenario_api_server.py"
 
 function Stop-OldServer {
+  $serverScriptPattern = [regex]::Escape($serverScript)
+  $currentPid = $PID
+  Get-CimInstance Win32_Process -Filter "name='python.exe'" |
+    Where-Object {
+      $_.ProcessId -ne $currentPid -and
+      $_.CommandLine -and
+      $_.CommandLine -match $serverScriptPattern
+    } |
+    ForEach-Object {
+      Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+
   if (-not (Test-Path -LiteralPath $pidPath)) {
     return
   }
