@@ -10,11 +10,15 @@ import os
 import re
 import sys
 import time
+import urllib.error
+import urllib.request
+import zipfile
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, unquote, urlparse
+from xml.etree import ElementTree as ET
 
 from auth_store import AuthStore
 from kaipanla_capture_client import KaipanlaCapturedClient, REQUESTS
@@ -91,7 +95,16 @@ STOCK_DETAIL_GROUP = "个股详情"
 INFO_CONTENT_GROUP = "资讯内容"
 TOPIC_DATA_GROUP = "题材数据"
 LHB_GROUP = "龙虎榜"
+BILEILA_GROUP = "避雷啦"
 SYSTEM_CONFIG_GROUP = "系统配置接口"
+BILEILA_EXCEL_CACHE_DIR = ROOT.parent / "outputs" / "bileila"
+BILEILA_EXCEL_API = {
+    "name": "bileila_excel",
+    "endpoint": "/api/bileila/excel",
+    "alias_endpoint": "/api/bileila/excel-download",
+    "download_endpoint": "/api/bileila/excel/file",
+    "description": "避雷啦 ST预警/退市预警 Excel 下载与解析",
+}
 UPSTREAM_GUARD = UpstreamGuard(
     min_interval=float(os.environ.get("KPL_UPSTREAM_MIN_INTERVAL", "2.0")),
     max_per_minute=int(os.environ.get("KPL_UPSTREAM_MAX_PER_MINUTE", "24")),
@@ -219,6 +232,160 @@ def _read_tail_lines(path: Path, max_bytes: int) -> list[str]:
     except OSError:
         return []
     return data.decode("utf-8", errors="ignore").splitlines()
+
+
+def _normalize_bileila_excel_date(value: object = None) -> tuple[str, str]:
+    text = str(value or "").strip()
+    if not text:
+        day = datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+        return day, day.replace("-", ".")
+    digits = re.sub(r"\D", "", text)
+    if len(digits) != 8:
+        raise ValueError("date must be YYYY-MM-DD, YYYYMMDD, or YYYY.MM.DD")
+    day = f"{digits[:4]}-{digits[4:6]}-{digits[6:8]}"
+    datetime.strptime(day, "%Y-%m-%d")
+    return day, day.replace("-", ".")
+
+
+def _bileila_excel_url(dot_day: str) -> str:
+    return f"https://appcdn.longhuvip.com/BiLeiLa/kaipanla_bileila_{dot_day}.xlsx"
+
+
+def _column_name_to_index(name: str) -> int:
+    value = 0
+    for char in name.upper():
+        if not ("A" <= char <= "Z"):
+            continue
+        value = value * 26 + ord(char) - ord("A") + 1
+    return max(value - 1, 0)
+
+
+def _xlsx_cell_text(cell: ET.Element, shared_strings: list[str]) -> object:
+    cell_type = cell.attrib.get("t", "")
+    if cell_type == "inlineStr":
+        parts = [item.text or "" for item in cell.findall(".//{*}t")]
+        return "".join(parts).strip()
+    value_node = cell.find("{*}v")
+    if value_node is None:
+        return ""
+    text = (value_node.text or "").strip()
+    if cell_type == "s":
+        try:
+            return shared_strings[int(text)]
+        except (ValueError, IndexError):
+            return text
+    if cell_type == "b":
+        return text == "1"
+    return text
+
+
+def _unique_headers(values: list[object]) -> list[str]:
+    headers: list[str] = []
+    seen: dict[str, int] = {}
+    for index, value in enumerate(values, start=1):
+        header = str(value or "").strip() or f"Column{index}"
+        seen[header] = seen.get(header, 0) + 1
+        headers.append(header if seen[header] == 1 else f"{header}_{seen[header]}")
+    return headers
+
+
+def _parse_bileila_xlsx(path: Path) -> dict[str, object]:
+    with zipfile.ZipFile(path) as archive:
+        shared_strings: list[str] = []
+        if "xl/sharedStrings.xml" in archive.namelist():
+            root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+            for item in root.findall("{*}si"):
+                shared_strings.append("".join(node.text or "" for node in item.findall(".//{*}t")).strip())
+
+        rel_targets: dict[str, str] = {}
+        if "xl/_rels/workbook.xml.rels" in archive.namelist():
+            rel_root = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+            for rel in rel_root.findall("{*}Relationship"):
+                target = rel.attrib.get("Target", "")
+                rel_id = rel.attrib.get("Id", "")
+                if rel_id and target:
+                    rel_targets[rel_id] = "xl/" + target.lstrip("/")
+
+        workbook = ET.fromstring(archive.read("xl/workbook.xml"))
+        sheets: list[dict[str, object]] = []
+        all_codes: set[str] = set()
+        for sheet in workbook.findall(".//{*}sheet"):
+            sheet_name = sheet.attrib.get("name", "")
+            rel_id = sheet.attrib.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id", "")
+            sheet_path = rel_targets.get(rel_id, "")
+            if not sheet_path or sheet_path not in archive.namelist():
+                continue
+            sheet_root = ET.fromstring(archive.read(sheet_path))
+            raw_rows: list[list[object]] = []
+            for row in sheet_root.findall(".//{*}sheetData/{*}row"):
+                cells: list[object] = []
+                for cell in row.findall("{*}c"):
+                    ref = cell.attrib.get("r", "")
+                    match = re.match(r"([A-Z]+)", ref)
+                    column_index = _column_name_to_index(match.group(1)) if match else len(cells)
+                    while len(cells) < column_index:
+                        cells.append("")
+                    cells.append(_xlsx_cell_text(cell, shared_strings))
+                if any(str(value).strip() for value in cells):
+                    raw_rows.append(cells)
+                    for value in cells:
+                        all_codes.update(re.findall(r"(?<!\d)(?:00|30|60|68|83|87|92)\d{4}(?!\d)", str(value)))
+
+            headers = _unique_headers(raw_rows[0]) if raw_rows else []
+            row_dicts: list[dict[str, object]] = []
+            for raw_row in raw_rows[1:]:
+                row_dicts.append(
+                    {
+                        headers[index] if index < len(headers) else f"Column{index + 1}": value
+                        for index, value in enumerate(raw_row)
+                        if str(value).strip()
+                    }
+                )
+            sheets.append(
+                {
+                    "name": sheet_name,
+                    "header": headers,
+                    "row_count": len(row_dicts),
+                    "rows": row_dicts,
+                }
+            )
+    return {"sheets": sheets, "stock_codes": sorted(all_codes)}
+
+
+def _load_bileila_excel(day_value: object = None, force: bool = False) -> dict[str, object]:
+    day, dot_day = _normalize_bileila_excel_date(day_value)
+    url = _bileila_excel_url(dot_day)
+    BILEILA_EXCEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_path = BILEILA_EXCEL_CACHE_DIR / f"kaipanla_bileila_{dot_day}.xlsx"
+    from_cache = cache_path.exists() and not force
+    if not from_cache:
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
+                "Accept": "*/*",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=25) as response:
+                body = response.read()
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(f"upstream HTTP {exc.code}: {url}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"upstream download failed: {exc.reason}") from exc
+        if not body.startswith(b"PK"):
+            raise RuntimeError("upstream response is not an XLSX file")
+        cache_path.write_bytes(body)
+    parsed = _parse_bileila_xlsx(cache_path)
+    return {
+        "date": day,
+        "source_url": url,
+        "download_endpoint": f"{BILEILA_EXCEL_API['download_endpoint']}?date={day}",
+        "cached_path": str(cache_path),
+        "from_cache": from_cache,
+        "file_size": cache_path.stat().st_size,
+        **parsed,
+    }
 
 
 SCENARIO_LEVELS = {
@@ -466,6 +633,8 @@ def _scenario_group_for(
 
     if "市场量能" in text or re.match(r"^182(2[5-9]|3[0-2])$", session_id):
         return MARKET_VOLUME_GROUP
+    if session_id in {"18222", "18295"} or "打板" in text:
+        return HQ_CORE_GROUP
     if (
         "情绪" in text
         or "大幅回撤" in text
@@ -1254,7 +1423,7 @@ TITLE_CN_BY_SESSION = {
     "18219": "涨停表现-历史指数",
     "18220": "涨停表现-历史列表",
     "18221": "涨停表现-历史连板列表",
-    "18222": "涨停表现-历史打板列表",
+    "18222": "行情-打板列表",
     "18223": "涨停表现-历史走势增量",
     "18224": "涨停表现-历史量额增量",
     "18225": "市场量能-大单历史K线",
@@ -1298,6 +1467,7 @@ TITLE_CN_BY_SESSION = {
     "18289": "行情-历史地域指数排名",
     "18290": "行情-历史行业指数时间段排名",
     "18291": "行情-历史地域指数时间段排名",
+    "18295": "行情-打板统计数量",
     "18259": "龙虎榜-游资组合信息-成都系",
     "18272": "龙虎榜-游资组合流水-成都系",
     "18260": "龙虎榜-游资组合信息-佛山系",
@@ -1375,7 +1545,7 @@ TITLE_CN_FIXES = {
     "18219": "涨停表现-历史指数",
     "18220": "涨停表现-历史列表",
     "18221": "涨停表现-历史连板列表",
-    "18222": "涨停表现-历史打板列表",
+    "18222": "行情-打板列表",
     "18223": "涨停表现-历史走势增量",
     "18224": "涨停表现-历史量额增量",
     "18225": "市场量能-大单历史K线",
@@ -1445,6 +1615,7 @@ TITLE_CN_FIXES = {
     "18289": "行情-历史地域指数排名",
     "18290": "行情-历史行业指数时间段排名",
     "18291": "行情-历史地域指数时间段排名",
+    "18295": "行情-打板统计数量",
 }
 
 
@@ -1726,6 +1897,7 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "alias_endpoint": alias_endpoint,
                 "params": params,
                 "data": data,
+                "url_params": spec.get("url_params", []),
                 "hide_url_fields": spec.get("hide_url_fields", []),
             }
         )
@@ -1875,6 +2047,48 @@ def _build_scenarios() -> list[dict[str, object]]:
             "source": TOPIC_TABLE_API["source"],
             "packet_code": TOPIC_TABLE_API["packet_code"],
             "is_local": True,
+            "hide_url_fields": [],
+        }
+    )
+    bileila_session_id = "bileila:excel"
+    bileila_level = _effective_scenario_level_for(bileila_session_id)
+    if bileila_level == "normal":
+        bileila_level = "rare"
+    bileila_policy = _scenario_risk_policy(
+        bileila_level,
+        scenario={
+            "title": "BiLeiLa Excel Download",
+            "title_cn": "\u907f\u96f7\u5566-Excel\u4e0b\u8f7d",
+            "endpoint": BILEILA_EXCEL_API["endpoint"],
+            "target_url": _bileila_excel_url("YYYY.MM.DD"),
+        },
+    )
+    scenarios.append(
+        {
+            "session_id": bileila_session_id,
+            "title": "BiLeiLa Excel Download",
+            "title_cn": "\u907f\u96f7\u5566-Excel\u4e0b\u8f7d",
+            "added_time": "2026-07-06",
+            "maintenance_time": "2026-07-06",
+            "level": bileila_level,
+            "level_label": SCENARIO_LEVELS[bileila_level],
+            "group": BILEILA_GROUP,
+            "risk_level": bileila_policy["risk_level"],
+            "call_policy": bileila_policy["call_policy"],
+            "call_disabled": bileila_policy["call_disabled"],
+            "risk_reason": bileila_policy["risk_reason"],
+            "cache_ttl": 0,
+            "method_name": BILEILA_EXCEL_API["name"],
+            "http_method": "GET",
+            "target_url": _bileila_excel_url("YYYY.MM.DD"),
+            "endpoint": BILEILA_EXCEL_API["endpoint"],
+            "alias_endpoint": BILEILA_EXCEL_API["alias_endpoint"],
+            "params": {"date": datetime.now(BEIJING_TZ).strftime("%Y-%m-%d"), "force": "0"},
+            "url_params": ["date", "day", "Day", "force"],
+            "data": {},
+            "source": "appcdn.longhuvip.com/BiLeiLa",
+            "is_local": True,
+            "local_name": BILEILA_EXCEL_API["name"],
             "hide_url_fields": [],
         }
     )
@@ -2051,6 +2265,18 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 self._send_auth_failure(error, json_response=True)
                 return
             self._handle_topic_library_api(path)
+            return
+
+        if path in {
+            BILEILA_EXCEL_API["endpoint"],
+            BILEILA_EXCEL_API["alias_endpoint"],
+            BILEILA_EXCEL_API["download_endpoint"],
+        }:
+            user, error = self._require_interface_or_session_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            self._handle_bileila_excel_api(user, path)
             return
 
         if path == "/api/core" or path.startswith("/api/core/"):
@@ -2853,6 +3079,91 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             return
 
         self._send_json({"error": "not_found", "path": path}, status=404)
+
+    def _handle_bileila_excel_api(self, user: dict[str, object], path: str) -> None:
+        if self.command not in {"GET", "POST"}:
+            self._send_json({"error": "method_not_allowed"}, status=405)
+            return
+        parsed = urlparse(self.path)
+        query_values = self._flatten_query(parse_qs(parsed.query, keep_blank_values=True))
+        body_values = self._read_body_values()
+        values = {**query_values, **body_values}
+        values.pop("_ts", None)
+        if not self._validate_interface_api_key(user):
+            return
+        for key in LEGACY_INTERFACE_API_KEY_FIELDS:
+            values.pop(key, None)
+
+        requested_at = time.time()
+        started_iso = datetime.fromtimestamp(requested_at, BEIJING_TZ).isoformat(timespec="seconds")
+        force = str(values.get("force") or values.get("refresh") or "").strip().lower() in {"1", "true", "yes", "y"}
+        day_value = values.get("date") or values.get("day") or values.get("Day")
+        try:
+            result = _load_bileila_excel(day_value, force=force)
+            status_code = 200
+            error_message = ""
+        except (RuntimeError, ValueError, zipfile.BadZipFile) as exc:
+            result = {}
+            status_code = 502 if isinstance(exc, RuntimeError) else 400
+            error_message = str(exc)
+
+        _append_call_log(
+            {
+                "requested_at": requested_at,
+                "requested_at_text": started_iso,
+                "username": user.get("username", ""),
+                "role": user.get("role", ""),
+                "session_id": "bileila:excel",
+                "title": "BiLeiLa Excel Download",
+                "title_cn": "\u907f\u96f7\u5566-Excel\u4e0b\u8f7d",
+                "endpoint": BILEILA_EXCEL_API["endpoint"],
+                "target_url": result.get("source_url") or _bileila_excel_url("YYYY.MM.DD"),
+                "http_method": self.command,
+                "status": "ok" if not error_message else "error",
+                "status_code": status_code,
+                "duration_ms": int((time.time() - requested_at) * 1000),
+                "overrides": _safe_log_values(values),
+                "request": {
+                    "date": day_value or "",
+                    "force": force,
+                    "source": "appcdn.longhuvip.com/BiLeiLa",
+                },
+                "response": {
+                    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "body": {
+                        "sheet_count": len(result.get("sheets", [])) if result else 0,
+                        "stock_code_count": len(result.get("stock_codes", [])) if result else 0,
+                    },
+                },
+                "error": error_message,
+            }
+        )
+        if error_message:
+            self._send_json({"error": "bileila_excel_failed", "message": error_message}, status=status_code)
+            return
+        if path == BILEILA_EXCEL_API["download_endpoint"]:
+            self._serve_file(
+                Path(str(result["cached_path"])),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+            return
+        self._send_json(
+            {
+                "requested_at": requested_at,
+                "bileila_api": BILEILA_EXCEL_API,
+                "date": result["date"],
+                "source_url": result["source_url"],
+                "download_endpoint": result["download_endpoint"],
+                "cached_path": result["cached_path"],
+                "from_cache": result["from_cache"],
+                "file_size": result["file_size"],
+                "body": {
+                    "sheets": result["sheets"],
+                    "stock_codes": result["stock_codes"],
+                    "stock_code_count": len(result["stock_codes"]),
+                },
+            }
+        )
 
     def _handle_topic_rank_api(self, user: dict[str, object], path: str) -> None:
         if self.command not in {"GET", "POST"}:

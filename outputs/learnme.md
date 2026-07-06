@@ -321,3 +321,169 @@
 | `/api/longhubang_updatelist` | 龙虎榜更新列表 |
 | `/api/longhubang_add` | 动作类接口，非查询主入口 |
 | `/api/longhubang_beijiaosuoget` | 北交所龙虎榜数据；本次三份 HAR 未覆盖字段结构，暂不展开 |
+
+---
+
+# 打板模块调用建议
+
+## 数据来源
+
+- `C:\Users\Administrator\Desktop\myfile\行情\api接口\行情-打板_2026_07_06_22_22_15.har`
+- 项目存量接口：`/api/hishomedingpan_getnum`
+- 项目存量接口：`/api/hishomedingpan_hisdabanlist`
+
+以下说明只基于上述抓包和项目现有接口整理；未能从抓包确认的字段标注为“未确认”。
+
+## 调用建议
+
+- 统计主入口：`/api/hishomedingpan_getnum`。传 `Day=YYYY-MM-DD` 查询指定交易日的打板页顶部统计数量。该接口返回 `nums` 对象，包含涨停、破板、跌停、翘板、竞价等计数字段。
+- 列表主入口：`/api/hishomedingpan_hisdabanlist`。传 `Day=YYYY-MM-DD`、`PidType`、`Type` 查询对应分类列表；分页使用 `Index` 和 `st`；排序使用 `Order`。新接入只保留这个动态主入口，不按 `PidType + Type` 拆成多个重复接口。
+- 过滤参数：`Is_st`、`Filter`、`FilterGem`、`FilterMotherboard`、`FilterTIB` 由 URL 动态传入。抓包样例均为 `Is_st=1&Filter=0&FilterGem=0&FilterMotherboard=0&FilterTIB=0`。
+- 日期参数：`Day` 必须放到 URL 中；抓包格式为 `YYYY-MM-DD`，例如 `2026-07-03`。
+- 当前抓包只有历史源，Host 为 `apphis.longhuvip.com`；未确认实时源是否使用同名接口。
+
+## 上游抓包依据
+
+| 场景 | Host | c | a | 关键参数 | 说明 |
+| --- | --- | --- | --- | --- | --- |
+| 打板统计数量 | `apphis.longhuvip.com` | `HisHomeDingPan` | `GetNum` | `Day=2026-07-03&Is_st=1&Filter=0&FilterGem=0&FilterMotherboard=0&FilterTIB=0` | 返回 `nums` 统计 |
+| 打板分类列表 | `apphis.longhuvip.com` | `HisHomeDingPan` | `HisDaBanList` | `Day=2026-07-03&PidType=8&Type=18&Order=1&Index=0&st=30` | 返回 `list` 股票列表 |
+
+## 已确认分类参数
+
+| PidType | Type | 抓包返回条数 | 对应统计项判断 |
+| --- | --- | ---: | --- |
+| `1` | `6` | `30+` | 可能对应涨停列表，和 `ZT=104` 方向一致 |
+| `2` | `4` | `30+` | 可能对应破板列表，和 `PB=52` 方向一致 |
+| `3` | `6` | `19` | 对应跌停列表，和 `DT=19` 对得上 |
+| `4` | `6` | `30+` | 可能对应 `FYZ=97`，具体中文名未确认 |
+| `5` | `4` | `12` | 对应翘板列表，和 `QB=12` 对得上 |
+| `8` | `18` | `30+` | 竞价/综合打板列表，可能对应 `JJ` 或 `JJZZ`，具体中文名未确认 |
+
+未在本次 HAR 中抓到对应列表请求的统计项：`WKB`、`FXB`。不要为这两个字段自行编造 `PidType` / `Type`，后续需要点击对应页面后再补。
+
+## 统计字段
+
+### `/api/hishomedingpan_getnum`
+
+| 字段名 | 类型 | 说明 |
+| --- | --- | --- |
+| `nums` | Object | 打板页顶部统计对象 |
+| `nums.JJZZ` | Number | 抓包样例为 `191`，竞价相关子统计，具体中文名未确认 |
+| `nums.ZT` | Number | 涨停数量，抓包样例为 `104` |
+| `nums.PB` | Number | 破板数量，抓包样例为 `52` |
+| `nums.DT` | Number | 跌停数量，抓包样例为 `19` |
+| `nums.FYZ` | Number | 抓包样例为 `97`，具体中文名未确认 |
+| `nums.QB` | Number | 翘板数量，抓包样例为 `12` |
+| `nums.JJ` | Number | 竞价相关总数，抓包样例为 `245` |
+| `nums.WKB` | Number | 抓包样例为 `1`，具体中文名未确认 |
+| `nums.FXB` | Number | 抓包样例为 `45`，具体中文名未确认 |
+| `ttag` | Number | 上游耗时标记 |
+| `errcode` | String | 错误码，`0` 表示成功 |
+
+示例：
+
+```text
+GET|POST /api/hishomedingpan_getnum?Day=2026-07-03&Is_st=1&Filter=0&FilterGem=0&FilterMotherboard=0&FilterTIB=0
+```
+
+示例响应：
+
+```json
+{
+  "nums": {
+    "JJZZ": 191,
+    "ZT": 104,
+    "PB": 52,
+    "DT": 19,
+    "FYZ": 97,
+    "QB": 12,
+    "JJ": 245,
+    "WKB": 1,
+    "FXB": 45
+  },
+  "ttag": 0.0012940000000000035,
+  "errcode": "0"
+}
+```
+
+## 列表字段
+
+### `/api/hishomedingpan_hisdabanlist`
+
+| 字段名 | 类型 | 说明 |
+| --- | --- | --- |
+| `list[]` | Array | 股票列表，每行是数组结构 |
+| `list[][0]` | String | 股票代码 |
+| `list[][1]` | String | 股票名称 |
+| `list[][4]` | Number/String | 涨跌幅或阶段涨幅；不同 `PidType/Type` 下含义可能不同 |
+| `list[][6]` | Number/String | 时间戳字段；在部分分类中出现 |
+| `list[][7]` | Number/String | 时间戳字段；在部分分类中出现 |
+| `list[][8]` | Number/String | 金额/成交类字段；具体口径未确认 |
+| `list[][9]` | String | 连板标签；样例为 `4天3板` |
+| `list[][10]` | Number/String | 连板/高度类数值；具体口径未确认 |
+| `list[][11]` | String | 题材/概念标签，多个标签用顿号分隔 |
+| `list[][12]` | Number/String | 资金/金额类字段，具体口径未确认 |
+| `list[][13]` | Number/String | 成交额或金额类字段，具体口径未确认 |
+| `list[][14]` | Number/String | 换手率/比例类字段，具体口径未确认 |
+| `list[][15]` | Number/String | 市值类字段，具体口径未确认 |
+| `day` | String | 查询日期，格式 `YYYY-MM-DD` |
+| `ttag` | Number | 上游耗时标记 |
+| `errcode` | String | 错误码，`0` 表示成功 |
+
+示例：
+
+```text
+GET|POST /api/hishomedingpan_hisdabanlist?Day=2026-07-03&PidType=8&Type=18&Order=1&Index=0&st=30&Is_st=1&Filter=0&FilterGem=0&FilterMotherboard=0&FilterTIB=0
+```
+
+示例响应片段：
+
+```json
+{
+  "list": [
+    [
+      "603137",
+      "恒尚节能",
+      0,
+      "",
+      10.03,
+      0,
+      0,
+      0,
+      0,
+      "",
+      0,
+      "并购重组、基础建设",
+      6791218,
+      10426365,
+      0.73,
+      1433615976
+    ]
+  ],
+  "day": "2026-07-03",
+  "errcode": "0"
+}
+```
+
+## 参数规则
+
+| 参数名 | 适用接口 | 说明 |
+| --- | --- | --- |
+| `Day` | `GetNum`、`HisDaBanList` | 交易日期，抓包格式 `YYYY-MM-DD`，必须放 URL |
+| `PidType` | `HisDaBanList` | 分类参数，需要与 `Type` 联合使用 |
+| `Type` | `HisDaBanList` | 分类参数，需要与 `PidType` 联合使用 |
+| `Order` | `HisDaBanList` | 排序参数；抓包固定为 `1`，其他取值未确认 |
+| `Index` | `HisDaBanList` | 分页起点；抓包出现 `0` 和 `12` |
+| `st` | `HisDaBanList` | 单次返回数量；抓包为 `30` |
+| `Is_st` | `GetNum`、`HisDaBanList` | 抓包固定为 `1`，具体业务含义未确认 |
+| `Filter` | `GetNum`、`HisDaBanList` | 过滤开关；抓包为 `0` |
+| `FilterGem` | `GetNum`、`HisDaBanList` | 创业板过滤；抓包为 `0` |
+| `FilterMotherboard` | `GetNum`、`HisDaBanList` | 主板过滤；抓包为 `0` |
+| `FilterTIB` | `GetNum`、`HisDaBanList` | 科创板过滤；抓包为 `0` |
+
+## 接入规则
+
+- 只保留 `GetNum` 和 `HisDaBanList` 两个主入口，分类由 `PidType`、`Type` 动态传入。
+- `Day`、`PidType`、`Type`、`Order`、`Index`、`st` 和过滤参数都应在 URL 调用界面可编辑。
+- `JJZZ`、`FYZ`、`WKB`、`FXB` 的中文含义和对应列表参数未完全确认，后续必须通过补充抓包确认后再维护。

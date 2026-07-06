@@ -3729,23 +3729,30 @@ HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221 = {
 
 HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222 = {
     'session_id': '18222',
-    'added_time': '2026-06-27',
+    'added_time': '2026-07-06',
+    'title_cn': '行情-打板列表',
     'method': 'POST',
     'url': 'https://apphis.longhuvip.com/w1/api/index.php',
     'params': {},
+    'url_params': ['Day', 'PidType', 'Type', 'Order', 'Index', 'st', 'Is_st', 'Filter', 'FilterGem', 'FilterMotherboard', 'FilterTIB'],
     'data': {
         "Order": "1",
         "a": "HisDaBanList",
-        "st": "2000",
+        "st": "30",
         "c": "HisHomeDingPan",
         "PhoneOSNew": "1",
         "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
         "VerSion": "5.23.0.4",
         "Index": "0",
-        "PidType": "2",
+        "Is_st": "1",
+        "PidType": "8",
         "apiv": "w44",
-        "Type": "4",
-        "Day": "2026-06-25"
+        "Type": "18",
+        "FilterMotherboard": "0",
+        "Filter": "0",
+        "FilterTIB": "0",
+        "Day": "2026-07-03",
+        "FilterGem": "0"
     },
     'headers': {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -5500,12 +5507,13 @@ STOCKF10BASIC_GETFINANCEINFO_FRIDA_18294 = {
 
 HISHOMEDINGPAN_GETNUM_FRIDA_18295 = {
     'session_id': '18295',
-    'added_time': '2026-06-29',
-    'title_cn': '行情历史-盯盘数量',
+    'added_time': '2026-07-06',
+    'title_cn': '行情-打板统计数量',
     'method': 'POST',
     'url': 'https://apphis.longhuvip.com/w1/api/index.php',
     'params': {},
-    'data': {'a': 'GetNum', 'c': 'HisHomeDingPan', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Is_st': '1', 'apiv': 'w44', 'FilterMotherboard': '0', 'Filter': '0', 'FilterTIB': '0', 'Day': '2026-06-26', 'FilterGem': '0'},
+    'url_params': ['Day', 'Is_st', 'Filter', 'FilterGem', 'FilterMotherboard', 'FilterTIB'],
+    'data': {'a': 'GetNum', 'c': 'HisHomeDingPan', 'PhoneOSNew': '1', 'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2', 'VerSion': '5.23.0.4', 'Is_st': '1', 'apiv': 'w44', 'FilterMotherboard': '0', 'Filter': '0', 'FilterTIB': '0', 'Day': '2026-07-03', 'FilterGem': '0'},
     'headers': {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)'},
 }
 
@@ -6164,6 +6172,124 @@ COMMENTS_GET_TOPIC_LIBRARY_HAR_18342 = {
 }
 
 
+STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_REALTIME_HAR_18343 = {
+    'session_id': '18343',
+    'added_time': '2026-07-06',
+    'title_cn': '个股行情-大单透视明细',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'url_params': ['StockID', 'Money', 'IsBS', 'Index', 'st'],
+    'data': {
+        'a': 'GetMainMonitor_w30',
+        'c': 'StockYiDongKanPan',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'apiv': 'w44',
+        'StockID': '688808',
+        'UserID': '0',
+        'Money': '3',
+        'IsBS': '0',
+        'Index': '0',
+        'st': '30',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+STOCKL2DATA_GETMAINMONITOR_TREND_W30_BIG_ORDER_REALTIME_HAR_18344 = {
+    'session_id': '18344',
+    'added_time': '2026-07-06',
+    'title_cn': '个股行情-大单透视趋势',
+    'method': 'POST',
+    'url': 'https://apphwhq.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'url_params': ['StockID', 'Money', 'IsBS'],
+    'data': {
+        'a': 'GetMainMonitor_Trend_w30',
+        'c': 'StockL2Data',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'apiv': 'w44',
+        'StockID': '688808',
+        'UserID': '0',
+        'Money': '3',
+        'IsBS': '0',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_HISTORY_HAR_18345 = {
+    'session_id': '18345',
+    'added_time': '2026-07-06',
+    'title_cn': '个股行情-大单透视明细',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'url_params': ['StockID', 'Date', 'Money', 'IsBS', 'Index', 'st'],
+    'data': {
+        'a': 'GetMainMonitor_w30',
+        'c': 'StockYiDongKanPan',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'Date': '2026-07-03',
+        'Money': '3',
+        'apiv': 'w44',
+        'StockID': '688808',
+        'UserID': '0',
+        'IsBS': '0',
+        'Index': '0',
+        'st': '30',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
+STOCKL2HISTORY_GETMAINMONITOR_TREND_W30_BIG_ORDER_HISTORY_HAR_18346 = {
+    'session_id': '18346',
+    'added_time': '2026-07-06',
+    'title_cn': '个股行情-大单透视趋势',
+    'method': 'POST',
+    'url': 'https://apphis.longhuvip.com/w1/api/index.php',
+    'params': {},
+    'url_params': ['StockID', 'Date', 'Money', 'IsBS'],
+    'data': {
+        'a': 'GetMainMonitor_Trend_w30',
+        'c': 'StockL2History',
+        'PhoneOSNew': '1',
+        'DeviceID': '7905c37c-ccc6-3420-afbc-fbc91cd509b2',
+        'VerSion': '5.23.0.4',
+        'Token': '0',
+        'Date': '2026-07-03',
+        'Money': '3',
+        'apiv': 'w44',
+        'StockID': '688808',
+        'UserID': '0',
+        'IsBS': '0',
+    },
+    'headers': {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)',
+    },
+}
+
+
 REQUESTS = [
     USERINFO_APPNEWS,
     THEME_INFOGR,
@@ -6428,6 +6554,10 @@ REQUESTS = [
     PAIHANGBANGOPTION_GETTICAISTOCKOPTION_TOPIC_TABLE_HAR_18340,
     THEME_INFOGET_TOPIC_LIBRARY_HAR_18341,
     COMMENTS_GET_TOPIC_LIBRARY_HAR_18342,
+    STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_REALTIME_HAR_18343,
+    STOCKL2DATA_GETMAINMONITOR_TREND_W30_BIG_ORDER_REALTIME_HAR_18344,
+    STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_HISTORY_HAR_18345,
+    STOCKL2HISTORY_GETMAINMONITOR_TREND_W30_BIG_ORDER_HISTORY_HAR_18346,
 ]
 
 
@@ -7438,7 +7568,7 @@ class KaipanlaCapturedClient:
         return self.request(HISHOMEDINGPAN_DAILYLIMITPERFORMANCE2_HISTORY_18221, data=data)
 
 
-    def hishomedingpan_hisdabanlist_history(self, Day=None, PidType=None, Index=None, Order=None, st=None, Type=None, **overrides):
+    def hishomedingpan_hisdabanlist_history(self, Day=None, PidType=None, Index=None, Order=None, st=None, Type=None, Is_st=None, Filter=None, FilterGem=None, FilterMotherboard=None, FilterTIB=None, **overrides):
         """Replay session 18222: HisHomeDingPan.HisDaBanList."""
         data = dict(HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222['data'])
         if Day is not None:
@@ -7453,6 +7583,16 @@ class KaipanlaCapturedClient:
             data['st'] = str(st)
         if Type is not None:
             data['Type'] = str(Type)
+        if Is_st is not None:
+            data['Is_st'] = str(Is_st)
+        if Filter is not None:
+            data['Filter'] = str(Filter)
+        if FilterGem is not None:
+            data['FilterGem'] = str(FilterGem)
+        if FilterMotherboard is not None:
+            data['FilterMotherboard'] = str(FilterMotherboard)
+        if FilterTIB is not None:
+            data['FilterTIB'] = str(FilterTIB)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(HISHOMEDINGPAN_HISDABANLIST_HISTORY_18222, data=data)
 
@@ -8393,6 +8533,66 @@ class KaipanlaCapturedClient:
             data['Tsort'] = str(tsort)
         data.update({key: str(value) for key, value in overrides.items() if value is not None})
         return self.request(COMMENTS_GET_TOPIC_LIBRARY_HAR_18342, data=data)
+
+    def stockyidongkanpan_getmainmonitor_w30_big_order_realtime_har_18343(self, stockid=None, money=None, isbs=None, index=None, st=None, **overrides):
+        """Replay session 18343: StockYiDongKanPan.GetMainMonitor_w30."""
+        data = dict(STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_REALTIME_HAR_18343['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if money is not None:
+            data['Money'] = str(money)
+        if isbs is not None:
+            data['IsBS'] = str(isbs)
+        if index is not None:
+            data['Index'] = str(index)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_REALTIME_HAR_18343, data=data)
+
+    def stockl2data_getmainmonitor_trend_w30_big_order_realtime_har_18344(self, stockid=None, money=None, isbs=None, **overrides):
+        """Replay session 18344: StockL2Data.GetMainMonitor_Trend_w30."""
+        data = dict(STOCKL2DATA_GETMAINMONITOR_TREND_W30_BIG_ORDER_REALTIME_HAR_18344['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if money is not None:
+            data['Money'] = str(money)
+        if isbs is not None:
+            data['IsBS'] = str(isbs)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2DATA_GETMAINMONITOR_TREND_W30_BIG_ORDER_REALTIME_HAR_18344, data=data)
+
+    def stockyidongkanpan_getmainmonitor_w30_big_order_history_har_18345(self, stockid=None, date=None, money=None, isbs=None, index=None, st=None, **overrides):
+        """Replay session 18345: StockYiDongKanPan.GetMainMonitor_w30."""
+        data = dict(STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_HISTORY_HAR_18345['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if date is not None:
+            data['Date'] = str(date)
+        if money is not None:
+            data['Money'] = str(money)
+        if isbs is not None:
+            data['IsBS'] = str(isbs)
+        if index is not None:
+            data['Index'] = str(index)
+        if st is not None:
+            data['st'] = str(st)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKYIDONGKANPAN_GETMAINMONITOR_W30_BIG_ORDER_HISTORY_HAR_18345, data=data)
+
+    def stockl2history_getmainmonitor_trend_w30_big_order_history_har_18346(self, stockid=None, date=None, money=None, isbs=None, **overrides):
+        """Replay session 18346: StockL2History.GetMainMonitor_Trend_w30."""
+        data = dict(STOCKL2HISTORY_GETMAINMONITOR_TREND_W30_BIG_ORDER_HISTORY_HAR_18346['data'])
+        if stockid is not None:
+            data['StockID'] = str(stockid)
+        if date is not None:
+            data['Date'] = str(date)
+        if money is not None:
+            data['Money'] = str(money)
+        if isbs is not None:
+            data['IsBS'] = str(isbs)
+        data.update({key: str(value) for key, value in overrides.items() if value is not None})
+        return self.request(STOCKL2HISTORY_GETMAINMONITOR_TREND_W30_BIG_ORDER_HISTORY_HAR_18346, data=data)
 
 
 if __name__ == '__main__':
