@@ -82,6 +82,7 @@
       </div>
       <div class="actions">
         <a class="btn" href="/">返回接口文档</a>
+        <a class="btn" href="/change_password.html">修改密码</a>
         <button id="logout" type="button">退出</button>
       </div>
     </div>
@@ -397,6 +398,7 @@
             <button class="blue" data-action="save-user" data-user="${html(user.username)}">保存有效期</button>
             <button class="blue" data-action="assign-user-code" data-user="${html(user.username)}" ${user.role === "admin" ? "disabled" : ""}>更换激活码</button>
             <button class="danger" data-action="remove-user-code" data-user="${html(user.username)}" ${user.role === "admin" || !activation ? "disabled" : ""}>删除激活码</button>
+            <button class="blue" data-action="reset-user-password" data-user="${html(user.username)}" ${user.username === "admin" ? "disabled" : ""}>重置密码</button>
             <button data-action="toggle-user" data-user="${html(user.username)}" data-disabled="${user.disabled ? "false" : "true"}">${user.disabled ? "启用" : "禁用"}</button>
             <button class="danger" data-action="delete-user" data-user="${html(user.username)}" ${user.username === "admin" ? "disabled" : ""}>删除</button>
           </td>
@@ -535,6 +537,10 @@
           await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}/activation-code`, { method:"DELETE" });
           await loadUsers();
           await loadCodes();
+        } else if (action === "reset-user-password") {
+          if (!confirm(`确认将用户 ${button.dataset.user} 的密码重置为 Kpl@13579？`)) return;
+          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}/reset-password`, { method:"POST" });
+          await loadUsers();
         } else if (action === "toggle-code") {
           await request(`/api/admin/activation-codes/${encodeURIComponent(button.dataset.id)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ disabled: button.dataset.disabled === "true" }) });
           await loadCodes();

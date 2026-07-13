@@ -21,6 +21,7 @@ USERNAME_RE = re.compile(r"^[A-Za-z0-9_.-]{3,32}$")
 PASSWORD_ITERATIONS = 260_000
 SESSION_TTL_DAYS = 7
 ACTIVATION_CODE_BYTES = 12
+DEFAULT_RESET_PASSWORD = "Kpl@13579"
 
 
 def utcnow() -> datetime:
@@ -345,6 +346,39 @@ class AuthStore:
                     raise ValueError("密码至少 6 位")
                 user["password_hash"] = hash_password(password)
             user["updated_at"] = now_iso()
+            self._write(data)
+            return self.public_user(user)
+
+    def change_password(self, username: str, old_password: str, new_password: str) -> dict[str, Any]:
+        if len(new_password) < 6:
+            raise ValueError("password must be at least 6 chars")
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                raise KeyError("user not found")
+            if not verify_password(old_password, user.get("password_hash", "")):
+                raise ValueError("old password is incorrect")
+            user["password_hash"] = hash_password(new_password)
+            user["updated_at"] = now_iso()
+            self._write(data)
+            return self.public_user(user)
+
+    def reset_user_password(self, username: str, new_password: str = DEFAULT_RESET_PASSWORD) -> dict[str, Any]:
+        if len(new_password) < 6:
+            raise ValueError("password must be at least 6 chars")
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                raise KeyError("user not found")
+            user["password_hash"] = hash_password(new_password)
+            user["updated_at"] = now_iso()
+            data["sessions"] = {
+                key: session
+                for key, session in data["sessions"].items()
+                if session.get("username") != username
+            }
             self._write(data)
             return self.public_user(user)
 

@@ -66,6 +66,7 @@ LOGIN_FILE = "login.html"
 REGISTER_FILE = "register.html"
 EXPIRED_FILE = "expired.html"
 ADMIN_FILE = "admin.html"
+CHANGE_PASSWORD_FILE = "change_password.html"
 STATIC_DIR = ROOT / "static"
 SPA_INDEX_FILE = STATIC_DIR / "index.html"
 AUTH_DB_FILE = ROOT / "users.json"
@@ -2173,6 +2174,10 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             self._serve_file(ROOT / EXPIRED_FILE, "text/html; charset=utf-8")
             return
 
+        if path in {f"/{CHANGE_PASSWORD_FILE}", "/change-password"}:
+            self._serve_file(ROOT / CHANGE_PASSWORD_FILE, "text/html; charset=utf-8")
+            return
+
         if path.startswith("/api/auth/"):
             self._handle_auth_api(path)
             return
@@ -2775,6 +2780,32 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             self._send_json(result)
             return
 
+        if path == "/api/auth/change-password" and self.command == "POST":
+            user, error = self._require_user()
+            if error:
+                self._send_auth_failure(error, json_response=True)
+                return
+            payload = self._read_json_body()
+            old_password = str(payload.get("old_password", ""))
+            new_password = str(payload.get("new_password", ""))
+            confirm_password = str(payload.get("confirm_password", new_password))
+            if not old_password or not new_password:
+                self._send_json({"error": "invalid_request", "message": "old_password and new_password are required"}, status=400)
+                return
+            if new_password != confirm_password:
+                self._send_json({"error": "invalid_request", "message": "new passwords do not match"}, status=400)
+                return
+            if len(new_password) < 6:
+                self._send_json({"error": "invalid_request", "message": "password must be at least 6 chars"}, status=400)
+                return
+            try:
+                result = AUTH.change_password(str(user["username"]), old_password, new_password)
+            except ValueError as exc:
+                self._send_json({"error": "invalid_request", "message": str(exc)}, status=400)
+                return
+            self._send_json(result)
+            return
+
         if path == "/api/auth/logout" and self.command in {"GET", "POST"}:
             AUTH.logout(self._session_token())
             self._send_json({"ok": True}, extra_headers=[self._clear_session_cookie()])
@@ -2944,6 +2975,19 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         prefix = "/api/admin/users/"
         if path.startswith(prefix):
             user_path = path[len(prefix) :]
+            if user_path.endswith("/reset-password"):
+                username = unquote(user_path[: -len("/reset-password")])
+                if self.command in {"POST", "PATCH"}:
+                    try:
+                        user = AUTH.reset_user_password(username)
+                    except KeyError as exc:
+                        self._send_json({"error": "not_found", "message": str(exc)}, status=404)
+                        return
+                    except ValueError as exc:
+                        self._send_json({"error": "invalid_request", "message": str(exc)}, status=400)
+                        return
+                    self._send_json({"user": user, "password": "Kpl@13579"})
+                    return
             if user_path.endswith("/activation-code"):
                 username = unquote(user_path[: -len("/activation-code")])
                 if self.command in {"PUT", "PATCH", "POST"}:
