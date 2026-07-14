@@ -72,7 +72,10 @@ SPA_INDEX_FILE = STATIC_DIR / "index.html"
 AUTH_DB_FILE = ROOT / "users.json"
 SCENARIO_LEVEL_FILE = ROOT / "scenario_levels.json"
 SCENARIO_META_FILE = ROOT / "scenario_meta.json"
-CALL_LOG_FILE = ROOT / "scenario_call_logs.jsonl"
+CALL_LOG_DIR = ROOT / "scenario_call_logs"
+CALL_LOG_LEGACY_FILE = ROOT / "scenario_call_logs.jsonl"
+RARE_CALL_LOG_DIR = ROOT / "scenario_rare_call_logs"
+RARE_CALL_LOG_LEGACY_FILE = ROOT / "scenario_rare_call_logs.jsonl"
 UPSTREAM_IDENTITY_FILE = ROOT / "upstream_identity.local.json"
 FRIDA_CAPTURE_LOG = ROOT.parent / "outputs" / "frida" / "kpl_capture.ndjson"
 DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
@@ -210,14 +213,19 @@ def _with_beijing_time_fields(payload: object) -> object:
         return payload
 
     converted: dict[object, object] = {}
-    additions: dict[str, str] = {}
+    additions: dict[str, object] = {}
     for key, value in payload.items():
         converted_value = _with_beijing_time_fields(value)
+        key_name = str(key or "").strip().lower()
+        beijing_text = _epoch_to_beijing_text(value) if _is_timestamp_field_name(key) else None
+        if key_name == "requested_at" and beijing_text:
+            converted[key] = beijing_text
+            additions["requested_at_epoch"] = value
+            additions["requested_at_beijing"] = beijing_text
+            continue
         converted[key] = converted_value
-        if _is_timestamp_field_name(key):
-            beijing_text = _epoch_to_beijing_text(value)
-            if beijing_text:
-                additions[f"{key}_beijing"] = beijing_text
+        if beijing_text:
+            additions[f"{key}_beijing"] = beijing_text
     converted.update(additions)
     return converted
 
@@ -1171,28 +1179,91 @@ def _apply_upstream_identity(data: dict[str, object], identity: dict[str, str]) 
             data[key] = value
 
 
-def _append_call_log(record: dict[str, object]) -> None:
+def _log_day_key(record: dict[str, object] | None = None) -> str:
+    if isinstance(record, dict):
+        requested_at = record.get("requested_at")
+        try:
+            if requested_at is not None:
+                return datetime.fromtimestamp(float(requested_at), BEIJING_TZ).strftime("%Y-%m-%d")
+        except (TypeError, ValueError, OverflowError):
+            pass
+        requested_at_text = str(record.get("requested_at_text") or "").strip()
+        if len(requested_at_text) >= 10 and requested_at_text[4] == "-" and requested_at_text[7] == "-":
+            return requested_at_text[:10]
+    return datetime.now(BEIJING_TZ).strftime("%Y-%m-%d")
+
+
+def _log_file_for_day(base_dir: Path, day_key: str) -> Path:
+    return base_dir / f"{day_key}.jsonl"
+
+
+def _is_sparse_business_log(record: dict[str, object]) -> bool:
+    level = str(record.get("level") or "").strip().lower()
+    risk_level = str(record.get("risk_level") or "").strip().lower()
+    call_policy = str(record.get("call_policy") or "").strip().lower()
+    endpoint = str(record.get("endpoint") or "").strip().lower()
+    session_id = str(record.get("session_id") or "").strip().lower()
+    title = str(record.get("title") or "").strip().lower()
+    title_cn = str(record.get("title_cn") or "").strip()
+    if level == "rare":
+        return True
+    if risk_level in {"critical", "high"}:
+        return True
+    if call_policy == "admin_only":
+        return True
+    if session_id.startswith("bileila:"):
+        return True
+    return "rare" in endpoint or "rare" in title or "bileila" in endpoint or "bileila" in title_cn
+
+
+def _write_jsonl_record(path: Path, record: dict[str, object]) -> None:
     try:
-        with CALL_LOG_FILE.open("a", encoding="utf-8") as handle:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
     except OSError:
         return
 
 
+def _append_call_log(record: dict[str, object]) -> None:
+    payload = dict(record)
+    username = str(payload.get("username", "") or "").strip()
+    role = str(payload.get("role", "") or "").strip()
+    payload.setdefault("caller_username", username)
+    payload.setdefault("caller_account", username)
+    payload.setdefault("caller_role", role)
+    payload["is_sparse_business"] = _is_sparse_business_log(payload)
+    day_key = _log_day_key(payload)
+    payload["log_day"] = day_key
+    try:
+        _write_jsonl_record(_log_file_for_day(CALL_LOG_DIR, day_key), payload)
+        if payload["is_sparse_business"]:
+            sparse_payload = dict(payload)
+            sparse_payload["log_kind"] = "sparse_business"
+            _write_jsonl_record(_log_file_for_day(RARE_CALL_LOG_DIR, day_key), sparse_payload)
+    except OSError:
+        return
+
+
 def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
-    if not CALL_LOG_FILE.exists():
-        return []
-    lines = _read_tail_lines(CALL_LOG_FILE, MAX_CALL_LOG_TAIL_BYTES)
     records: list[dict[str, object]] = []
-    for line in reversed(lines[-MAX_CALL_LOGS:]):
-        try:
-            item = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(item, dict):
-            records.append(item)
-        if len(records) >= limit:
-            break
+    files: list[Path] = []
+    if CALL_LOG_LEGACY_FILE.exists():
+        files.append(CALL_LOG_LEGACY_FILE)
+    if CALL_LOG_DIR.exists():
+        files.extend(sorted(CALL_LOG_DIR.glob("*.jsonl")))
+    for path in sorted(files, key=lambda item: item.stat().st_mtime if item.exists() else 0.0, reverse=True):
+        lines = _read_tail_lines(path, MAX_CALL_LOG_TAIL_BYTES)
+        for line in reversed(lines[-MAX_CALL_LOGS:]):
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(item, dict):
+                records.append(item)
+    records.sort(key=lambda item: float(item.get("requested_at") or 0.0), reverse=True)
+    if len(records) > limit:
+        records = records[:limit]
     return records
 
 

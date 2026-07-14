@@ -12,6 +12,9 @@ generated/scenario_meta.json
 generated/scenario_meta.tmp
 generated/upstream_identity.local.json
 generated/scenario_call_logs.jsonl
+generated/scenario_call_logs/
+generated/scenario_rare_call_logs.jsonl
+generated/scenario_rare_call_logs/
 outputs/
 capture_0627_01/
 render_tmp/
