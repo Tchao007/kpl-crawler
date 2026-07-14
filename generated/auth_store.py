@@ -54,6 +54,20 @@ def normalize_expiration(value: Any, role: str) -> str | None:
     return expires.isoformat() if expires else None
 
 
+def normalize_remaining_calls(value: Any) -> int | None:
+    if value in {None, ""}:
+        return None
+    if isinstance(value, str) and value.strip().lower() in {"unlimited", "none", "null", "-1"}:
+        return None
+    try:
+        calls = int(value)
+    except (TypeError, ValueError):
+        raise ValueError("remaining_calls must be a non-negative integer or empty for unlimited")
+    if calls < 0:
+        return None
+    return calls
+
+
 def hash_password(password: str) -> str:
     salt = secrets.token_bytes(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, PASSWORD_ITERATIONS)
@@ -160,6 +174,7 @@ class AuthStore:
 
     def public_user(self, user: dict[str, Any]) -> dict[str, Any]:
         expires_at = user.get("expires_at")
+        remaining_calls = normalize_remaining_calls(user.get("remaining_calls"))
         return {
             "id": user.get("id"),
             "username": user.get("username"),
@@ -167,6 +182,8 @@ class AuthStore:
             "disabled": bool(user.get("disabled")),
             "expires_at": expires_at,
             "expired": self.is_expired(user),
+            "remaining_calls": remaining_calls,
+            "call_limit_enabled": user.get("role") != "admin" and remaining_calls is not None,
             "created_at": user.get("created_at"),
             "updated_at": user.get("updated_at"),
         }
@@ -276,6 +293,7 @@ class AuthStore:
             raise ValueError("密码至少 6 位")
 
         expires_at = normalize_expiration(payload.get("expires_at"), role)
+        remaining_calls = None if role == "admin" else normalize_remaining_calls(payload.get("remaining_calls"))
         with self.lock:
             data = self._read()
             if username in data["users"]:
@@ -287,6 +305,7 @@ class AuthStore:
                 "role": role,
                 "disabled": bool(payload.get("disabled", False)),
                 "expires_at": expires_at,
+                "remaining_calls": remaining_calls,
                 "created_at": now_iso(),
                 "updated_at": now_iso(),
             }
@@ -311,6 +330,7 @@ class AuthStore:
                 "role": "user",
                 "disabled": False,
                 "expires_at": None,
+                "remaining_calls": None,
                 "created_at": now_iso(),
                 "updated_at": now_iso(),
                 "trial": False,
@@ -340,6 +360,10 @@ class AuthStore:
                 user["expires_at"] = normalize_expiration(user.get("expires_at"), role)
             else:
                 user["expires_at"] = user.get("expires_at")
+            if role == "admin":
+                user["remaining_calls"] = None
+            elif "remaining_calls" in payload:
+                user["remaining_calls"] = normalize_remaining_calls(payload.get("remaining_calls"))
             if payload.get("password"):
                 password = str(payload["password"])
                 if len(password) < 6:
@@ -348,6 +372,29 @@ class AuthStore:
             user["updated_at"] = now_iso()
             self._write(data)
             return self.public_user(user)
+
+    def consume_api_call(self, username: str, role: str) -> tuple[bool, str | None, int | None]:
+        with self.lock:
+            data = self._read()
+            user = data["users"].get(username)
+            if not user:
+                return False, "invalid_session", None
+            remaining_calls = normalize_remaining_calls(user.get("remaining_calls"))
+            if user.get("disabled"):
+                return False, "disabled", remaining_calls
+            if user.get("role") == "admin" or role == "admin":
+                return True, None, None
+            if self.is_expired(user):
+                return False, "expired", remaining_calls
+            if remaining_calls is None:
+                return True, None, None
+            if remaining_calls <= 0:
+                return False, "call_quota_exhausted", 0
+            remaining_calls -= 1
+            user["remaining_calls"] = remaining_calls
+            user["updated_at"] = now_iso()
+            self._write(data)
+            return True, None, remaining_calls
 
     def change_password(self, username: str, old_password: str, new_password: str) -> dict[str, Any]:
         if len(new_password) < 6:

@@ -114,6 +114,7 @@
               <div><label>密码</label><input name="password" type="password" required></div>
               <div><label>角色</label><select name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
               <div><label>初始有效期</label><input name="expires_at" type="date"></div>
+              <div><label>调用次数</label><input name="remaining_calls" type="number" min="0" placeholder="留空不限"></div>
               <div><label>状态</label><select name="disabled"><option value="false">启用</option><option value="true">禁用</option></select></div>
               <button class="primary" type="submit">创建</button>
             </form>
@@ -143,7 +144,7 @@
           <h2>现有用户</h2>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>有效期</th><th>当前激活码</th><th>更换激活码</th><th>创建时间</th><th>操作</th></tr></thead>
+              <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>有效期</th><th>剩余调用次数</th><th>当前激活码</th><th>更换激活码</th><th>创建时间</th><th>操作</th></tr></thead>
               <tbody id="users"></tbody>
             </table>
           </div>
@@ -386,6 +387,7 @@
           <td><span class="badge ${user.role === "admin" ? "admin" : ""}">${html(user.role)}</span></td>
           <td><span class="badge ${user.disabled || user.expired ? "bad" : ""}">${user.disabled ? "禁用" : (user.expired ? "已过期" : "正常")}</span></td>
           <td><input type="date" data-field="expires_at" data-user="${html(user.username)}" value="${html(user.expires_at || "")}"></td>
+          <td><input type="number" min="0" data-field="remaining_calls" data-user="${html(user.username)}" value="${user.remaining_calls === null || user.remaining_calls === undefined ? "" : html(user.remaining_calls)}" placeholder="${user.role === "admin" ? "不限" : "留空不限"}" ${user.role === "admin" ? "disabled" : ""}></td>
           <td class="log-detail">
             <code title="${html(activationLabel)}">${html(activationLabel)}</code>
             ${plainCode ? `<button data-copy="${html(plainCode)}">复制</button>` : ""}
@@ -443,6 +445,7 @@
       const payload = Object.fromEntries(new FormData(event.target).entries());
       payload.disabled = payload.disabled === "true";
       if (!payload.expires_at) payload.expires_at = null;
+      if (payload.remaining_calls === "") payload.remaining_calls = null;
       try {
         await request("/api/admin/users", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload) });
         event.target.reset();
@@ -521,8 +524,11 @@
           await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ disabled: button.dataset.disabled === "true" }) });
           await loadUsers();
         } else if (action === "save-user") {
-          const input = document.querySelector(`input[data-field="expires_at"][data-user="${CSS.escape(button.dataset.user)}"]`);
-          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ expires_at: input.value || null }) });
+          const expiresInput = document.querySelector(`input[data-field="expires_at"][data-user="${CSS.escape(button.dataset.user)}"]`);
+          const callsInput = document.querySelector(`input[data-field="remaining_calls"][data-user="${CSS.escape(button.dataset.user)}"]`);
+          const payload = { expires_at: expiresInput.value || null };
+          if (callsInput && !callsInput.disabled) payload.remaining_calls = callsInput.value === "" ? null : Number(callsInput.value);
+          await request(`/api/admin/users/${encodeURIComponent(button.dataset.user)}`, { method:"PATCH", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload) });
           await loadUsers();
         } else if (action === "assign-user-code") {
           const input = document.querySelector(`input[data-field="activation-code"][data-user="${CSS.escape(button.dataset.user)}"]`);

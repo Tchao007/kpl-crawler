@@ -2521,6 +2521,8 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 overrides.pop("_ts", None)
                 for key in LEGACY_INTERFACE_API_KEY_FIELDS:
                     overrides.pop(key, None)
+                if not self._validate_interface_api_key(user):
+                    return
                 self._call_stock_getnewestday_api_key(user, route["scenario"], route["spec"], overrides)
                 return
             user, error = self._require_interface_or_session_user()
@@ -4087,7 +4089,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             str(user.get("role", "")),
         )
         if ok:
-            return True
+            return self._consume_call_quota(user)
         self._send_json(
             {
                 "error": error or "invalid_activation_code",
@@ -4097,7 +4099,28 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         )
         return False
 
+    def _consume_call_quota(self, user: dict[str, object]) -> bool:
+        ok, error, remaining_calls = AUTH.consume_api_call(
+            str(user.get("username", "")),
+            str(user.get("role", "")),
+        )
+        if ok:
+            user["remaining_calls"] = remaining_calls
+            return True
+        status = 429 if error == "call_quota_exhausted" else self._auth_failure_status(error or "")
+        self._send_json(
+            {
+                "error": error or "call_quota_failed",
+                "message": "当前账号接口调用次数不足，请联系管理员增加调用次数",
+                "remaining_calls": remaining_calls,
+            },
+            status=status,
+        )
+        return False
+
     def _auth_failure_status(self, error: str) -> int:
+        if error == "call_quota_exhausted":
+            return 429
         if error in {"disabled", "expired", "activation_code_disabled", "activation_code_not_bound_to_user"}:
             return 403
         return 401
@@ -4225,7 +4248,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve generated Kaipanla scene APIs.")
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", default=8765, type=int)
+    parser.add_argument("--port", default=80, type=int)
     args = parser.parse_args()
 
     server = ThreadingHTTPServer((args.host, args.port), ScenarioApiHandler)

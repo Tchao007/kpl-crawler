@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-$HOME/workspace/kpl-crawler}"
-PORT="${PORT:-8765}"
+PORT="${PORT:-80}"
 
 cd "$APP_DIR"
 

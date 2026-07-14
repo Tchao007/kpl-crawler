@@ -1,6 +1,6 @@
 param(
   [string]$HostName = "127.0.0.1",
-  [int]$Port = 8765,
+  [int]$Port = 80,
   [int]$StopTimeoutMs = 2000,
   [int]$HealthTimeoutSec = 3,
   [switch]$WithLogs

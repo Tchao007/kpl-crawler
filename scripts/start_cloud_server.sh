@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-$HOME/workspace/kpl-crawler}"
 HOST="${HOST:-0.0.0.0}"
-PORT="${PORT:-8765}"
+PORT="${PORT:-80}"
 PUBLIC_IP="${PUBLIC_IP:-124.222.192.83}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
