@@ -8,16 +8,18 @@ import json
 import mimetypes
 import os
 import re
+import sqlite3
 import sys
 import time
 import urllib.error
 import urllib.request
 import zipfile
+import zlib
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from http.cookies import SimpleCookie
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, unquote, unquote_to_bytes, urlparse
 from xml.etree import ElementTree as ET
 
 from auth_store import AuthStore
@@ -76,6 +78,7 @@ CALL_LOG_DIR = ROOT / "scenario_call_logs"
 CALL_LOG_LEGACY_FILE = ROOT / "scenario_call_logs.jsonl"
 RARE_CALL_LOG_DIR = ROOT / "scenario_rare_call_logs"
 RARE_CALL_LOG_LEGACY_FILE = ROOT / "scenario_rare_call_logs.jsonl"
+CALL_LOG_DB_FILE = ROOT / "scenario_call_logs.sqlite3"
 UPSTREAM_IDENTITY_FILE = ROOT / "upstream_identity.local.json"
 FRIDA_CAPTURE_LOG = ROOT.parent / "outputs" / "frida" / "kpl_capture.ndjson"
 DEFAULT_INTERFACE_ADDED_TIME = "2026-06-25"
@@ -764,6 +767,54 @@ def _response_log_payload(response: object, body: object) -> dict[str, object]:
     }
 
 
+def _parse_json_text(text: str) -> object:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return text
+
+
+def _decode_compressed_bytes(raw: bytes) -> bytes | None:
+    for wbits in (zlib.MAX_WBITS, -zlib.MAX_WBITS, 16 + zlib.MAX_WBITS):
+        try:
+            return zlib.decompress(raw, wbits)
+        except zlib.error:
+            continue
+    return None
+
+
+def _decode_upstream_text_payload(value: object) -> object:
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    if not text:
+        return value
+
+    candidates: list[bytes] = []
+    if "%" in text:
+        try:
+            candidates.append(unquote_to_bytes(text))
+        except ValueError:
+            pass
+    try:
+        candidates.append(text.encode("latin1"))
+    except UnicodeEncodeError:
+        candidates.append(text.encode("utf-8", errors="ignore"))
+
+    for raw in candidates:
+        if not raw:
+            continue
+        decoded = _decode_compressed_bytes(raw)
+        if decoded is None:
+            continue
+        decoded_text = decoded.decode("utf-8", errors="replace").strip()
+        return _parse_json_text(decoded_text)
+
+    if text.startswith(("{", "[")):
+        return _parse_json_text(text)
+    return value
+
+
 def _is_upstream_auth_error(body: object) -> bool:
     if not isinstance(body, dict):
         text = str(body or "").lower()
@@ -1082,7 +1133,7 @@ def _fetch_online_weituo(stock_id: str, overrides: dict[str, str]) -> tuple[obje
     try:
         body: object = response.json()
     except ValueError:
-        body = response.text
+        body = _decode_upstream_text_payload(response.text)
     UPSTREAM_GUARD.record_result(host, endpoint, body, _upstream_error_message(body))
     return response, body
 
@@ -1225,27 +1276,89 @@ def _write_jsonl_record(path: Path, record: dict[str, object]) -> None:
         return
 
 
-def _append_call_log(record: dict[str, object]) -> None:
-    payload = dict(record)
-    username = str(payload.get("username", "") or "").strip()
-    role = str(payload.get("role", "") or "").strip()
-    payload.setdefault("caller_username", username)
-    payload.setdefault("caller_account", username)
-    payload.setdefault("caller_role", role)
-    payload["is_sparse_business"] = _is_sparse_business_log(payload)
-    day_key = _log_day_key(payload)
-    payload["log_day"] = day_key
+def _call_log_db() -> sqlite3.Connection:
+    conn = sqlite3.connect(str(CALL_LOG_DB_FILE), timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA busy_timeout=10000")
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS call_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            requested_at REAL NOT NULL,
+            log_day TEXT NOT NULL,
+            username TEXT,
+            role TEXT,
+            session_id TEXT,
+            endpoint TEXT,
+            status TEXT,
+            status_code INTEGER,
+            is_sparse_business INTEGER NOT NULL DEFAULT 0,
+            payload TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_call_logs_requested_at ON call_logs(requested_at DESC)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_call_logs_sparse ON call_logs(is_sparse_business, requested_at DESC)")
+    return conn
+
+
+def _append_call_log_db(record: dict[str, object]) -> None:
+    payload_text = json.dumps(record, ensure_ascii=False, separators=(",", ":"), default=str)
     try:
-        _write_jsonl_record(_log_file_for_day(CALL_LOG_DIR, day_key), payload)
-        if payload["is_sparse_business"]:
-            sparse_payload = dict(payload)
-            sparse_payload["log_kind"] = "sparse_business"
-            _write_jsonl_record(_log_file_for_day(RARE_CALL_LOG_DIR, day_key), sparse_payload)
-    except OSError:
+        requested_at = float(record.get("requested_at") or time.time())
+    except (TypeError, ValueError):
+        requested_at = time.time()
+    try:
+        with _call_log_db() as conn:
+            conn.execute(
+                """
+                INSERT INTO call_logs(
+                    requested_at, log_day, username, role, session_id, endpoint,
+                    status, status_code, is_sparse_business, payload
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    requested_at,
+                    str(record.get("log_day") or _log_day_key(record)),
+                    str(record.get("username") or record.get("caller_username") or ""),
+                    str(record.get("role") or record.get("caller_role") or ""),
+                    str(record.get("session_id") or ""),
+                    str(record.get("endpoint") or ""),
+                    str(record.get("status") or ""),
+                    int(record.get("status_code") or 0),
+                    1 if record.get("is_sparse_business") else 0,
+                    payload_text,
+                ),
+            )
+    except (OSError, sqlite3.Error, ValueError):
         return
 
 
-def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
+def _load_call_logs_db(limit: int) -> list[dict[str, object]]:
+    if not CALL_LOG_DB_FILE.exists():
+        return []
+    records: list[dict[str, object]] = []
+    try:
+        with _call_log_db() as conn:
+            rows = conn.execute(
+                "SELECT payload FROM call_logs ORDER BY requested_at DESC LIMIT ?",
+                (max(1, limit),),
+            ).fetchall()
+    except sqlite3.Error:
+        return []
+    for (payload_text,) in rows:
+        try:
+            item = json.loads(payload_text)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict):
+            records.append(item)
+    return records
+
+
+def _load_call_logs_jsonl(limit: int) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
     files: list[Path] = []
     if CALL_LOG_LEGACY_FILE.exists():
@@ -1261,6 +1374,27 @@ def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
                 continue
             if isinstance(item, dict):
                 records.append(item)
+    records.sort(key=lambda item: float(item.get("requested_at") or 0.0), reverse=True)
+    return records[:limit]
+
+
+def _append_call_log(record: dict[str, object]) -> None:
+    payload = dict(record)
+    username = str(payload.get("username", "") or "").strip()
+    role = str(payload.get("role", "") or "").strip()
+    payload.setdefault("caller_username", username)
+    payload.setdefault("caller_account", username)
+    payload.setdefault("caller_role", role)
+    payload["is_sparse_business"] = _is_sparse_business_log(payload)
+    day_key = _log_day_key(payload)
+    payload["log_day"] = day_key
+    _append_call_log_db(payload)
+
+
+def _load_call_logs(limit: int = 200) -> list[dict[str, object]]:
+    records = _load_call_logs_db(limit)
+    if len(records) < limit:
+        records.extend(_load_call_logs_jsonl(limit - len(records)))
     records.sort(key=lambda item: float(item.get("requested_at") or 0.0), reverse=True)
     if len(records) > limit:
         records = records[:limit]
@@ -2574,7 +2708,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         try:
             payload = response.json()
         except ValueError:
-            payload = response.text
+            payload = _decode_upstream_text_payload(response.text)
         relogin_attempted = False
         relogin_succeeded = False
         if _is_upstream_auth_error(payload):
@@ -2603,7 +2737,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     try:
                         payload = response.json()
                     except ValueError:
-                        payload = response.text
+                        payload = _decode_upstream_text_payload(response.text)
                     relogin_succeeded = not _is_upstream_auth_error(payload)
                 except Exception:
                     pass
@@ -2728,7 +2862,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
             try:
                 payload: object = response.json()
             except ValueError:
-                payload = response.text
+                payload = _decode_upstream_text_payload(response.text)
         except Exception as exc:
             _append_call_log(
                 {
@@ -3838,7 +3972,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         try:
             body: object = response.json()
         except ValueError:
-            body = response.text
+            body = _decode_upstream_text_payload(response.text)
         relogin_attempted = False
         relogin_succeeded = False
         if _is_upstream_auth_error(body):
@@ -3854,7 +3988,7 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                     try:
                         body = response.json()
                     except ValueError:
-                        body = response.text
+                        body = _decode_upstream_text_payload(response.text)
                     relogin_succeeded = not _is_upstream_auth_error(body)
                 except Exception:
                     pass
