@@ -37,6 +37,8 @@ CORE_API_KEYS = {
     "stock_dp_explain": ("apphwhq.longhuvip.com", "StockYiDongKanPan", "StockDPExplain"),
     "xianhuo_list": ("apphwhq.longhuvip.com", "XianHuoData", "GetXianHuoList"),
     "plate_popup_config": ("apphwhq.longhuvip.com", "ZhiShuRanking", "PlateTCConfig"),
+    "plate_factor_tags": ("apphwhq.longhuvip.com", "ConceptionPoint", "BKFenShiZhiBo"),
+    "plate_factor_stock_list": ("apphwhq.longhuvip.com", "ZhiShuRanking", "ZhiShuStockList_W8"),
     "five_level": ("local_hqstock", "hqStock", "2015"),
     "time_sales": ("local_hqstock", "hqStock", "2006"),
 }
@@ -94,6 +96,53 @@ CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
         },
     },
+    "plate_factor_tags": {
+        "session_id": "core_plate_factor_tags",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            "a": "BKFenShiZhiBo",
+            "apiv": "w44",
+            "c": "ConceptionPoint",
+            "PhoneOSNew": "1",
+            "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+            "VerSion": "5.23.0.4",
+            "Date": "",
+            "PlateID": "801612",
+        },
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
+        },
+    },
+    "plate_factor_stock_list": {
+        "session_id": "core_plate_factor_stock_list",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            "a": "ZhiShuStockList_W8",
+            "apiv": "w44",
+            "c": "ZhiShuRanking",
+            "PhoneOSNew": "1",
+            "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+            "VerSion": "5.23.0.4",
+            "Index": "0",
+            "IsKZZType": "0",
+            "IsZZ": "0",
+            "Order": "1",
+            "PlateID": "801612",
+            "TSZB": "17",
+            "Type": "42",
+            "old": "1",
+            "st": "30",
+        },
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
+        },
+    },
 }
 
 
@@ -131,9 +180,11 @@ class KaipanlaCoreClient:
         self.client.session.trust_env = False
 
     def request_core(self, name: str, **overrides: Any):
-        spec = _core_spec(name)
+        spec = dict(_core_spec(name))
         data = dict(spec.get("data") or {})
         params = dict(spec.get("params") or {})
+        if name in {"plate_factor_tags", "plate_factor_stock_list"}:
+            self._apply_plate_factor_source(name, spec, data, overrides)
         self._apply_env_auth(data)
         for key, value in overrides.items():
             if value is None:
@@ -143,6 +194,27 @@ class KaipanlaCoreClient:
             else:
                 data[key] = str(value)
         return self.client.request(spec, data=data, params=params)
+
+    @staticmethod
+    def _apply_plate_factor_source(
+        name: str,
+        spec: dict[str, Any],
+        data: dict[str, Any],
+        overrides: dict[str, Any],
+    ) -> None:
+        date = str(overrides.get("Date") or overrides.get("date") or data.get("Date") or "").strip()
+        if name == "plate_factor_tags":
+            if date:
+                spec["url"] = "https://apphis.longhuvip.com/w1/api/index.php"
+                data["c"] = "HisConceptionPoint"
+                data["Date"] = date
+            else:
+                data["c"] = "ConceptionPoint"
+                data["Date"] = ""
+            return
+        if date:
+            spec["url"] = "https://apphis.longhuvip.com/w1/api/index.php"
+            data["Date"] = date
 
     @staticmethod
     def _apply_env_auth(data: dict[str, Any]) -> None:
@@ -191,3 +263,26 @@ class KaipanlaCoreClient:
 
     def plate_popup_config(self, **overrides: Any):
         return self.request_core("plate_popup_config", **overrides)
+
+    def plate_factor_tags(self, plate_id: str, date: str | None = None, **overrides: Any):
+        return self.request_core("plate_factor_tags", PlateID=plate_id, Date=date, **overrides)
+
+    def plate_factor_stock_list(
+        self,
+        plate_id: str,
+        *,
+        tszb: str = "17",
+        factor_type: str = "42",
+        order: str = "1",
+        date: str | None = None,
+        **overrides: Any,
+    ):
+        return self.request_core(
+            "plate_factor_stock_list",
+            PlateID=plate_id,
+            TSZB=tszb,
+            Type=factor_type,
+            Order=order,
+            Date=date,
+            **overrides,
+        )

@@ -3737,6 +3737,12 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         host, controller, action = CORE_API_KEYS[name]
+        date_override = str(overrides.get("Date") or overrides.get("date") or "").strip()
+        if name == "plate_factor_tags" and date_override:
+            host = "apphis.longhuvip.com"
+            controller = "HisConceptionPoint"
+        elif name == "plate_factor_stock_list" and date_override:
+            host = "apphis.longhuvip.com"
         packet_code_for_default = "2015" if name == "five_level" else "2006"
         stock_id = normalize_stock_id(
             str(
@@ -3877,6 +3883,12 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         host, controller, action = CORE_API_KEYS[name]
+        date_override = str(overrides.get("Date") or overrides.get("date") or "").strip()
+        if name == "plate_factor_tags" and date_override:
+            host = "apphis.longhuvip.com"
+            controller = "HisConceptionPoint"
+        elif name == "plate_factor_stock_list" and date_override:
+            host = "apphis.longhuvip.com"
         if name in CORE_LOCAL_API_KEYS:
             scenario = next(
                 (item for item in SCENARIOS if item.get("core_name") == name),

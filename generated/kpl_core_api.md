@@ -24,6 +24,8 @@ xianhuo_list
 plate_popup_config
 five_level
 time_sales
+plate_factor_tags
+plate_factor_stock_list
 ```
 
 示例：
@@ -35,6 +37,75 @@ GET /api/core/stock_dp_real?StockID=002354
 GET /api/core/large_orders_page?StockID=001399&st=50&Type=2&Vol=500
 GET /api/core/five_level?StockID=000620
 GET /api/core/time_sales?StockID=000620&limit=100
+GET /api/core/plate_factor_tags?PlateID=801612
+GET /api/core/plate_factor_stock_list?PlateID=801612&TSZB=17&Type=42&Order=1&Date=2026-07-27
+```
+
+## Plate Factor Ranking
+
+The `plate_factor_tags` and `plate_factor_stock_list` core APIs package the
+plate-detail factor ranking flow captured from Frida on 2026-07-28.
+
+Tag discovery:
+
+```text
+GET|POST /api/core/plate_factor_tags?PlateID=801612
+GET|POST /api/core/plate_factor_tags?PlateID=801612&Date=2026-07-27
+```
+
+Upstream mapping:
+
+| Mode | Host | c | a | Key params |
+| --- | --- | --- | --- | --- |
+| Realtime tags | `apphwhq.longhuvip.com` | `ConceptionPoint` | `BKFenShiZhiBo` | `PlateID`, `Date=` |
+| History tags | `apphis.longhuvip.com` | `HisConceptionPoint` | `BKFenShiZhiBo` | `PlateID`, `Date=YYYY-MM-DD` |
+
+The tag response contains reusable factor definitions:
+
+```json
+{
+  "TSZB": "17",
+  "TSZB_N": "人气激增",
+  "TSZB_Order": "1",
+  "TSZB_Type": "42",
+  "GoodID": "67",
+  "Filed_Type": "3",
+  "IsOpen": 1
+}
+```
+
+Stock list:
+
+```text
+GET|POST /api/core/plate_factor_stock_list?PlateID=801612&TSZB=17&Type=42&Order=1
+GET|POST /api/core/plate_factor_stock_list?PlateID=801612&TSZB=17&Type=42&Order=1&Date=2026-07-27
+```
+
+Upstream mapping:
+
+| Mode | Host | c | a | Key params |
+| --- | --- | --- | --- | --- |
+| Realtime list | `apphwhq.longhuvip.com` | `ZhiShuRanking` | `ZhiShuStockList_W8` | `PlateID`, `TSZB`, `Type`, `Order`, `Index=0`, `st=30` |
+| History list | `apphis.longhuvip.com` | `ZhiShuRanking` | `ZhiShuStockList_W8` | `PlateID`, `TSZB`, `Type`, `Order`, `Date=YYYY-MM-DD`, `Index=0`, `st=30` |
+
+Verified factor tags from the same capture include:
+
+| Name | TSZB | Type | Order |
+| --- | --- | --- | --- |
+| 最正宗 | `3` | `6` | `1` |
+| 人气激增 | `17` | `42` | `1` |
+| 机构增仓 | `20` | `29` | `1` |
+| 机构预测 | `69` | `162` | `1` |
+| 外资持股 | `66` | `231` | `1` |
+| 低PE | `7` | `46` | `0` |
+| 高股息 | `8` | `67` | `1` |
+| 破净相关 | `19` | `38` | `0` |
+| 中报增长 | `12` | `33` | `1` |
+
+The realtime socket packet observed for 人气激增 used:
+
+```text
+hqList|26:20030/2501-0/801612:42:1:0:0:0:17:0
 ```
 
 ## Five-level quote
