@@ -39,6 +39,19 @@ CORE_API_KEYS = {
     "plate_popup_config": ("apphwhq.longhuvip.com", "ZhiShuRanking", "PlateTCConfig"),
     "plate_factor_tags": ("apphwhq.longhuvip.com", "ConceptionPoint", "BKFenShiZhiBo"),
     "plate_factor_stock_list": ("apphwhq.longhuvip.com", "ZhiShuRanking", "ZhiShuStockList_W8"),
+    "plate_info": ("apphwhq.longhuvip.com", "ZhiShuRanking", "GetPlate_Info_QJ"),
+    "plate_children": ("apphwhq.longhuvip.com", "ZhiShuRanking", "SonPlate_Info"),
+    "plate_stock_factor_tags": ("apphwhq.longhuvip.com", "ZhiShuRanking", "GetGPCPHBTS_Tag"),
+    "plate_real_ranking": ("apphis.longhuvip.com", "ZhiShuRanking", "RealRankingInfo"),
+    "plate_parent": ("apphwhq.longhuvip.com", "ZhiShuL2Data", "GetParentPlateCode"),
+    "plate_trend_incremental": ("apphwhq.longhuvip.com", "ZhiShuL2Data", "GetTrendIncremental"),
+    "plate_vol_tur_incremental": ("apphwhq.longhuvip.com", "ZhiShuL2Data", "GetVolTurIncremental"),
+    "plate_art_title": ("apphwhq.longhuvip.com", "Index", "GetArtTitle"),
+    "theme_info_bkr": ("applhb.longhuvip.com", "Theme", "InfoBKR"),
+    "conception_point": ("apphwhq.longhuvip.com", "ConceptionPoint", "GetPoint"),
+    "index_rqz_data": ("apphwhq.longhuvip.com", "Index", "GetRQZ_Data"),
+    "etf_stock_ranking": ("apphwhq.longhuvip.com", "NewStockRanking", "ETFStockRanking"),
+    "index_change": ("apphwhq.longhuvip.com", "NewStockRanking", "IndexChange"),
     "five_level": ("local_hqstock", "hqStock", "2015"),
     "time_sales": ("local_hqstock", "hqStock", "2006"),
 }
@@ -47,6 +60,32 @@ CORE_API_KEYS = {
 CORE_LOCAL_API_KEYS = {
     "five_level",
     "time_sales",
+}
+
+
+PLATE_HISTORY_SOURCE_KEYS = {
+    "plate_factor_tags",
+    "plate_factor_stock_list",
+    "plate_info",
+    "plate_children",
+    "plate_stock_factor_tags",
+    "plate_real_ranking",
+    "plate_trend_incremental",
+    "plate_vol_tur_incremental",
+}
+
+
+COMMON_HEADERS = {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
+}
+
+
+COMMON_FORM_FIELDS = {
+    "apiv": "w44",
+    "PhoneOSNew": "1",
+    "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
+    "VerSion": "5.23.0.4",
 }
 
 
@@ -73,10 +112,7 @@ CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
             "VType": "1",
             "VOrder": "0",
         },
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
-        },
+        "headers": COMMON_HEADERS,
     },
     "plate_popup_config": {
         "session_id": "core_plate_popup_config",
@@ -91,10 +127,7 @@ CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
             "DeviceID": "7905c37c-ccc6-3420-afbc-fbc91cd509b2",
             "VerSion": "5.23.0.4",
         },
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
-        },
+        "headers": COMMON_HEADERS,
     },
     "plate_factor_tags": {
         "session_id": "core_plate_factor_tags",
@@ -111,10 +144,7 @@ CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
             "Date": "",
             "PlateID": "801612",
         },
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
-        },
+        "headers": COMMON_HEADERS,
     },
     "plate_factor_stock_list": {
         "session_id": "core_plate_factor_stock_list",
@@ -138,10 +168,191 @@ CORE_FALLBACK_SPECS: dict[str, dict[str, Any]] = {
             "old": "1",
             "st": "30",
         },
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 7.1.2; SM-G988N Build/NRD90M)",
+        "headers": COMMON_HEADERS,
+    },
+    "plate_info": {
+        "session_id": "core_plate_info",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetPlate_Info_QJ",
+            "c": "ZhiShuRanking",
+            "Date": "",
+            "PlateID": "801225",
         },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_children": {
+        "session_id": "core_plate_children",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "SonPlate_Info",
+            "c": "ZhiShuRanking",
+            "PlateID": "801225",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_stock_factor_tags": {
+        "session_id": "core_plate_stock_factor_tags",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetGPCPHBTS_Tag",
+            "c": "ZhiShuRanking",
+            "Date": "",
+            "PlateID": "801225",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_real_ranking": {
+        "session_id": "core_plate_real_ranking",
+        "method": "POST",
+        "url": "https://apphis.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "RealRankingInfo",
+            "c": "ZhiShuRanking",
+            "Date": "",
+            "Index": "0",
+            "Order": "1",
+            "Type": "1",
+            "ZSType": "7",
+            "st": "30",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_parent": {
+        "session_id": "core_plate_parent",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetParentPlateCode",
+            "c": "ZhiShuL2Data",
+            "StockID": "801225",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_trend_incremental": {
+        "session_id": "core_plate_trend_incremental",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetTrendIncremental",
+            "c": "ZhiShuL2Data",
+            "StockID": "803023",
+            "Day": "",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_vol_tur_incremental": {
+        "session_id": "core_plate_vol_tur_incremental",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetVolTurIncremental",
+            "c": "ZhiShuL2Data",
+            "StockID": "803023",
+            "Day": "",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "plate_art_title": {
+        "session_id": "core_plate_art_title",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetArtTitle",
+            "c": "Index",
+            "Type": "2",
+            "StockID": "803023",
+            "Token": "0",
+            "UserID": "0",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "theme_info_bkr": {
+        "session_id": "core_theme_info_bkr",
+        "method": "POST",
+        "url": "https://applhb.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "InfoBKR",
+            "c": "Theme",
+            "ZSCode": "803023",
+            "Token": "0",
+            "UserID": "0",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "conception_point": {
+        "session_id": "core_conception_point",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetPoint",
+            "c": "ConceptionPoint",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "index_rqz_data": {
+        "session_id": "core_index_rqz_data",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "GetRQZ_Data",
+            "c": "Index",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "etf_stock_ranking": {
+        "session_id": "core_etf_stock_ranking",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "ETFStockRanking",
+            "c": "NewStockRanking",
+            "Index": "0",
+            "Order": "1",
+            "PidType": "2",
+            "Type": "1",
+            "st": "30",
+        },
+        "headers": COMMON_HEADERS,
+    },
+    "index_change": {
+        "session_id": "core_index_change",
+        "method": "POST",
+        "url": "https://apphwhq.longhuvip.com/w1/api/index.php",
+        "params": {},
+        "data": {
+            **COMMON_FORM_FIELDS,
+            "a": "IndexChange",
+            "c": "NewStockRanking",
+        },
+        "headers": COMMON_HEADERS,
     },
 }
 
@@ -183,8 +394,8 @@ class KaipanlaCoreClient:
         spec = dict(_core_spec(name))
         data = dict(spec.get("data") or {})
         params = dict(spec.get("params") or {})
-        if name in {"plate_factor_tags", "plate_factor_stock_list"}:
-            self._apply_plate_factor_source(name, spec, data, overrides)
+        if name in PLATE_HISTORY_SOURCE_KEYS:
+            self._apply_plate_history_source(name, spec, data, overrides)
         self._apply_env_auth(data)
         for key, value in overrides.items():
             if value is None:
@@ -196,13 +407,21 @@ class KaipanlaCoreClient:
         return self.client.request(spec, data=data, params=params)
 
     @staticmethod
-    def _apply_plate_factor_source(
+    def _apply_plate_history_source(
         name: str,
         spec: dict[str, Any],
         data: dict[str, Any],
         overrides: dict[str, Any],
     ) -> None:
-        date = str(overrides.get("Date") or overrides.get("date") or data.get("Date") or "").strip()
+        date = str(
+            overrides.get("Date")
+            or overrides.get("date")
+            or overrides.get("Day")
+            or overrides.get("day")
+            or data.get("Date")
+            or data.get("Day")
+            or ""
+        ).strip()
         if name == "plate_factor_tags":
             if date:
                 spec["url"] = "https://apphis.longhuvip.com/w1/api/index.php"
@@ -214,7 +433,16 @@ class KaipanlaCoreClient:
             return
         if date:
             spec["url"] = "https://apphis.longhuvip.com/w1/api/index.php"
-            data["Date"] = date
+            if "Day" in data and "Date" not in data:
+                data["Day"] = date
+            else:
+                data["Date"] = date
+            if name == "plate_children":
+                data.setdefault("IsShow", "1")
+        elif "Date" in data:
+            data["Date"] = ""
+        elif "Day" in data:
+            data["Day"] = ""
 
     @staticmethod
     def _apply_env_auth(data: dict[str, Any]) -> None:
@@ -286,3 +514,78 @@ class KaipanlaCoreClient:
             Date=date,
             **overrides,
         )
+
+    def plate_info(self, plate_id: str, date: str | None = None, **overrides: Any):
+        return self.request_core("plate_info", PlateID=plate_id, Date=date, **overrides)
+
+    def plate_children(self, plate_id: str, date: str | None = None, **overrides: Any):
+        return self.request_core("plate_children", PlateID=plate_id, Date=date, **overrides)
+
+    def plate_stock_factor_tags(self, plate_id: str, date: str | None = None, **overrides: Any):
+        return self.request_core("plate_stock_factor_tags", PlateID=plate_id, Date=date, **overrides)
+
+    def plate_real_ranking(
+        self,
+        *,
+        date: str | None = None,
+        ranking_type: str = "1",
+        zs_type: str = "7",
+        order: str = "1",
+        index: str = "0",
+        st: str = "30",
+        **overrides: Any,
+    ):
+        return self.request_core(
+            "plate_real_ranking",
+            Date=date,
+            Type=ranking_type,
+            ZSType=zs_type,
+            Order=order,
+            Index=index,
+            st=st,
+            **overrides,
+        )
+
+    def plate_parent(self, plate_id: str, **overrides: Any):
+        return self.request_core("plate_parent", StockID=plate_id, **overrides)
+
+    def plate_trend_incremental(self, plate_id: str, day: str | None = None, **overrides: Any):
+        return self.request_core("plate_trend_incremental", StockID=plate_id, Day=day, **overrides)
+
+    def plate_vol_tur_incremental(self, plate_id: str, day: str | None = None, **overrides: Any):
+        return self.request_core("plate_vol_tur_incremental", StockID=plate_id, Day=day, **overrides)
+
+    def plate_art_title(self, plate_id: str, art_type: str = "2", **overrides: Any):
+        return self.request_core("plate_art_title", StockID=plate_id, Type=art_type, **overrides)
+
+    def theme_info_bkr(self, zs_code: str, **overrides: Any):
+        return self.request_core("theme_info_bkr", ZSCode=zs_code, **overrides)
+
+    def conception_point(self, **overrides: Any):
+        return self.request_core("conception_point", **overrides)
+
+    def index_rqz_data(self, **overrides: Any):
+        return self.request_core("index_rqz_data", **overrides)
+
+    def etf_stock_ranking(
+        self,
+        *,
+        ranking_type: str = "1",
+        order: str = "1",
+        index: str = "0",
+        st: str = "30",
+        pid_type: str = "2",
+        **overrides: Any,
+    ):
+        return self.request_core(
+            "etf_stock_ranking",
+            Type=ranking_type,
+            Order=order,
+            Index=index,
+            st=st,
+            PidType=pid_type,
+            **overrides,
+        )
+
+    def index_change(self, **overrides: Any):
+        return self.request_core("index_change", **overrides)

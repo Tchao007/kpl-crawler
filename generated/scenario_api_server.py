@@ -175,6 +175,141 @@ CORE_LOCAL_TITLES = {
         "title_cn": "行情核心-分时成交",
         "params": {"StockID": "688008", "limit": "100"},
     },
+    "plate_factor_tags": {
+        "method_name": "plate_factor_tags",
+        "title_cn": "行情核心-板块因子标签",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"PlateID": "801612", "Date": ""},
+        "url_params": ["PlateID", "Date"],
+    },
+    "plate_factor_stock_list": {
+        "method_name": "plate_factor_stock_list",
+        "title_cn": "行情核心-人气激增股票列表",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {
+            "PlateID": "801612",
+            "TSZB": "17",
+            "Type": "42",
+            "Order": "1",
+            "Date": "2026-07-27",
+            "Index": "0",
+            "st": "30",
+        },
+        "url_params": ["PlateID", "Date", "TSZB", "Type", "Order", "Index", "st"],
+    },
+    "plate_info": {
+        "method_name": "plate_info",
+        "title_cn": "行情核心-板块信息",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"PlateID": "801225", "Date": ""},
+        "url_params": ["PlateID", "Date"],
+    },
+    "plate_children": {
+        "method_name": "plate_children",
+        "title_cn": "行情核心-子板块信息",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"PlateID": "801225", "Date": "", "IsShow": "1"},
+        "url_params": ["PlateID", "Date", "IsShow"],
+    },
+    "plate_stock_factor_tags": {
+        "method_name": "plate_stock_factor_tags",
+        "title_cn": "行情核心-板块股票标签",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"PlateID": "801225", "Date": ""},
+        "url_params": ["PlateID", "Date"],
+    },
+    "plate_real_ranking": {
+        "method_name": "plate_real_ranking",
+        "title_cn": "行情核心-板块实时排行",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {
+            "Date": "",
+            "Index": "0",
+            "Order": "1",
+            "Type": "1",
+            "ZSType": "7",
+            "st": "30",
+        },
+        "url_params": ["Date", "Index", "Order", "Type", "ZSType", "st", "RStart", "REnd"],
+    },
+    "plate_parent": {
+        "method_name": "plate_parent",
+        "title_cn": "行情核心-父级板块",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"StockID": "801225"},
+        "url_params": ["StockID"],
+    },
+    "plate_trend_incremental": {
+        "method_name": "plate_trend_incremental",
+        "title_cn": "行情核心-板块趋势增量",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"StockID": "803023", "Day": ""},
+        "url_params": ["StockID", "Day"],
+    },
+    "plate_vol_tur_incremental": {
+        "method_name": "plate_vol_tur_incremental",
+        "title_cn": "行情核心-板块量能换手增量",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"StockID": "803023", "Day": ""},
+        "url_params": ["StockID", "Day"],
+    },
+    "plate_art_title": {
+        "method_name": "plate_art_title",
+        "title_cn": "行情核心-板块文章标题",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"StockID": "803023", "Type": "2"},
+        "url_params": ["StockID", "Type"],
+    },
+    "theme_info_bkr": {
+        "method_name": "theme_info_bkr",
+        "title_cn": "行情核心-题材板块详情",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"ZSCode": "803023"},
+        "url_params": ["ZSCode"],
+    },
+    "conception_point": {
+        "method_name": "conception_point",
+        "title_cn": "行情核心-概念点统计",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {},
+        "url_params": [],
+    },
+    "index_rqz_data": {
+        "method_name": "index_rqz_data",
+        "title_cn": "行情核心-人气值数据",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {},
+        "url_params": [],
+    },
+    "etf_stock_ranking": {
+        "method_name": "etf_stock_ranking",
+        "title_cn": "行情核心-ETF股票排行",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {"Index": "0", "Order": "1", "PidType": "2", "Type": "1", "st": "30"},
+        "url_params": ["Index", "Order", "PidType", "Type", "st"],
+    },
+    "index_change": {
+        "method_name": "index_change",
+        "title_cn": "行情核心-指数变动",
+        "group": HQ_CORE_GROUP,
+        "params": {},
+        "data": {},
+        "url_params": [],
+    },
 }
 
 
@@ -2136,7 +2271,7 @@ def _build_scenarios() -> list[dict[str, object]]:
         scenarios.append(copy_scenario)
         break
     for name, (host, controller, action) in CORE_API_KEYS.items():
-        if name not in CORE_LOCAL_API_KEYS:
+        if name not in CORE_LOCAL_TITLES:
             continue
         session_id = f"core:{name}"
         defaults = CORE_LOCAL_TITLES.get(name, {})
@@ -2147,7 +2282,23 @@ def _build_scenarios() -> list[dict[str, object]]:
         maintenance_time = core_meta.get("maintenance_time", CORE_LOCAL_ADDED_TIME)
         added_time = CORE_LOCAL_ADDED_TIME
         level = _effective_scenario_level_for(session_id)
-        risk_policy = _scenario_risk_policy(level, scenario={"title": title, "title_cn": title_cn, "endpoint": f"/api/{method_name}", "target_url": str(HQSTOCK_LOG)})
+        target_url = str(HQSTOCK_LOG) if name in CORE_LOCAL_API_KEYS else f"https://{host}/w1/api/index.php"
+        core_spec = {
+            "session_id": session_id,
+            "url": target_url,
+            "title": title,
+            "title_cn": title_cn,
+            "data": {"c": controller, "a": action, **dict(defaults.get("data") or {})},
+        }
+        risk_policy = _scenario_risk_policy(
+            level,
+            scenario={
+                "title": title,
+                "title_cn": title_cn,
+                "endpoint": f"/api/{method_name}",
+                "target_url": target_url,
+            },
+        )
         scenarios.append(
             {
                 "session_id": session_id,
@@ -2157,7 +2308,13 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "maintenance_time": maintenance_time,
                 "level": level,
                 "level_label": SCENARIO_LEVELS[level],
-                "group": _scenario_group_for(level),
+                "group": str(defaults.get("group") or _scenario_group_for(
+                    level,
+                    spec=core_spec,
+                    controller=controller,
+                    action=action,
+                    title_cn=title_cn,
+                )),
                 "risk_level": risk_policy["risk_level"],
                 "call_policy": risk_policy["call_policy"],
                 "call_disabled": risk_policy["call_disabled"],
@@ -2165,15 +2322,16 @@ def _build_scenarios() -> list[dict[str, object]]:
                 "cache_ttl": risk_policy["cache_ttl"],
                 "method_name": method_name,
                 "http_method": "GET",
-                "target_url": str(HQSTOCK_LOG),
+                "target_url": target_url,
                 "endpoint": f"/api/{method_name}",
                 "alias_endpoint": f"/api/core/{name}",
-                "params": dict(defaults.get("params") or {"StockID": "000620"}),
-                "data": {},
+                "params": dict(defaults.get("params") or ({"StockID": "000620"} if name in CORE_LOCAL_API_KEYS else {})),
+                "data": dict(defaults.get("data") or {}),
                 "host": host,
                 "core_name": name,
                 "is_core": True,
                 "hide_url_fields": [],
+                "url_params": list(defaults.get("url_params") or []),
             }
         )
     topic_rank_level = _effective_scenario_level_for("topic_rank:3009")
@@ -2547,10 +2705,14 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
                 return
             for key in LEGACY_INTERFACE_API_KEY_FIELDS:
                 overrides.pop(key, None)
-            overrides = _normalized_scene_overrides(route["spec"], overrides)
             if route.get("core_name"):
-                self._call_core_scene(user, route["scenario"], str(route["core_name"]), overrides)
+                core_name = str(route["core_name"])
+                if core_name in CORE_LOCAL_API_KEYS:
+                    self._call_core_scene(user, route["scenario"], core_name, overrides)
+                else:
+                    self._handle_core_api(user, f"/api/core/{core_name}")
                 return
+            overrides = _normalized_scene_overrides(route["spec"], overrides)
             self._call_scene(user, route["scenario"], route["spec"], overrides)
             return
 
@@ -3737,11 +3899,21 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         host, controller, action = CORE_API_KEYS[name]
-        date_override = str(overrides.get("Date") or overrides.get("date") or "").strip()
+        date_override = str(
+            overrides.get("Date") or overrides.get("date") or overrides.get("Day") or overrides.get("day") or ""
+        ).strip()
         if name == "plate_factor_tags" and date_override:
             host = "apphis.longhuvip.com"
             controller = "HisConceptionPoint"
-        elif name == "plate_factor_stock_list" and date_override:
+        elif name in {
+            "plate_factor_stock_list",
+            "plate_info",
+            "plate_children",
+            "plate_stock_factor_tags",
+            "plate_real_ranking",
+            "plate_trend_incremental",
+            "plate_vol_tur_incremental",
+        } and date_override:
             host = "apphis.longhuvip.com"
         packet_code_for_default = "2015" if name == "five_level" else "2006"
         stock_id = normalize_stock_id(
@@ -3883,11 +4055,21 @@ class ScenarioApiHandler(BaseHTTPRequestHandler):
         requested_at = time.time()
         started_iso = datetime.fromtimestamp(requested_at).isoformat(timespec="seconds")
         host, controller, action = CORE_API_KEYS[name]
-        date_override = str(overrides.get("Date") or overrides.get("date") or "").strip()
+        date_override = str(
+            overrides.get("Date") or overrides.get("date") or overrides.get("Day") or overrides.get("day") or ""
+        ).strip()
         if name == "plate_factor_tags" and date_override:
             host = "apphis.longhuvip.com"
             controller = "HisConceptionPoint"
-        elif name == "plate_factor_stock_list" and date_override:
+        elif name in {
+            "plate_factor_stock_list",
+            "plate_info",
+            "plate_children",
+            "plate_stock_factor_tags",
+            "plate_real_ranking",
+            "plate_trend_incremental",
+            "plate_vol_tur_incremental",
+        } and date_override:
             host = "apphis.longhuvip.com"
         if name in CORE_LOCAL_API_KEYS:
             scenario = next(

@@ -405,3 +405,34 @@ KPL_UPSTREAM_DEVICE_ID
 | `st` | 多数列表/K线接口 | 单次返回条数 |
 | `StockID` | `Stock.GetStockChart` | 股票代码，抓包使用 6 位代码 |
 | `Type` | `LongHuBang.GetStockList`、`GetBusinessList` | 抓包中 `GetStockList` 使用 `Type=2`，`GetBusinessList` 使用 `Type=1`；完整枚举未确认 |
+## 第一、二批核心接口补充
+
+### 第一批：板块/题材核心接口
+
+- `/api/core/plate_info`：对应 `ZhiShuRanking.GetPlate_Info_QJ`。传 `PlateID` 查询板块基础信息；传 `Date=YYYY-MM-DD` 或 `YYYYMMDD` 时切换到历史源 `apphis.longhuvip.com`。
+- `/api/core/plate_children`：对应 `ZhiShuRanking.SonPlate_Info`。传 `PlateID` 查询子板块；历史查询传 `Date`，并默认带 `IsShow=1`。
+- `/api/core/plate_stock_factor_tags`：对应 `ZhiShuRanking.GetGPCPHBTS_Tag`。传 `PlateID` 查询板块股票/成分的标签信息；传 `Date` 查询历史。
+- `/api/core/plate_real_ranking`：对应 `ZhiShuRanking.RealRankingInfo`。用于板块实时/历史排行，主要可变参数为 `Date`、`Type`、`ZSType`、`Order`、`Index`、`st`、`RStart`、`REnd`。
+- `/api/core/plate_parent`：对应 `ZhiShuL2Data.GetParentPlateCode`。传 `StockID`，这里的 `StockID` 可以是板块代码，用于查询父级板块。
+
+### 第二批：一般补充接口
+
+- `/api/core/conception_point`：对应 `ConceptionPoint.GetPoint`。返回概念点/市场统计类数据，抓包响应包含 `list`、`ttag`、`errcode`。
+- `/api/core/index_rqz_data`：对应 `Index.GetRQZ_Data`。用于人气值/热度类指数数据。
+- `/api/core/etf_stock_ranking`：对应 `NewStockRanking.ETFStockRanking`。可变参数为 `Index`、`Order`、`PidType`、`Type`、`st`。
+- `/api/core/index_change`：对应 `NewStockRanking.IndexChange`。用于指数变动类数据。
+
+### 调用建议
+
+新接入优先使用 `/api/core/<name>` 统一入口。板块类接口如果要锁定历史交易日，直接把 `Date` 放到 URL 参数中；未传 `Date` 时默认按实时源请求。`plate_real_ranking` 已保留抓包中出现的 `Type`、`ZSType`、`RStart`、`REnd` 等可变参数，后续按页面选项继续补枚举含义即可。
+
+### 最新抓包补充：板块详情页
+
+本批来自 `2026-07-28 22:55-22:58` 抓包，样例板块为 `803023`。
+
+- `/api/core/plate_trend_incremental`：对应 `ZhiShuL2Data.GetTrendIncremental`。传 `StockID` 查询板块趋势增量；传 `Day=YYYY-MM-DD` 时切换到历史源。
+- `/api/core/plate_vol_tur_incremental`：对应 `ZhiShuL2Data.GetVolTurIncremental`。传 `StockID` 查询板块量能/换手增量；传 `Day=YYYY-MM-DD` 时切换到历史源。
+- `/api/core/plate_art_title`：对应 `Index.GetArtTitle`。传 `StockID` 和 `Type=2` 查询板块关联文章标题。
+- `/api/core/theme_info_bkr`：对应 `Theme.InfoBKR`。传 `ZSCode` 查询题材/板块详情说明，抓包样例为 `ZSCode=803023`。
+
+`plate_trend_incremental` 和 `plate_vol_tur_incremental` 使用 `Day` 作为日期参数；其它板块历史接口多使用 `Date`。新接入时按接口原始参数名透传，避免服务端误判实时/历史源。
